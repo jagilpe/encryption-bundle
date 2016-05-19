@@ -5,22 +5,24 @@ services:
         arguments:
             - "@annotation_reader"
             - "@eh_encryption.cryptography_provider"
+            - "@eh_encryption.key_manager"
+            - "%eh_encryption.settings%"
             
     eh_encryption.cryptography_provider:
         class: EHEncryptionBundle\Crypt\CryptographyProvider
         arguments:
-            - "@eh_encryption.key_manager"
+            - "%eh_encryption.settings%"
         
     eh_encryption.key_manager:
         class: EHEncryptionBundle\Crypt\KeyManager
         arguments:
             - "@security.token_storage"
+            - "@eh_encryption.cryptography_provider"
     
     # Event subscribers
     eh_encryption.doctrine_subscriber:
         class: EHEncryptionBundle\EventListener\EncryptionSubscriber
         arguments:
             - "@eh_encryption.encryption.service"
-            - "%encryption_enabled%"
         tags:
             - { name: doctrine.event_subscriber, connection: default }

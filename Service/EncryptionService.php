@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Common\Annotations\Reader;
 use EHEncryptionBundle\Annotation\EncryptedEntity;
 use EHEncryptionBundle\Crypt\CryptographyProviderInterface;
+use EHEncryptionBundle\Crypt\KeyManagerInterface;
 
 /**
  * Encapsulates the core encryption logic
@@ -14,18 +15,44 @@ use EHEncryptionBundle\Crypt\CryptographyProviderInterface;
  */
 class EncryptionService
 {
+    const ENCRYPT = 'encrypt';
+    const DECRYPT = 'decrypt';
+
     /**
      * Supported entity encryption modes
      */
     const MODE_PER_USER_SHAREABLE = 'PER_USER_SHAREABLE';
 
+    /**
+     * @var Doctrine\Common\Annotations\Reader
+     */
     private $reader;
+
+    /**
+     * @var EHEncryptionBundle\Crypt\CryptographyProviderInterface
+     */
     private $cryptographyProvider;
 
-    public function __construct(Reader $reader, CryptographyProviderInterface $cryptographyProvider)
+    /**
+     * @var EHEncryptionBundle\Crypt\KeyManagerInterface
+     */
+    private $keyManager;
+
+    /**
+     * @var array
+     */
+    private $settings;
+
+    public function __construct(
+                    Reader $reader,
+                    CryptographyProviderInterface $cryptographyProvider,
+                    KeyManagerInterface $keyManager,
+                    $settings)
     {
         $this->reader = $reader;
         $this->cryptographyProvider = $cryptographyProvider;
+        $this->keyManager = $keyManager;
+        $this->settings = $settings;
     }
 
     /**
@@ -97,14 +124,7 @@ class EncryptionService
      */
     public function encryptEntity($entity)
     {
-        $reflection = new \ReflectionClass($entity);
-
-        if ($this->hasEncryptionEnabled($reflection) && !$entity->isEncrypted()) {
-            dump('encrypt');
-            $entity->setEncrypted(true);
-        }
-
-        return $entity;
+        return $this->processEntity($entity, self::ENCRYPT);
     }
 
     /**
@@ -116,14 +136,63 @@ class EncryptionService
      */
     public function decryptEntity($entity)
     {
-        $reflection = new \ReflectionClass($entity);
+        return $this->processEntity($entity, self::DECRYPT);
+    }
 
-        if ($this->hasEncryptionEnabled($reflection) && $entity->isEncrypted()) {
-            dump('decrypt');
-            $entity->setEncrypted(false);
+    /**
+     * Processes an entity is it has encryption enabled and it's not already processed
+     *
+     * @param mixed $entity
+     * @param string $operation
+     *
+     * @return mixed
+     */
+    private function processEntity($entity, $operation)
+    {
+        if ($this->settings[$operation.'_on_backend']) {
+            $reflection = new \ReflectionClass($entity);
+
+            if ($this->hasEncryptionEnabled($reflection) && $this->toProcess($entity, $operation)) {
+                // Get the encryption key
+                $key = $this->keyManager->getEntityEncryptionKey($entity);
+                $iv = $this->keyManager->getEntityEncryptionIv($entity);
+
+                // get the encrypted fields
+                $encryptionEnabledFields = $this->getEncryptionEnabledFields($reflection);
+
+                // Encrypt the fields
+                foreach ($encryptionEnabledFields as $field) {
+                    $value = $this->getFieldValue($entity, $field);
+                    $encryptedValue = $this->cryptographyProvider->{$operation}($value, $key, $iv);
+                    $this->setFieldValue($entity, $field, $encryptedValue);
+                }
+
+                // Set the encryption flag
+                $entity->setEncrypted($operation === self::ENCRYPT);
+            }
         }
 
         return $entity;
+    }
+
+    /**
+     * Checks if the entity has to be processed
+     *
+     * @param mixed $entity
+     * @param unknown $operation
+     *
+     * @return boolean
+     */
+    private function toProcess($entity, $operation)
+    {
+        switch ($operation) {
+            case self::ENCRYPT:
+                return !$entity->isEncrypted();
+            case self::DECRYPT:
+                return $entity->isEncrypted();
+            default:
+                return false;
+        }
     }
 
     /**
@@ -167,5 +236,66 @@ class EncryptionService
     private function keyPerEntityRequired(EncryptedEntity $hasEncryptionEnabled)
     {
         return $hasEncryptionEnabled->mode === self::MODE_PER_USER_SHAREABLE;
+    }
+
+    /**
+     * Checks the fields of the entity and returns a list of those with encryption enabled
+     *
+     * @param \ReflectionClass $reflection
+     *
+     * @return array
+     */
+    private function getEncryptionEnabledFields(\ReflectionClass $reflectionClass)
+    {
+        $encryptionEnabledFields = array();
+
+        $reflectionProperties = $reflectionClass->getProperties();
+
+        foreach ($reflectionProperties as $reflectionProperty) {
+            $encryptedField = $this->reader->getPropertyAnnotation(
+                $reflectionProperty,
+                'EHEncryptionBundle\\Annotation\\EncryptedField'
+            );
+
+            if ($encryptedField) {
+                $encryptionEnabledFields[] = $reflectionProperty;
+            }
+        }
+
+        return $encryptionEnabledFields;
+    }
+
+    /**
+     * Returns the value of an entity using reflection
+     *
+     * @param mixed $entity
+     * @param \ReflectionProperty $reflectionProperty
+     *
+     * @return mixed
+     */
+    private function getFieldValue($entity, \ReflectionProperty $reflectionProperty)
+    {
+        $value = null;
+        if ($reflectionProperty) {
+            $reflectionProperty->setAccessible(true);
+            $value = $reflectionProperty->getValue($entity);
+        }
+
+        return $value;
+    }
+
+    /**
+     * Sets the value of an entity using reflection
+     *
+     * @param mixed $entity
+     * @param \ReflectionProperty $reflectionProperty
+     * @param mixed $value
+     */
+    private function setFieldValue($entity, \ReflectionProperty $reflectionProperty, $value)
+    {
+        if ($reflectionProperty) {
+            $reflectionProperty->setAccessible(true);
+            $value = $reflectionProperty->setValue($entity, $value);
+        }
     }
 }

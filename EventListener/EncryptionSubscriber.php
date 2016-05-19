@@ -16,13 +16,14 @@ use EHEncryptionBundle\Service\EncryptionService;
  */
 class EncryptionSubscriber implements EventSubscriber
 {
+    /**
+     * @var EHEncryptionBundle\Service\EncryptionService
+     */
     private $encryptionService;
-    private $encryptionEnabled;
 
-    public function __construct(EncryptionService $encryptionService, $encryptionEnabled)
+    public function __construct(EncryptionService $encryptionService)
     {
         $this->encryptionService = $encryptionService;
-        $this->encryptionEnabled = $encryptionEnabled;
     }
 
     /**
@@ -30,14 +31,12 @@ class EncryptionSubscriber implements EventSubscriber
      */
     public function getSubscribedEvents()
     {
-        return $this->encryptionEnabled
-        ? array(
+        return array(
             Events::loadClassMetadata,
             Events::prePersist,
             Events::preUpdate,
             Events::postLoad,
         )
-        : array()
         ;
     }
 
@@ -53,7 +52,7 @@ class EncryptionSubscriber implements EventSubscriber
     /**
      * {@inheritDoc}
      */
-    public function prePresists(LifecycleEventArgs $args)
+    public function prePersist(LifecycleEventArgs $args)
     {
         $this->encryptionService->encryptEntity($args->getEntity());
     }

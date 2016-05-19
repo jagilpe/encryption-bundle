@@ -23,6 +23,10 @@ class EHEncryptionExtension extends Extension
         $config = $this->processConfiguration($configuration, $configs);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-        $loader->load('services.yml');
+
+        if ($config['enabled']) {
+            $container->setParameter('eh_encryption.settings', $config['settings']);
+            $loader->load('services.yml');
+        }
     }
 }

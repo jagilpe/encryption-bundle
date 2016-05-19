@@ -18,11 +18,30 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('eh_encryption_bundle');
+        $rootNode = $treeBuilder->root('eh_encryption');
 
-        // Here you should define the parameters that are allowed to
-        // configure your bundle. See the documentation linked above for
-        // more information on that topic.
+        $rootNode
+            ->addDefaultsIfNotSet()
+            ->children()
+                ->scalarNode('enabled')->defaultValue(false)->end()
+                ->arrayNode('settings')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('encrypt_on_backend')->defaultValue(true)->end()
+                        ->scalarNode('decrypt_on_backend')->defaultValue(true)->end()
+                        ->scalarNode('digest_method')->defaultValue('SHA256')->end()
+                        ->scalarNode('key_length')->defaultValue('16')->end()
+                        ->arrayNode('cipher_method')
+                            ->addDefaultsIfNotSet()
+                            ->children()
+                                ->scalarNode('property')->defaultValue('AES-256-CBC')->end()
+                                ->scalarNode('file')->defaultValue('AES-256-CFC')->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
 
         return $treeBuilder;
     }
