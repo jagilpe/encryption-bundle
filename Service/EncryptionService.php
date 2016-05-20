@@ -71,7 +71,7 @@ class EncryptionService
                 $keyField = array(
                     'fieldName' => 'key',
                     'columnName' => '_key',
-                    'type' => 'text',
+                    'type' => 'array',
                     'nullable' => true,
                 );
                 $metadata->mapField($keyField);
@@ -94,7 +94,7 @@ class EncryptionService
             $metadata->mapField($encryptedField);
         }
 
-        if ($isEncryptedEnabledUser = $this->isPKEncryptionEnabledUser($reflection)) {
+        if ($this->isPKEncryptionEnabledUser($reflection)) {
             $publicKeyField = array(
                 'fieldName' => 'publicKey',
                 'columnName' => '_publicKey',
@@ -116,27 +116,49 @@ class EncryptionService
     }
 
     /**
-     * Encrypts an entity is it has encryption enabled and it's not already encrypted
+     * Process all encryption related actions on an Entity pre persist event
      *
      * @param mixed $entity
      *
      * @return mixed
      */
-    public function encryptEntity($entity)
+    public function processEntityPrePersist($entity)
     {
-        return $this->processEntity($entity, self::ENCRYPT);
+        // Check if this is the user entity
+        $reflectionClass = new \ReflectionClass($entity);
+        if ($this->isPKEncryptionEnabledUser($reflectionClass)) {
+            // We have to generate the public and private encryption keys
+            $this->keyManager->generateUserPKIKeys($entity);
+        }
+
+        // Process the encryption of the entity
+        $this->processEntity($entity, self::ENCRYPT);
     }
 
     /**
-     * Decrypts an entity is it has encryption enabled and it's encrypted
+     * Process all encryption related actions on an Entity pre persist event
      *
      * @param mixed $entity
      *
      * @return mixed
      */
-    public function decryptEntity($entity)
+    public function processEntityPreUpdate($entity)
     {
-        return $this->processEntity($entity, self::DECRYPT);
+        // Process the encryption of the entity
+        $this->processEntity($entity, self::ENCRYPT);
+    }
+
+    /**
+     * Process all encryption related actions on an Entity post load event
+     *
+     * @param mixed $entity
+     *
+     * @return mixed
+     */
+    public function processEntityPostLoad($entity)
+    {
+        // Process the encryption of the entity
+        $this->processEntity($entity, self::DECRYPT);
     }
 
     /**
@@ -153,9 +175,8 @@ class EncryptionService
             $reflection = new \ReflectionClass($entity);
 
             if ($this->hasEncryptionEnabled($reflection) && $this->toProcess($entity, $operation)) {
-                // Get the encryption key
-                $key = $this->keyManager->getEntityEncryptionKey($entity);
-                $iv = $this->keyManager->getEntityEncryptionIv($entity);
+                // Get the encryption key data
+                $keyData = $this->keyManager->getEntityEncryptionKeyData($entity);
 
                 // get the encrypted fields
                 $encryptionEnabledFields = $this->getEncryptionEnabledFields($reflection);
@@ -163,8 +184,8 @@ class EncryptionService
                 // Encrypt the fields
                 foreach ($encryptionEnabledFields as $field) {
                     $value = $this->getFieldValue($entity, $field);
-                    $encryptedValue = $this->cryptographyProvider->{$operation}($value, $key, $iv);
-                    $this->setFieldValue($entity, $field, $encryptedValue);
+                    $processedValue = $this->cryptographyProvider->{$operation}($value, $keyData);
+                    $this->setFieldValue($entity, $field, $processedValue);
                 }
 
                 // Set the encryption flag
@@ -219,12 +240,19 @@ class EncryptionService
      */
     private function isPKEncryptionEnabledUser(\ReflectionClass $reflection)
     {
-        $encryptedEnabled = $this->reader->getClassAnnotation(
-            $reflection,
-            'EHEncryptionBundle\\Annotation\\PKEncryptionEnabledUser'
-        );
+        $encryptedEnabledUser = $this->userBasedEncryption() && ($reflection->getName() === $this->settings['user_class']);
 
-        return $encryptedEnabled;
+        return $encryptedEnabledUser;
+    }
+
+    /**
+     * Checks if the encryption mode is user based
+     *
+     * @return boolean
+     */
+    private function userBasedEncryption()
+    {
+        return $this->settings['mode'] === self::MODE_PER_USER_SHAREABLE;
     }
 
     /**
@@ -235,7 +263,7 @@ class EncryptionService
      */
     private function keyPerEntityRequired(EncryptedEntity $hasEncryptionEnabled)
     {
-        return $hasEncryptionEnabled->mode === self::MODE_PER_USER_SHAREABLE;
+        return $this->userBasedEncryption();
     }
 
     /**

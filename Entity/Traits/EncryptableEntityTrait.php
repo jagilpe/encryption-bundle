@@ -4,7 +4,7 @@ namespace EHEncryptionBundle\Entity\Traits;
 
 trait EncryptableEntityTrait
 {
-    protected $encrypted;
+    protected $encrypted = false;
 
     public function getEncrypted()
     {

@@ -19,19 +19,63 @@ class CryptographyProvider implements CryptographyProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function encrypt($value, $key, $iv)
+    public function encrypt($value, KeyData $keyData)
     {
         $method = $this->getCipherMethod();
-        return openssl_encrypt($value, $method, $key, 0, $iv);
+        return openssl_encrypt($value, $method, $keyData->getKey(), 0, $keyData->getIv());
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decrypt($value, $key, $iv)
+    public function decrypt($value, KeyData $keyData)
     {
         $method = $this->getCipherMethod();
-        return openssl_decrypt($value, $method, $key, 0, $iv);
+        return openssl_decrypt($value, $method, $keyData->getKey(), 0, $keyData->getIv());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function encryptWithPublicKey($value, $publicKey)
+    {
+        $encryptedValue = null;
+        openssl_public_encrypt($value, $encryptedValue, $publicKey);
+
+        return $encryptedValue;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function decryptWithPublicKey($encryptedValue, $publicKey)
+    {
+        $decryptedValue = null;
+        openssl_public_decrypt($encryptedValue, $decryptedValue, $publicKey);
+
+        return $decryptedValue;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function encryptWithPrivateKey($value, $privateKey)
+    {
+        $encryptedValue = null;
+        openssl_private_encrypt($value, $encryptedValue, $privateKey);
+
+        return $encryptedValue;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function decryptWithPrivateKey($encryptedValue, $privateKey)
+    {
+        $decryptedValue = null;
+        openssl_private_decrypt($encryptedValue, $decryptedValue, $privateKey);
+
+        return $decryptedValue;
     }
 
     /**
@@ -57,7 +101,7 @@ class CryptographyProvider implements CryptographyProviderInterface
      */
     public function generateSecureKey()
     {
-        $randomPass = openssl_random_pseudo_bytes($this->settings['key_length'], $secure);
+        $randomPass = openssl_random_pseudo_bytes($this->settings['symmetric_key_length'], $secure);
         $method = $this->getDigestMethod();
 
         return hash($method, $randomPass, true);

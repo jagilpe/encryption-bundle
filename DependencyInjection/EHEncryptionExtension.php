@@ -26,6 +26,7 @@ class EHEncryptionExtension extends Extension
 
         if ($config['enabled']) {
             $container->setParameter('eh_encryption.settings', $config['settings']);
+            $container->setAlias('eh_encryption.access_checker', $config['access_checker']);
             $loader->load('services.yml');
         }
     }

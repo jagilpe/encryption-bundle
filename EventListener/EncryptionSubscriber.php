@@ -36,8 +36,7 @@ class EncryptionSubscriber implements EventSubscriber
             Events::prePersist,
             Events::preUpdate,
             Events::postLoad,
-        )
-        ;
+        );
     }
 
     /**
@@ -54,7 +53,7 @@ class EncryptionSubscriber implements EventSubscriber
      */
     public function prePersist(LifecycleEventArgs $args)
     {
-        $this->encryptionService->encryptEntity($args->getEntity());
+        $this->encryptionService->processEntityPrePersist($args->getEntity());
     }
 
     /**
@@ -62,7 +61,7 @@ class EncryptionSubscriber implements EventSubscriber
      */
     public function preUpdate(LifecycleEventArgs $args)
     {
-        $this->encryptionService->encryptEntity($args->getEntity());
+        $this->encryptionService->processEntityPreUpdate($args->getEntity());
     }
 
     /**
@@ -70,6 +69,6 @@ class EncryptionSubscriber implements EventSubscriber
      */
     public function postLoad(LifecycleEventArgs $args)
     {
-        $this->encryptionService->decryptEntity($args->getEntity());
+        $this->encryptionService->processEntityPostLoad($args->getEntity());
     }
 }

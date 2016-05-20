@@ -18,7 +18,16 @@ services:
         arguments:
             - "@security.token_storage"
             - "@eh_encryption.cryptography_provider"
+            - "@event_dispatcher"
+            - "@eh_encryption.access_checker"
+            - "%eh_encryption.settings%"
     
+    # default access checker
+    eh_encryption.security.access_checker.default:
+        class: EHEncryptionBundle\Security\DefaultAccessChecker
+        arguments:
+            - "%eh_encryption.settings%"
+            
     # Event subscribers
     eh_encryption.doctrine_subscriber:
         class: EHEncryptionBundle\EventListener\EncryptionSubscriber

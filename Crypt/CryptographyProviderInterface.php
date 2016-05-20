@@ -12,9 +12,65 @@ interface CryptographyProviderInterface
     const PROPERTY_ENCRYPTION = 'property';
     const FILE_ENCRYPTION = 'file';
 
-    public function encrypt($value, $key, $iv);
+    /**
+     * Encrypts a value using symmetric encryption
+     *
+     * @param string $value
+     * @param KeyData $keyData
+     *
+     * @return string
+     */
+    public function encrypt($value, KeyData $keyData);
 
-    public function decrypt($value, $key, $iv);
+    /**
+     * Decrypts a value using symmetric encryption
+     *
+     * @param string $value
+     * @param KeyData $keyData
+     *
+     * @return string
+     */
+    public function decrypt($value, KeyData $keyData);
+
+    /**
+     * Encrypts with a public key using asymmetric encryption
+     *
+     * @param string $value
+     * @param mixed $publicKey
+     *
+     * @return string
+     */
+    public function encryptWithPublicKey($value, $publicKey);
+
+    /**
+     * Decrypts with a public key using asymmetric encryption
+     *
+     * @param string $value
+     * @param mixed $publicKey
+     *
+     * @return string
+     */
+    public function decryptWithPublicKey($value, $publicKey);
+
+    /**
+     * Encrypts with a public key using asymmetric encryption
+     *
+     * @param string $value
+     * @param mixed $publicKey
+     *
+     * @return string
+     */
+    public function encryptWithPrivateKey($value, $privateKey);
+
+    /**
+     * Decrypts with a public key using asymmetric encryption
+     *
+     * @param string $value
+     * @param mixed $publicKey
+     *
+     * @return string
+     */
+    public function decryptWithPrivateKey($value, $privateKey);
 
     /**
      * Generates an Initialization Vector
