@@ -73,7 +73,7 @@ class CryptographyProvider implements CryptographyProviderInterface
     public function decryptWithPrivateKey($encryptedValue, $privateKey)
     {
         $decryptedValue = null;
-        openssl_private_decrypt($encryptedValue, $decryptedValue, $privateKey);
+        $result = openssl_private_decrypt($encryptedValue, $decryptedValue, $privateKey);
 
         return $decryptedValue;
     }
@@ -101,15 +101,42 @@ class CryptographyProvider implements CryptographyProviderInterface
      */
     public function generateSecureKey()
     {
-        $randomPass = openssl_random_pseudo_bytes($this->settings['symmetric_key_length'], $secure);
-        $method = $this->getDigestMethod();
-
-        return hash($method, $randomPass, true);
+        $randomPass = openssl_random_pseudo_bytes($this->getSymmetricKeyLength(), $secure);
+        return $randomPass;
     }
 
     private function getCipherMethod($type = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
     {
         return $this->settings['cipher_method'][$type];
+    }
+
+    /**
+     * Returns the key length for the desired encryption method
+     *
+     * @param string $type
+     *
+     * @return integer
+     */
+    private function getSymmetricKeyLength($type = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
+    {
+        $cipherMethod = $this->getCipherMethod($type);
+
+        switch ($cipherMethod) {
+            case 'AES-128-CBC':
+                $length = 16;
+                break;
+            case 'AES-192-CBC':
+                $length = 24;
+                break;
+            case 'AES-256-CBC':
+                $length = 32;
+                break;
+            default:
+                $length = 16;
+                break;
+        }
+
+        return $length;
     }
 
     private function getDigestMethod()

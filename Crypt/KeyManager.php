@@ -189,7 +189,7 @@ class KeyManager implements KeyManagerInterface
         return $this->cryptographyProvider->generateSecureKey();
     }
 
-    public function encryptSymmetricKey($clearKey, $entity)
+    private function encryptSymmetricKey($clearKey, $entity)
     {
         $users = $this->accessChecker->getAllowedUsers($entity);
 
