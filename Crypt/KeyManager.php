@@ -209,7 +209,7 @@ class KeyManager implements KeyManagerInterface
         $decryptedKey = null;
         $user = $this->getUser();
 
-        if (isset($encryptedKey[$user->getId()])) {
+        if ($user && isset($encryptedKey[$user->getId()])) {
             $userKey = base64_decode($encryptedKey[$user->getId()]);
             $privateKey = $this->getPrivateKey($user);
 
@@ -221,7 +221,8 @@ class KeyManager implements KeyManagerInterface
 
     private function getUser()
     {
-        $user = $this->tokenStorage->getToken()->getUser();
+        $token = $this->tokenStorage->getToken();
+        $user = $token ? $token->getUser() : null;
 
         return $user;
     }
