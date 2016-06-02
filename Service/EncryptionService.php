@@ -4,6 +4,7 @@ namespace EHEncryptionBundle\Service;
 
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Common\Annotations\Reader;
+use Metadata\MetadataFactoryInterface;
 use EHEncryptionBundle\Annotation\EncryptedEntity;
 use EHEncryptionBundle\Crypt\CryptographyProviderInterface;
 use EHEncryptionBundle\Crypt\KeyManagerInterface;
@@ -22,6 +23,11 @@ class EncryptionService
      * Supported entity encryption modes
      */
     const MODE_PER_USER_SHAREABLE = 'PER_USER_SHAREABLE';
+
+    /**
+     * @var Metadata\MetadataFactoryInterface
+     */
+    private $metadataFactory;
 
     /**
      * @var Doctrine\Common\Annotations\Reader
@@ -44,11 +50,13 @@ class EncryptionService
     private $settings;
 
     public function __construct(
+                    MetadataFactoryInterface $metataFactory,
                     Reader $reader,
                     CryptographyProviderInterface $cryptographyProvider,
                     KeyManagerInterface $keyManager,
                     $settings)
     {
+        $this->metadataFactory = $metataFactory;
         $this->reader = $reader;
         $this->cryptographyProvider = $cryptographyProvider;
         $this->keyManager = $keyManager;
@@ -162,6 +170,46 @@ class EncryptionService
     }
 
     /**
+     * Checks if the entity has encryption enabled and is actually encrypted
+     *
+     * @param mixed $entity
+     *
+     * @return boolean
+     */
+    public function isEntityEncrypted($entity)
+    {
+        $reflection = new \ReflectionClass($entity);
+
+        return $this->hasEncryptionEnabled($reflection)
+            && $reflection->hasMethod('isEncrypted')
+            && $entity->isEncrypted();
+    }
+
+    /**
+     * Checks if the entity has file encryption enabled
+     *
+     * @param mixed $entity
+     *
+     * @return boolean
+     */
+    public function isEncryptableFile($entity)
+    {
+        $isEncryptableFile = false;
+
+        $reflection = new \ReflectionClass($entity);
+        if ($this->hasEncryptionEnabled($reflection)) {
+            $encryptableFile = $this->reader->getClassAnnotation(
+                $reflection,
+                'EHEncryptionBundle\\Annotation\\EncryptedFile'
+            );
+
+            $isEncryptableFile = $encryptableFile ? $encryptableFile->enabled : false;
+        }
+
+        return $isEncryptableFile;
+    }
+
+    /**
      * Processes an entity is it has encryption enabled and it's not already processed
      *
      * @param mixed $entity
@@ -224,6 +272,8 @@ class EncryptionService
      */
     private function hasEncryptionEnabled(\ReflectionClass $reflection)
     {
+        $classMetadata = $this->metadataFactory->getMetadataForClass($reflection->getName());
+
         $encryptedEnabled = $this->reader->getClassAnnotation(
             $reflection,
             'EHEncryptionBundle\\Annotation\\EncryptedEntity'
