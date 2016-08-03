@@ -8,6 +8,7 @@ use Metadata\MetadataFactoryInterface;
 use EHEncryptionBundle\Annotation\EncryptedEntity;
 use EHEncryptionBundle\Crypt\CryptographyProviderInterface;
 use EHEncryptionBundle\Crypt\KeyManagerInterface;
+use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 
 /**
  * Encapsulates the core encryption logic
@@ -100,24 +101,6 @@ class EncryptionService
                 'type' => 'boolean',
             );
             $metadata->mapField($encryptedField);
-        }
-
-        if ($this->isPKEncryptionEnabledUser($reflection)) {
-            $publicKeyField = array(
-                'fieldName' => 'publicKey',
-                'columnName' => '_publicKey',
-                'type' => 'text',
-                'nullable' => true,
-            );
-            $metadata->mapField($publicKeyField);
-
-            $privateKeyField = array(
-                'fieldName' => 'privateKey',
-                'columnName' => '_privateKey',
-                'type' => 'text',
-                'nullable' => true,
-            );
-            $metadata->mapField($privateKeyField);
         }
 
         return $metadata;
@@ -290,9 +273,8 @@ class EncryptionService
      */
     private function isPKEncryptionEnabledUser(\ReflectionClass $reflection)
     {
-        $encryptedEnabledUser = $this->userBasedEncryption() && ($reflection->getName() === $this->settings['user_class']);
-
-        return $encryptedEnabledUser;
+        return $this->userBasedEncryption()
+            && ($reflection->implementsInterface(PKEncryptionEnabledUserInterface::class));
     }
 
     /**
