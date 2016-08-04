@@ -2,6 +2,8 @@
 
 namespace EHEncryptionBundle\Crypt;
 
+use EHEncryptionBundle\Exception\EncryptionException;
+
 /**
  * Manages all the encryption modes and algorithms
  *
@@ -19,16 +21,16 @@ class CryptographyProvider implements CryptographyProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function encrypt($value, KeyData $keyData)
+    public function encrypt($value, KeyData $keyData, $method = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
     {
-        $method = $this->getCipherMethod();
+        $method = $this->getCipherMethod($method);
         return openssl_encrypt($value, $method, $keyData->getKey(), 0, $keyData->getIv());
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decrypt($value, KeyData $keyData)
+    public function decrypt($value, KeyData $keyData, $method = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
     {
         $method = $this->getCipherMethod();
         return openssl_decrypt($value, $method, $keyData->getKey(), 0, $keyData->getIv());
@@ -105,9 +107,23 @@ class CryptographyProvider implements CryptographyProviderInterface
         return $randomPass;
     }
 
+    /**
+     * Returns the cipher method corresponding to a determined element type
+     *
+     * @param string $type
+     *
+     * @return string
+     */
     private function getCipherMethod($type = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
     {
-        return $this->settings['cipher_method'][$type];
+        $method = $this->settings['cipher_method'][$type];
+        $supportedMethods = openssl_get_cipher_methods();
+
+        if (!in_array($method, $supportedMethods)) {
+            throw new EncryptionException('Method '.$method.' not supported by openssl installation.');
+        }
+
+        return $method;
     }
 
     /**
