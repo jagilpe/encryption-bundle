@@ -65,7 +65,7 @@ class Configuration implements ConfigurationInterface
                             ->addDefaultsIfNotSet()
                             ->children()
                                 ->scalarNode('property')->defaultValue('AES-128-CBC')->end()
-                                ->scalarNode('file')->defaultValue('AES-128-CFC')->end()
+                                ->scalarNode('file')->defaultValue('AES-128-CBC')->end()
                             ->end()
                         ->end()
                     ->end()
