@@ -21,19 +21,21 @@ class CryptographyProvider implements CryptographyProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function encrypt($value, KeyData $keyData, $method = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
+    public function encrypt($value, KeyData $keyData, $encType = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
     {
-        $method = $this->getCipherMethod($method);
-        return openssl_encrypt($value, $method, $keyData->getKey(), 0, $keyData->getIv());
+        $method = $this->getCipherMethod($encType);
+        $encryptionOptions = $this->getEncryptionOptions($encType);
+        return openssl_encrypt($value, $method, $keyData->getKey(), $encryptionOptions, $keyData->getIv());
     }
 
     /**
      * {@inheritdoc}
      */
-    public function decrypt($value, KeyData $keyData, $method = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
+    public function decrypt($value, KeyData $keyData, $encType = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
     {
-        $method = $this->getCipherMethod();
-        return openssl_decrypt($value, $method, $keyData->getKey(), 0, $keyData->getIv());
+        $method = $this->getCipherMethod($encType);
+        $encryptionOptions = $this->getEncryptionOptions($encType);
+        return openssl_decrypt($value, $method, $keyData->getKey(), $encryptionOptions, $keyData->getIv());
     }
 
     /**
@@ -83,9 +85,9 @@ class CryptographyProvider implements CryptographyProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function generateIV($type = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
+    public function generateIV($encType = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
     {
-        $method = $this->getCipherMethod($type);
+        $method = $this->getCipherMethod($encType);
         $ivLength = openssl_cipher_iv_length($method);
         $secure = true;
         $iv = openssl_random_pseudo_bytes($ivLength, $secure);
@@ -114,9 +116,9 @@ class CryptographyProvider implements CryptographyProviderInterface
      *
      * @return string
      */
-    private function getCipherMethod($type = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
+    private function getCipherMethod($encType = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
     {
-        $method = $this->settings['cipher_method'][$type];
+        $method = $this->settings['cipher_method'][$encType];
         $supportedMethods = openssl_get_cipher_methods();
 
         if (!in_array($method, $supportedMethods)) {
@@ -133,9 +135,9 @@ class CryptographyProvider implements CryptographyProviderInterface
      *
      * @return integer
      */
-    private function getSymmetricKeyLength($type = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
+    private function getSymmetricKeyLength($encType = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
     {
-        $cipherMethod = $this->getCipherMethod($type);
+        $cipherMethod = $this->getCipherMethod($encType);
 
         switch ($cipherMethod) {
             case 'AES-128-CBC':
@@ -155,8 +157,32 @@ class CryptographyProvider implements CryptographyProviderInterface
         return $length;
     }
 
+    /**
+     * Returns the configured digest method
+     *
+     * @return string
+     */
     private function getDigestMethod()
     {
         return $this->settings['digest_method'];
+    }
+
+    /**
+     * Returns the options for the encryption depending on the encryption type
+     *
+     * @param string $type
+     *
+     * @return integer
+     */
+    private function getEncryptionOptions($type = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
+    {
+        switch ($type) {
+            case CryptographyProviderInterface::PROPERTY_ENCRYPTION:
+                return 0;
+            case CryptographyProviderInterface::FILE_ENCRYPTION:
+                return OPENSSL_RAW_DATA;
+            default:
+                throw new EncryptionException('Encryption type not supported: '.$type);
+        }
     }
 }

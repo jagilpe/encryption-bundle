@@ -9,6 +9,7 @@ use EHEncryptionBundle\Annotation\EncryptedEntity;
 use EHEncryptionBundle\Crypt\CryptographyProviderInterface;
 use EHEncryptionBundle\Crypt\KeyManagerInterface;
 use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use EHEncryptionBundle\Exception\EncryptionException;
 
 /**
  * Encapsulates the core encryption logic
@@ -103,6 +104,15 @@ class EncryptionService
             $metadata->mapField($encryptedField);
         }
 
+        if ($hasFileEncryptionEnabled = $this->hasFileEncryptionEnabled($reflection)) {
+            $encryptedFileField = array(
+                'fieldName' => 'fileEncrypted',
+                'columnName' => '_file_encrypted',
+                'type' => 'boolean',
+            );
+            $metadata->mapField($encryptedFileField);
+        }
+
         return $metadata;
     }
 
@@ -124,6 +134,9 @@ class EncryptionService
 
         // Process the encryption of the entity
         $this->processEntity($entity, self::ENCRYPT);
+
+        // Process the possible file associated with the entity
+        $this->processFileEntity($entity, self::ENCRYPT);
     }
 
     /**
@@ -148,24 +161,28 @@ class EncryptionService
      */
     public function processEntityPostLoad($entity)
     {
-        // Process the encryption of the entity
-        $this->processEntity($entity, self::DECRYPT);
+        if ($entity) {
+            // Process the encryption of the entity
+            $this->processEntity($entity, self::DECRYPT);
+
+            $this->processFileEntity($entity, self::DECRYPT);
+        }
     }
 
     /**
-     * Checks if the entity has encryption enabled and is actually encrypted
+     * Checks if the entity has file encryption enabled and the file is actually encrypted
      *
      * @param mixed $entity
      *
      * @return boolean
      */
-    public function isEntityEncrypted($entity)
+    public function isEntityFileEncrypted($entity)
     {
         $reflection = new \ReflectionClass($entity);
 
-        return $this->hasEncryptionEnabled($reflection)
-            && $reflection->hasMethod('isEncrypted')
-            && $entity->isEncrypted();
+        return $this->hasFileEncryptionEnabled($reflection)
+        && $reflection->hasMethod('isFileEncrypted')
+        && $entity->isFileEncrypted();
     }
 
     /**
@@ -228,6 +245,78 @@ class EncryptionService
     }
 
     /**
+     * Processes an entity is it has file encryption enabled and it's not already processed
+     *
+     * @param mixed $entity
+     *
+     * @return mixed
+     */
+    private function processFileEntity($entity, $operation)
+    {
+        if ($this->settings[$operation.'_on_backend']) {
+            $reflection = new \ReflectionClass($entity);
+
+            if ($this->hasFileEncryptionEnabled($reflection) && $this->toProcessFile($entity, $operation)) {
+                switch ($operation) {
+                    case self::ENCRYPT:
+                        $this->encryptFile($entity);
+                        break;
+                    case self::DECRYPT:
+                        $this->decryptFile($entity);
+                        break;
+                    default:
+                        throw new EncryptionException('Operation '.$operation.' not supported.');
+                        break;
+                }
+            }
+        }
+
+        return $entity;
+    }
+
+    /**
+     * Encrypts the uploaded file contained in a File Entity
+     *
+     * @param mixed $entity
+     */
+    private function encryptFile($entity)
+    {
+        $file = $entity->getFile();
+
+        if ($file) {
+            $filePath = $file->getRealPath();
+            $fileContent = file_get_contents($filePath);
+            // Get the encryption key data
+            $keyData = $this->keyManager->getEntityEncryptionKeyData($entity);
+
+            $encType = CryptographyProviderInterface::FILE_ENCRYPTION;
+            $encryptedContent = $this->cryptographyProvider->encrypt($fileContent, $keyData, $encType);
+
+            // Replace the file content with the encrypted
+            file_put_contents($filePath, $encryptedContent);
+            $entity->setFileEncrypted(true);
+        }
+    }
+
+    /**
+     * Decrpyts the content of a file associated with an Encryptable File Entity
+     *
+     * @param mixed $entity
+     */
+    private function decryptFile($fileEntity)
+    {
+        // Get the encryption key data
+        $keyData = $this->keyManager->getEntityEncryptionKeyData($fileEntity);
+
+        $encryptedContent = $fileEntity->getContent();
+        $encType = CryptographyProviderInterface::FILE_ENCRYPTION;
+        $decryptedContent = $this->cryptographyProvider->decrypt($encryptedContent, $keyData, $encType);
+
+        $fileEntity->setContent($decryptedContent);
+        $fileEntity->setFileEncrypted(false);
+    }
+
+    /**
      * Checks if the entity has to be processed
      *
      * @param mixed $entity
@@ -248,10 +337,30 @@ class EncryptionService
     }
 
     /**
+     * Checks if the entity has to be processed
+     *
+     * @param mixed $entity
+     * @param unknown $operation
+     *
+     * @return boolean
+     */
+    private function toProcessFile($entity, $operation)
+    {
+        switch ($operation) {
+            case self::ENCRYPT:
+                return !$entity->isFileEncrypted();
+            case self::DECRYPT:
+                return $entity->isFileEncrypted();
+            default:
+                return false;
+        }
+    }
+
+    /**
      * Checks if the class has been enabled for encryption
      *
      * @param \ReflectionClass $reflection
-     * @return EHEncryptionBundle\Annotation\EncryptedEntity/null
+     * @return EHEncryptionBundle\Annotation\EncryptedEntity|null
      */
     private function hasEncryptionEnabled(\ReflectionClass $reflection)
     {
@@ -263,6 +372,24 @@ class EncryptionService
         );
 
         return $encryptedEnabled;
+    }
+
+    /**
+     * Checks if the class is a File entity and has the file encryption enabled
+     *
+     * @param \ReflectionClass $reflection
+     * @return EHEncryptionBundle\Annotation\EncryptedFile|null
+     */
+    private function hasFileEncryptionEnabled(\ReflectionClass $reflection)
+    {
+        $classMetadata = $this->metadataFactory->getMetadataForClass($reflection->getName());
+
+        $fileEncryptionEnabled = $this->reader->getClassAnnotation(
+            $reflection,
+            'EHEncryptionBundle\\Annotation\\EncryptedFile'
+        );
+
+        return $fileEncryptionEnabled;
     }
 
     /**
