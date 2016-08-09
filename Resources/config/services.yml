@@ -51,7 +51,7 @@ services:
     eh_encryption.encryption.service:
         class: EHEncryptionBundle\Service\EncryptionService
         arguments:
-            - "@eh_encryption.metadata_factory"
+            - "@doctrine"
             - "@annotation_reader"
             - "@eh_encryption.cryptography_provider"
             - "@eh_encryption.key_manager"

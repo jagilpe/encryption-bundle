@@ -4,11 +4,12 @@ namespace EHEncryptionBundle\Service;
 
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Common\Annotations\Reader;
-use Metadata\MetadataFactoryInterface;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use EHEncryptionBundle\Annotation\EncryptedEntity;
 use EHEncryptionBundle\Crypt\CryptographyProviderInterface;
 use EHEncryptionBundle\Crypt\KeyManagerInterface;
 use EHEncryptionBundle\Crypt\FieldMapping;
+use EHEncryptionBundle\Crypt\FieldEncrypter;
 use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 use EHEncryptionBundle\Exception\EncryptionException;
 
@@ -28,22 +29,22 @@ class EncryptionService
     const MODE_PER_USER_SHAREABLE = 'PER_USER_SHAREABLE';
 
     /**
-     * @var Metadata\MetadataFactoryInterface
+     * @var \Doctrine\Bundle\DoctrineBundle\Registry
      */
-    private $metadataFactory;
+    private $doctrine;
 
     /**
-     * @var Doctrine\Common\Annotations\Reader
+     * @var \Doctrine\Common\Annotations\Reader
      */
     private $reader;
 
     /**
-     * @var EHEncryptionBundle\Crypt\CryptographyProviderInterface
+     * @var \EHEncryptionBundle\Crypt\CryptographyProviderInterface
      */
     private $cryptographyProvider;
 
     /**
-     * @var EHEncryptionBundle\Crypt\KeyManagerInterface
+     * @var \EHEncryptionBundle\Crypt\KeyManagerInterface
      */
     private $keyManager;
 
@@ -52,14 +53,19 @@ class EncryptionService
      */
     private $settings;
 
+    /**
+     * @var array
+     */
+    private $fieldEncrypters;
+
     public function __construct(
-                    MetadataFactoryInterface $metataFactory,
+                    Registry $doctrine,
                     Reader $reader,
                     CryptographyProviderInterface $cryptographyProvider,
                     KeyManagerInterface $keyManager,
                     $settings)
     {
-        $this->metadataFactory = $metataFactory;
+        $this->doctrine = $doctrine;
         $this->reader = $reader;
         $this->cryptographyProvider = $cryptographyProvider;
         $this->keyManager = $keyManager;
@@ -251,8 +257,9 @@ class EncryptionService
 
                 // Encrypt the fields
                 foreach ($encryptionEnabledFields as $field) {
+                    $fieldEncrypter = $this->getFieldEncrypter($field);
                     $value = $this->getFieldValue($entity, $field);
-                    $processedValue = $this->cryptographyProvider->{$operation}($value, $keyData);
+                    $processedValue = $fieldEncrypter->{$operation}($value, $keyData);
                     $this->setFieldValue($entity, $field, $processedValue);
                 }
 
@@ -384,8 +391,6 @@ class EncryptionService
      */
     private function hasEncryptionEnabled(\ReflectionClass $reflection)
     {
-        $classMetadata = $this->metadataFactory->getMetadataForClass($reflection->getName());
-
         $encryptedEnabled = $this->reader->getClassAnnotation(
             $reflection,
             'EHEncryptionBundle\\Annotation\\EncryptedEntity'
@@ -402,8 +407,6 @@ class EncryptionService
      */
     private function hasFileEncryptionEnabled(\ReflectionClass $reflection)
     {
-        $classMetadata = $this->metadataFactory->getMetadataForClass($reflection->getName());
-
         $fileEncryptionEnabled = $this->reader->getClassAnnotation(
             $reflection,
             'EHEncryptionBundle\\Annotation\\EncryptedFile'
@@ -507,7 +510,7 @@ class EncryptionService
     }
 
     /**
-     * Factory method to get the right EncryptedFieldMapping class for a determined field
+     * Factory method to get the right EncryptedFieldMapping object for a determined field
      *
      * @param array $fieldMapping
      *
@@ -526,5 +529,43 @@ class EncryptionService
             default:
                 throw new EncryptionException('Field type '.$fieldMapping['type'].' not supported.');
         }
+    }
+
+    /**
+     * Factory method to get the right EncryptedFieldEncrypter object for a determined field
+     *
+     * @param array $fieldMapping
+     *
+     * @return \EHEncryptionBundle\Crypt\FieldMapping\EncryptedFieldMappingInterface
+     */
+    private function getFieldEncrypter(\ReflectionProperty $reflectionProperty)
+    {
+        $classMetadata = $this->doctrine->getManager()->getMetadataFactory()->getMetadataFor($reflectionProperty->class);
+
+        $fieldName = $reflectionProperty->getName();
+        $fieldMapping = $classMetadata->getFieldMapping($fieldName);
+
+        if (!isset($fieldMapping['_old_type'])) {
+            throw new EncryptionException('Field metadata not updated');
+        }
+
+        switch ($fieldMapping['_old_type']) {
+            case 'string':
+            case 'text':
+                $encrypterClass = FieldEncrypter\DefaultFieldEncrypter::class;
+                break;
+            case 'date':
+            case 'datetime':
+                $encrypterClass = FieldEncrypter\SerializableObjectFieldEncrypter::class;
+                break;
+            default:
+                throw new EncryptionException('Field type '.$fieldMapping['_old_type'].' not supported.');
+        }
+
+        if (!isset($this->encrypters[$encrypterClass])) {
+            $this->encrypters[$encrypterClass] = new $encrypterClass($this->cryptographyProvider);
+        }
+
+        return $this->encrypters[$encrypterClass];
     }
 }
