@@ -9,7 +9,7 @@ class StringFieldMapping extends AbstractEncryptedFieldMapping
      */
     public function getMappingAttributeOverride()
     {
-        $fieldMapping = $this->fieldMapping;
+        $fieldMapping = $this->getFieldMapping();
         $fieldMapping['length'] += 16;
 
         return $fieldMapping;

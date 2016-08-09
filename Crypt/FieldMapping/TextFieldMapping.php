@@ -9,6 +9,6 @@ class TextFieldMapping extends AbstractEncryptedFieldMapping
      */
     public function getMappingAttributeOverride()
     {
-        return $this->fieldMapping;
+        return $this->getFieldMapping();
     }
 }

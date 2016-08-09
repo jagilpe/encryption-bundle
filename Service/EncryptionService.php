@@ -112,7 +112,14 @@ class EncryptionService
                 $fieldMapping = $metadata->getFieldMapping($fieldName);
                 $encryptedFieldMapping = $this->getEncryptedFieldMapping($fieldMapping);
                 $override = $encryptedFieldMapping->getMappingAttributeOverride();
-                $metadata->setAttributeOverride($fieldName, $override);
+                /*
+                 * It's not possible to change the type of a column using
+                 * Doctrine\ORM\Mapping\ClassMetadataInfo::setAssociationOverride
+                 * The only alternative that I found it to directly access the fieldMappings property
+                 * that until the version 2.5 of Doctrine ORM is public. If this changes in comming
+                 * versions of Doctrine this should also be changed
+                 */
+                $metadata->fieldMappings[$fieldName] = $override;
             }
         }
 
@@ -513,6 +520,9 @@ class EncryptionService
                 return new FieldMapping\StringFieldMapping($this, $fieldMapping);
             case 'text':
                 return new FieldMapping\TextFieldMapping($this, $fieldMapping);
+            case 'date':
+            case 'datetime':
+                return new FieldMapping\DateTimeFieldMapping($this, $fieldMapping);
             default:
                 throw new EncryptionException('Field type '.$fieldMapping['type'].' not supported.');
         }
