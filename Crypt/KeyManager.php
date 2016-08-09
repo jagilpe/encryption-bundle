@@ -4,6 +4,7 @@ namespace EHEncryptionBundle\Crypt;
 
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use EHEncryptionBundle\Exception\EncryptionException;
 use EHEncryptionBundle\Event as EncryptionEvents;
 use EHEncryptionBundle\Security\AccessCheckerInterface;
@@ -19,6 +20,11 @@ class KeyManager implements KeyManagerInterface
      * @var \Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface
      */
     private $tokenStorage;
+
+    /**
+     * @var \Symfony\Component\HttpFoundation\Session\SessionInterface
+     */
+    private $session;
 
     /**
      * @var \EHEncryptionBundle\Crypt\CryptographyProvider
@@ -42,12 +48,14 @@ class KeyManager implements KeyManagerInterface
 
     public function __construct(
                     TokenStorageInterface $tokenStorage,
+                    SessionInterface $session,
                     CryptographyProvider $cryptographyProvider,
                     EventDispatcherInterface $dispatcher,
                     AccessCheckerInterface $accessChecker,
                     $settings)
     {
         $this->tokenStorage = $tokenStorage;
+        $this->session = $session;
         $this->cryptographyProvider = $cryptographyProvider;
         $this->dispatcher = $dispatcher;
         $this->accessChecker = $accessChecker;
@@ -168,15 +176,13 @@ class KeyManager implements KeyManagerInterface
     }
 
     /**
-     * Returns the private key of the user
-     *
-     * @param mixed $user
+     * Returns the private key of the user logged in user
      *
      * @return string
      */
-    private function getPrivateKey($user = null)
+    private function getPrivateKey()
     {
-        return $user->getPrivateKey();
+        return $this->session->get('pki_private_key');
     }
 
     /**
@@ -211,7 +217,7 @@ class KeyManager implements KeyManagerInterface
 
         if ($user && isset($encryptedKey[$user->getId()])) {
             $userKey = base64_decode($encryptedKey[$user->getId()]);
-            $privateKey = $this->getPrivateKey($user);
+            $privateKey = $this->getPrivateKey();
 
             $decryptedKey = $this->cryptographyProvider->decryptWithPrivateKey($userKey, $privateKey);
         }
@@ -226,5 +232,4 @@ class KeyManager implements KeyManagerInterface
 
         return $user;
     }
-
 }

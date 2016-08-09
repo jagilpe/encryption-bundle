@@ -18,6 +18,7 @@ services:
         class: EHEncryptionBundle\Crypt\KeyManager
         arguments:
             - "@security.token_storage"
+            - "@session"
             - "@eh_encryption.cryptography_provider"
             - "@event_dispatcher"
             - "@eh_encryption.access_checker"
@@ -29,10 +30,17 @@ services:
         arguments:
             - "%eh_encryption.settings%"
             
-    # Event subscribers
+    # Event subscribers and listeners
     eh_encryption.doctrine_subscriber:
         class: EHEncryptionBundle\EventListener\EncryptionSubscriber
         arguments:
             - "@eh_encryption.encryption.service"
         tags:
             - { name: doctrine.event_subscriber, connection: default, priority: -10 }
+    eh_encryption.user_private_key_load_listener:
+        class: EHEncryptionBundle\EventListener\UserPrivateKeyLoadListener
+        arguments:
+            - "%eh_encryption.settings%"
+            - "@security.token_storage"
+        tags:
+            - { name: kernel.event_listener, event: kernel.response, priority: 2 }

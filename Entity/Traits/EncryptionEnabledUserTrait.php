@@ -17,6 +17,16 @@ trait EncryptionEnabledUserTrait
     protected $privateKey;
 
     /**
+     * @ORM\Column(name="_private_key_encrypted", type="boolean", nullable = TRUE)
+     */
+    protected $privateKeyEncrypted = false;
+
+    /**
+     * @ORM\Column(name="_private_key_iv", type="text", nullable = TRUE)
+     */
+    protected $privateKeyIv;
+
+    /**
      * {@inheritdoc}
      */
     public function getPublicKey()
@@ -47,6 +57,48 @@ trait EncryptionEnabledUserTrait
     public function setPrivateKey($privateKey)
     {
         $this->privateKey = $privateKey;
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPrivateKeyEncrypted()
+    {
+        return $this->privateKeyEncrypted;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setPrivateKeyEncrypted($privateKeyEncrypted)
+    {
+        $this->privateKeyEncrypted = $privateKeyEncrypted;
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isPrivateKeyEncrypted()
+    {
+        return $this->getPrivateKeyEncrypted();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPrivateKeyIv()
+    {
+        return $this->privateKeyIv;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setPrivateKeyIv($privateKeyIv)
+    {
+        $this->privateKeyIv = $privateKeyIv;
         return $this;
     }
 }

@@ -31,4 +31,32 @@ interface PKEncryptionEnabledUserInterface
      * @param string $privateKey
      */
     public function setPrivateKey($privateKey);
+
+    /**
+     * Checks if the private key is encrypted
+     *
+     * @return boolean
+     */
+    public function isPrivateKeyEncrypted();
+
+    /**
+     * Sets the encryption state of the private key of the user
+     *
+     * @param boolean $privateKey
+     */
+    public function setPrivateKeyEncrypted($privateKeyEncrypted);
+
+    /**
+     * Returns the initialization vector used to encrypt the private key of the user
+     *
+     * @return string
+     */
+    public function getPrivateKeyIv();
+
+    /**
+     * Sets the initialization vector used to encrypt the private key of the user
+     *
+     * @param string $privateKey
+     */
+    public function setPrivateKeyIv($privateKeyIv);
 }
