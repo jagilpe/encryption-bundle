@@ -8,6 +8,7 @@ use Metadata\MetadataFactoryInterface;
 use EHEncryptionBundle\Annotation\EncryptedEntity;
 use EHEncryptionBundle\Crypt\CryptographyProviderInterface;
 use EHEncryptionBundle\Crypt\KeyManagerInterface;
+use EHEncryptionBundle\Crypt\FieldMapping;
 use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 use EHEncryptionBundle\Exception\EncryptionException;
 
@@ -96,21 +97,33 @@ class EncryptionService
                 $metadata->mapField($ivField);
             }
 
-            $encryptedField = array(
+            // Field to control is the entity is already encrypted or not
+            $isEncryptedField = array(
                 'fieldName' => 'encrypted',
                 'columnName' => '_encrypted',
                 'type' => 'boolean',
             );
-            $metadata->mapField($encryptedField);
+            $metadata->mapField($isEncryptedField);
+
+            // Modify the metadata of the encrypted fields of the entity
+            $encryptedFields = $this->getEncryptionEnabledFields($reflection);
+            foreach ($encryptedFields as $encryptedField) {
+                $fieldName = $encryptedField->name;
+                $fieldMapping = $metadata->getFieldMapping($fieldName);
+                $encryptedFieldMapping = $this->getEncryptedFieldMapping($fieldMapping);
+                $override = $encryptedFieldMapping->getMappingAttributeOverride();
+                $metadata->setAttributeOverride($fieldName, $override);
+            }
         }
 
+        // Add a field to check if the associated file is encrypted
         if ($hasFileEncryptionEnabled = $this->hasFileEncryptionEnabled($reflection)) {
-            $encryptedFileField = array(
+            $isFileEncryptedField = array(
                 'fieldName' => 'fileEncrypted',
                 'columnName' => '_file_encrypted',
                 'type' => 'boolean',
             );
-            $metadata->mapField($encryptedFileField);
+            $metadata->mapField($isFileEncryptedField);
         }
 
         return $metadata;
@@ -483,6 +496,25 @@ class EncryptionService
         if ($reflectionProperty) {
             $reflectionProperty->setAccessible(true);
             $value = $reflectionProperty->setValue($entity, $value);
+        }
+    }
+
+    /**
+     * Factory method to get the right EncryptedFieldMapping class for a determined field
+     *
+     * @param array $fieldMapping
+     *
+     * @return \EHEncryptionBundle\Crypt\FieldMapping\EncryptedFieldMappingInterface
+     */
+    private function getEncryptedFieldMapping(array $fieldMapping)
+    {
+        switch($fieldMapping['type']) {
+            case 'string':
+                return new FieldMapping\StringFieldMapping($this, $fieldMapping);
+            case 'text':
+                return new FieldMapping\TextFieldMapping($this, $fieldMapping);
+            default:
+                throw new EncryptionException('Field type '.$fieldMapping['type'].' not supported.');
         }
     }
 }
