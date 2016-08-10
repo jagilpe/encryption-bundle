@@ -326,6 +326,7 @@ class EncryptionService
             file_put_contents($filePath, $encryptedContent);
             $entity->setFileEncrypted(true);
         }
+        dump($entity);
     }
 
     /**
@@ -343,7 +344,6 @@ class EncryptionService
         $decryptedContent = $this->cryptographyProvider->decrypt($encryptedContent, $keyData, $encType);
 
         $fileEntity->setContent($decryptedContent);
-        $fileEntity->setFileEncrypted(false);
     }
 
     /**
