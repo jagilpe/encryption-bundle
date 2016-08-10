@@ -11,6 +11,7 @@ interface CryptographyProviderInterface
 {
     const PROPERTY_ENCRYPTION = 'property';
     const FILE_ENCRYPTION = 'file';
+    const PRIVATE_KEY_ENCRYPTION = 'private_key';
 
     /**
      * Encrypts a value using symmetric encryption
@@ -87,4 +88,11 @@ interface CryptographyProviderInterface
      * @return string
      */
     public function generateSecureKey();
+
+    /**
+     * Returns the hash of the password used to encrypt the private key of the user
+     *
+     * @return string
+     */
+    public function getPasswordHash($password);
 }

@@ -37,10 +37,26 @@ services:
             - "@eh_encryption.encryption.service"
         tags:
             - { name: doctrine.event_subscriber, connection: default, priority: -10 }
+    eh_encryption.user_events.subscriber:
+        class: EHEncryptionBundle\EventListener\UserEventsSubsbriber
+        arguments:
+            - "@eh_encryption.encryption.service"
+        tags:
+            - { name: kernel.event_subscriber }
+            
     eh_encryption.user_private_key_load_listener:
         class: EHEncryptionBundle\EventListener\UserPrivateKeyLoadListener
         arguments:
             - "%eh_encryption.settings%"
             - "@security.token_storage"
+            - "@eh_encryption.key_manager"
         tags:
             - { name: kernel.event_listener, event: kernel.response, priority: 2 }
+    eh_encryption.web_service_private_key_load_listener:
+        class: EHEncryptionBundle\EventListener\WebServicePrivateKeyLoadListener
+        arguments:
+            - "%eh_encryption.settings%"
+            - "@security.token_storage"
+            - "@eh_encryption.key_manager"
+        tags:
+            - { name: kernel.event_listener, event: kernel.request }

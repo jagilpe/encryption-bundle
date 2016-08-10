@@ -5,6 +5,7 @@ namespace EHEncryptionBundle\Crypt;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 use EHEncryptionBundle\Exception\EncryptionException;
 use EHEncryptionBundle\Event as EncryptionEvents;
 use EHEncryptionBundle\Security\AccessCheckerInterface;
@@ -65,7 +66,7 @@ class KeyManager implements KeyManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function generateUserPKIKeys($user = null)
+    public function generateUserPKIKeys(PKEncryptionEnabledUserInterface $user = null)
     {
         $oldKeys = null;
 
@@ -80,26 +81,15 @@ class KeyManager implements KeyManagerInterface
         $event = new EncryptionEvents\PKIKeyGenerationEvent($user, $oldKeys);
         $this->dispatcher->dispatch(EncryptionEvents\Events::PKI_KEY_PRE_GENERATE, $event);
 
-        // OPENSSL config
-        $config = array(
-            'digest_alg' => $this->settings['private_key']['digest_method'],
-            'private_key_bits' => $this->settings['private_key']['bits'],
-            'private_key_type' => $this->settings['private_key']['type'],
-        );
+        list($publicKey, $privateKey) = $this->generatePKIKeys();
 
-        $privateKey = null;
-        $resource = openssl_pkey_new($config);
+        list($encryptedPrivateKey, $iv, $encrypted) = $this->encryptPrivateKey($privateKey, $user);
 
-        openssl_pkey_export($resource, $privateKey);
-
-        if(!$privateKey) {
-            throw new EncryptionException('Private key could not be generated');
+        $user->setPrivateKey($encryptedPrivateKey);
+        if ($encrypted) {
+            $user->setPrivateKeyIv($iv);
+            $user->setPrivateKeyEncrypted(true);
         }
-
-        $publicKeyDetails = openssl_pkey_get_details($resource);
-        $publicKey = $publicKeyDetails['key'];
-
-        $user->setPrivateKey($privateKey);
         $user->setPublicKey($publicKey);
 
         // Dispatch the post generation event
@@ -118,6 +108,48 @@ class KeyManager implements KeyManagerInterface
         $keyData = new KeyData($key, $iv);
 
         return $keyData;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getUserPublicKey(PKEncryptionEnabledUserInterface $user, array $params = array())
+    {
+        return $user->getPublicKey();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getUserPrivateKey(PKEncryptionEnabledUserInterface $user, array $params = array())
+    {
+        if ($user->isPrivateKeyEncrypted()) {
+            if (isset($params['password_hash'])) {
+                $passwordHash = $params['password_hash'];
+            }
+            else {
+                if (isset($params['password'])) {
+                    $passwordHash = $this->cryptographyProvider->getPasswordHash($params['password']);
+                }
+                else {
+                    throw new EncryptionException('Could not retrieve the user\'s key');
+                }
+            }
+
+            $iv = $user->getPrivateKeyIv();
+            $keyData = new KeyData($passwordHash, $iv);
+            $encryptedPrivateKey = $user->getPrivateKey();
+
+            $privateKey = $this->cryptographyProvider->decrypt(
+                            $encryptedPrivateKey,
+                            $keyData,
+                            CryptographyProviderInterface::PRIVATE_KEY_ENCRYPTION);
+        }
+        else {
+            $privateKey = $user->getPrivateKey();
+        }
+
+        return $privateKey;
     }
 
     /**
@@ -156,11 +188,11 @@ class KeyManager implements KeyManagerInterface
         $iv = $entity->getIv();
 
         if (!$iv) {
-            $iv = base64_encode($this->cryptographyProvider->generateIV(CryptographyProviderInterface::PROPERTY_ENCRYPTION));
+            $iv = $this->cryptographyProvider->generateIV(CryptographyProviderInterface::PROPERTY_ENCRYPTION);
             $entity->setIv($iv);
         }
 
-        return base64_decode($iv);
+        return $iv;
     }
 
     /**
@@ -170,7 +202,7 @@ class KeyManager implements KeyManagerInterface
      *
      * @return string
      */
-    private function getPublicKey($user = null)
+    private function getPublicKey(PKEncryptionEnabledUserInterface $user = null)
     {
         return $user->getPublicKey();
     }
@@ -231,5 +263,69 @@ class KeyManager implements KeyManagerInterface
         $user = $token ? $token->getUser() : null;
 
         return $user;
+    }
+
+    /**
+     * Generates a pki keys pair
+     *
+     * @return array
+     *
+     * @throws EncryptionException
+     */
+    private function generatePKIKeys()
+    {
+        // OPENSSL config
+        $config = array(
+            'digest_alg' => $this->settings['private_key']['digest_method'],
+            'private_key_bits' => $this->settings['private_key']['bits'],
+            'private_key_type' => $this->settings['private_key']['type'],
+        );
+
+        $privateKey = null;
+        $resource = openssl_pkey_new($config);
+
+        openssl_pkey_export($resource, $privateKey);
+
+        if(!$privateKey) {
+            throw new EncryptionException('Private key could not be generated');
+        }
+
+        $publicKeyDetails = openssl_pkey_get_details($resource);
+        $publicKey = $publicKeyDetails['key'];
+
+        return array($publicKey, $privateKey);
+    }
+
+    /**
+     * Encrypts the Private key of the user using its password
+     *
+     * @param string $privateKey
+     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     *
+     * @return array
+     */
+    private function encryptPrivateKey($privateKey, PKEncryptionEnabledUserInterface $user)
+    {
+        $password = $user->getPlainPassword();
+
+        if ($password && false) {
+            $passwordHash = $this->cryptographyProvider->getPasswordHash($params['password']);
+            $iv = $this->cryptographyProvider->generateIV();
+
+            $keyData = new KeyData($passwordHash, $iv);
+            $encryptedPrivateKey = $this->cryptographyProvider->encrypt(
+                            $privateKey,
+                            $keyData,
+                            CryptographyProviderInterface::PRIVATE_KEY_ENCRYPTION);
+
+            $encrypted = true;
+        }
+        else {
+            $encryptedPrivateKey = $privateKey;
+            $iv = null;
+            $encrypted = false;
+        }
+
+        return array($encryptedPrivateKey, $iv, $encrypted);
     }
 }

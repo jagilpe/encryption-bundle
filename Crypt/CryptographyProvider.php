@@ -25,7 +25,7 @@ class CryptographyProvider implements CryptographyProviderInterface
     {
         $method = $this->getCipherMethod($encType);
         $encryptionOptions = $this->getEncryptionOptions($encType);
-        return openssl_encrypt($value, $method, $keyData->getKey(), $encryptionOptions, $keyData->getIv());
+        return openssl_encrypt($value, $method, $keyData->getKey(), $encryptionOptions, base64_decode($keyData->getIv()));
     }
 
     /**
@@ -35,7 +35,7 @@ class CryptographyProvider implements CryptographyProviderInterface
     {
         $method = $this->getCipherMethod($encType);
         $encryptionOptions = $this->getEncryptionOptions($encType);
-        return openssl_decrypt($value, $method, $keyData->getKey(), $encryptionOptions, $keyData->getIv());
+        return openssl_decrypt($value, $method, $keyData->getKey(), $encryptionOptions, base64_decode($keyData->getIv()));
     }
 
     /**
@@ -93,7 +93,7 @@ class CryptographyProvider implements CryptographyProviderInterface
         $iv = openssl_random_pseudo_bytes($ivLength, $secure);
 
         if ($secure) {
-            return $iv;
+            return base64_encode($iv);
         }
         else {
             throw new \Exception();
@@ -107,6 +107,14 @@ class CryptographyProvider implements CryptographyProviderInterface
     {
         $randomPass = openssl_random_pseudo_bytes($this->getSymmetricKeyLength(), $secure);
         return $randomPass;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPasswordHash($password)
+    {
+
     }
 
     /**

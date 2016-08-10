@@ -57,6 +57,7 @@ class Configuration implements ConfigurationInterface
                             ->children()
                                 ->scalarNode('property')->defaultValue('AES-128-CBC')->end()
                                 ->scalarNode('file')->defaultValue('AES-128-CBC')->end()
+                                ->scalarNode('private_key')->defaultValue('AES-128-CBC')->end()
                             ->end()
                         ->end()
                     ->end()

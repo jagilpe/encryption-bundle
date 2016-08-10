@@ -151,13 +151,6 @@ class EncryptionService
      */
     public function processEntityPrePersist($entity)
     {
-        // Check if this is the user entity
-        $reflectionClass = new \ReflectionClass($entity);
-        if ($this->isPKEncryptionEnabledUser($reflectionClass)) {
-            // We have to generate the public and private encryption keys
-            $this->keyManager->generateUserPKIKeys($entity);
-        }
-
         // Process the encryption of the entity
         $this->processEntity($entity, self::ENCRYPT);
 
@@ -196,13 +189,23 @@ class EncryptionService
     }
 
     /**
+     * Initializes the registrered user to use the encryption
+     *
+     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     */
+    public function handleUserRegistration(PKEncryptionEnabledUserInterface $user)
+    {
+        $this->keyManager->generateUserPKIKeys($user);
+    }
+
+    /**
      * Checks if the entity has file encryption enabled and the file is actually encrypted
      *
      * @param mixed $entity
      *
      * @return boolean
      */
-    public function isEntityFileEncrypted($entity)
+    private function isEntityFileEncrypted($entity)
     {
         $reflection = new \ReflectionClass($entity);
 
@@ -218,7 +221,7 @@ class EncryptionService
      *
      * @return boolean
      */
-    public function isEncryptableFile($entity)
+    private function isEncryptableFile($entity)
     {
         $isEncryptableFile = false;
 
@@ -418,13 +421,15 @@ class EncryptionService
     /**
      * Checks if the class represents a user with public key encryption enabled
      *
-     * @param \ReflectionClass $reflection
+     * @param mixed $entity
+     *
      * @return EHEncryptionBundle\Annotation\PKEncryptionEnabledUser / null
      */
-    private function isPKEncryptionEnabledUser(\ReflectionClass $reflection)
+    private function isPKEncryptionEnabledUser($entity)
     {
+        $reflectionClass = new \ReflectionClass($entity);
         return $this->userBasedEncryption()
-            && ($reflection->implementsInterface(PKEncryptionEnabledUserInterface::class));
+            && ($reflectionClass->implementsInterface(PKEncryptionEnabledUserInterface::class));
     }
 
     /**
