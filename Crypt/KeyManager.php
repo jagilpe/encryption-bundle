@@ -331,7 +331,7 @@ class KeyManager implements KeyManagerInterface
     private function decryptPrivateKey(PKEncryptionEnabledUserInterface $user, array $params = array())
     {
         if (isset($params['password_digest'])) {
-            $passwordDigest = $params['password_digest'];
+            $passwordDigest = base64_decode($params['password_digest']);
         }
         else {
             if (isset($params['password'])) {

@@ -10,6 +10,8 @@ use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 
 class WebServicePrivateKeyLoadListener
 {
+    const PASSWORD_DIGEST_HEADER = 'pv-pd';
+
     /**
      * @var array
      */
@@ -47,7 +49,10 @@ class WebServicePrivateKeyLoadListener
             $request = $event->getRequest();
             $user = $this->getUser();
             if ($user && $user instanceof PKEncryptionEnabledUserInterface) {
-                $privateKey = $this->keyManager->getUserPrivateKey($user);
+                $params = array(
+                    'password_digest' => $request->headers->get(self::PASSWORD_DIGEST_HEADER),
+                );
+                $privateKey = $this->keyManager->getUserPrivateKey($user, $params);
                 $request->getSession()->set('pki_private_key', $privateKey);
             }
         }
