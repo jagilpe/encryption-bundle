@@ -20,9 +20,16 @@ services:
             - "@security.token_storage"
             - "@session"
             - "@eh_encryption.cryptography_provider"
+            - "@eh_encryption.key_store"
             - "@event_dispatcher"
             - "@eh_encryption.access_checker"
             - "%eh_encryption.settings%"
+
+    eh_encryption.key_store:
+        class: EHEncryptionBundle\Crypt\KeyStore
+        arguments:
+            - "@doctrine"
+            - "@eh_encryption.cryptography_provider"
     
     # default access checker
     eh_encryption.security.access_checker.default:

@@ -27,6 +27,12 @@ trait EncryptionEnabledUserTrait
     protected $privateKeyIv;
 
     /**
+     *
+     * @var string
+     */
+    protected $passwordDigest;
+
+    /**
      * {@inheritdoc}
      */
     public function getPublicKey()
@@ -99,6 +105,17 @@ trait EncryptionEnabledUserTrait
     public function setPrivateKeyIv($privateKeyIv)
     {
         $this->privateKeyIv = $privateKeyIv;
+        return $this;
+    }
+
+    public function getPasswordDigest()
+    {
+        return $this->passwordDigest;
+    }
+
+    public function setPasswordDigest($passwordDigest)
+    {
+        $this->passwordDigest = $passwordDigest;
         return $this;
     }
 }

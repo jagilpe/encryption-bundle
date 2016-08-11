@@ -14,9 +14,25 @@ interface KeyManagerInterface
     /**
      * Generates the required keys for the PKI
      *
-     * @param mixed $user
+     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
-    public function generateUserPKIKeys(PKEncryptionEnabledUserInterface $user = null);
+    public function generateUserPKIKeys(PKEncryptionEnabledUserInterface $user);
+
+    /**
+     * Stores the keys of the user in the configured key store
+     *
+     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     */
+    public function storeUserPKIKeys(PKEncryptionEnabledUserInterface $user);
+
+    /**
+     * Handles a password change by the user
+     *
+     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param $currentPassword
+     *
+     */
+    public function handleUserPasswordChange(PKEncryptionEnabledUserInterface $user, $currentPassword);
 
     /**
      * Returns the key to be used to encrypt the entity

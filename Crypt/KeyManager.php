@@ -7,7 +7,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 use EHEncryptionBundle\Exception\EncryptionException;
-use EHEncryptionBundle\Event as EncryptionEvents;
 use EHEncryptionBundle\Security\AccessCheckerInterface;
 
 /**
@@ -30,9 +29,14 @@ class KeyManager implements KeyManagerInterface
     private $session;
 
     /**
-     * @var \EHEncryptionBundle\Crypt\CryptographyProvider
+     * @var \EHEncryptionBundle\Crypt\CryptographyProviderInterface
      */
     private $cryptographyProvider;
+
+    /**
+     * @var \EHEncryptionBundle\Crypt\KeyStoreInterface
+     */
+    private $keyStore;
 
     /**
      * @var \EHEncryptionBundle\Security\AccessCheckerInterface
@@ -52,7 +56,8 @@ class KeyManager implements KeyManagerInterface
     public function __construct(
                     TokenStorageInterface $tokenStorage,
                     SessionInterface $session,
-                    CryptographyProvider $cryptographyProvider,
+                    CryptographyProviderInterface $cryptographyProvider,
+                    KeyStoreInterface $keyStore,
                     EventDispatcherInterface $dispatcher,
                     AccessCheckerInterface $accessChecker,
                     $settings)
@@ -60,6 +65,7 @@ class KeyManager implements KeyManagerInterface
         $this->tokenStorage = $tokenStorage;
         $this->session = $session;
         $this->cryptographyProvider = $cryptographyProvider;
+        $this->keyStore = $keyStore;
         $this->dispatcher = $dispatcher;
         $this->accessChecker = $accessChecker;
         $this->settings = $settings;
@@ -68,35 +74,52 @@ class KeyManager implements KeyManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function generateUserPKIKeys(PKEncryptionEnabledUserInterface $user = null)
+    public function generateUserPKIKeys(PKEncryptionEnabledUserInterface $user)
     {
-        $oldKeys = null;
-
-        if ($user->getPrivateKey() && $user->getPublicKey()) {
-            $oldKeys = array(
-                'private' => $user->getPrivateKey(),
-                'public' => $user->getPublicKey(),
-            );
-        }
-
-        // Dispatch the pre generation event
-        $event = new EncryptionEvents\PKIKeyGenerationEvent($user, $oldKeys);
-        $this->dispatcher->dispatch(EncryptionEvents\Events::PKI_KEY_PRE_GENERATE, $event);
-
         list($publicKey, $privateKey) = $this->generatePKIKeys();
 
-        list($encryptedPrivateKey, $iv, $encrypted) = $this->encryptPrivateKey($privateKey, $user);
-
-        $user->setPrivateKey($encryptedPrivateKey);
-        if ($encrypted) {
-            $user->setPrivateKeyIv($iv);
-            $user->setPrivateKeyEncrypted(true);
-        }
         $user->setPublicKey($publicKey);
+        $user->setPrivateKey($privateKey);
 
-        // Dispatch the post generation event
-        $event = new EncryptionEvents\PKIKeyGenerationEvent($user, $oldKeys);
-        $this->dispatcher->dispatch(EncryptionEvents\Events::PKI_KEY_POST_GENERATE, $event);
+        $password = $user->getPlainPassword();
+
+        $this->encryptPrivateKey($user);
+
+        if ($password) {
+            // Store the password digest for encrypting the private key after the user is persisted
+            $passwordDigest = $this->cryptographyProvider->getPasswordDigest($password, $user->getSalt());
+            $user->setPasswordDigest(base64_encode($passwordDigest));
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function storeUserPKIKeys(PKEncryptionEnabledUserInterface $user)
+    {
+        $passwordDigest = $user->getPasswordDigest();
+        $params = array('password_digest' => $passwordDigest);
+        $privateKey = $this->getUserPrivateKey($user, $params);
+
+        $this->keyStore->addKeys($user, $privateKey);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     */
+    public function handleUserPasswordChange(PKEncryptionEnabledUserInterface $user, $currentPassword)
+    {
+        $params = array('password' => $currentPassword);
+
+        // Decrypt the private key of the user using the current password
+        $privateKey = $this->getUserPrivateKey($user, $params);
+        $user->setPrivateKey($privateKey);
+        $user->setPrivateKeyIv(null);
+        $user->setPrivateKeyEncrypted(false);
+
+        $this->encryptPrivateKey($user);
+        $this->keyStore->addKeys($user, $privateKey);
     }
 
     /**
@@ -282,42 +305,67 @@ class KeyManager implements KeyManagerInterface
     /**
      * Encrypts the Private key of the user using his password
      *
-     * @param string $privateKey
      * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      *
      * @return array
      */
-    private function encryptPrivateKey($privateKey, PKEncryptionEnabledUserInterface $user)
+    private function encryptPrivateKey(PKEncryptionEnabledUserInterface $user)
     {
-        $password = $user->getPlainPassword();
-        $salt = $user->getSalt();
+        if (!$user->isPrivateKeyEncrypted()) {
+            $privateKey = $user->getPrivateKey();
+            $passwordDigest = $this->getUserPasswordDigest($user);
 
-        if ($password) {
-            $passwordDigest = $this->cryptographyProvider->getPasswordDigest($password, $salt);
-            $iv = $this->cryptographyProvider->generateIV(CryptographyProviderInterface::PRIVATE_KEY_ENCRYPTION);
+            if ($passwordDigest) {
+                $iv = $this->cryptographyProvider->generateIV(CryptographyProviderInterface::PRIVATE_KEY_ENCRYPTION);
 
-            $keyData = new KeyData($passwordDigest, $iv);
-            try {
-                $encryptedPrivateKey = $this->cryptographyProvider->encrypt(
-                                $privateKey,
-                                $keyData,
-                                CryptographyProviderInterface::PRIVATE_KEY_ENCRYPTION);
+                $keyData = new KeyData($passwordDigest, $iv);
+                try {
+                    $encryptedPrivateKey = $this->cryptographyProvider->encrypt(
+                                    $privateKey,
+                                    $keyData,
+                                    CryptographyProviderInterface::PRIVATE_KEY_ENCRYPTION);
 
-                $encrypted = true;
+                    $encrypted = true;
+                }
+                catch (\Exception $ex) {
+                    $encryptedPrivateKey = $privateKey;
+                    $iv = null;
+                    $encrypted = false;
+                }
             }
-            catch (\Exception $ex) {
+            else {
                 $encryptedPrivateKey = $privateKey;
                 $iv = null;
                 $encrypted = false;
             }
+
+            $user->setPrivateKey($encryptedPrivateKey);
+            if ($encrypted) {
+                $user->setPrivateKeyIv($iv);
+                $user->setPrivateKeyEncrypted(true);
+            }
         }
-        else {
-            $encryptedPrivateKey = $privateKey;
-            $iv = null;
-            $encrypted = false;
+    }
+
+    /**
+     * Returns the password digest of the password of the user
+     *
+     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     *
+     * @return string
+     */
+    private function getUserPasswordDigest(PKEncryptionEnabledUserInterface $user)
+    {
+        $passwordDigest = $user->getPasswordDigest();
+
+        if (!$passwordDigest) {
+            $password = $user->getPlainPassword();
+            $salt = $user->getSalt();
+
+            $passwordDigest = $this->cryptographyProvider->getPasswordDigest($password, $salt);
         }
 
-        return array($encryptedPrivateKey, $iv, $encrypted);
+        return $passwordDigest;
     }
 
     /**

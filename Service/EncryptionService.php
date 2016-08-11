@@ -193,9 +193,30 @@ class EncryptionService
      *
      * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
-    public function handleUserRegistration(PKEncryptionEnabledUserInterface $user)
+    public function handleUserRegistrationSuccess(PKEncryptionEnabledUserInterface $user)
     {
         $this->keyManager->generateUserPKIKeys($user);
+    }
+
+    /**
+     * Executes the required actions after the registration of user is completed
+     *
+     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     */
+    public function handleUserRegistrationComplete(PKEncryptionEnabledUserInterface $user)
+    {
+        $this->keyManager->storeUserPKIKeys($user);
+    }
+
+    /**
+     * Handles the event of a password change by the user
+     *
+     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param string $currenctPassword
+     */
+    public function handleUserPasswordChangeSuccess(PKEncryptionEnabledUserInterface $user, $currentPassword)
+    {
+        $this->keyManager->handleUserPasswordChange($user, $currentPassword);
     }
 
     /**

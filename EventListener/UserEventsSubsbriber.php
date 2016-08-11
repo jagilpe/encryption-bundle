@@ -5,6 +5,7 @@ namespace EHEncryptionBundle\EventListener;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use FOS\UserBundle\FOSUserEvents;
 use FOS\UserBundle\Event\FormEvent;
+use FOS\UserBundle\Event\FilterUserResponseEvent;
 use EHEncryptionBundle\Service\EncryptionService;
 use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 
@@ -23,24 +24,40 @@ class UserEventsSubsbriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         $events = array(
-            FOSUserEvents::CHANGE_PASSWORD_SUCCESS => 'handlePasswordChange',
-            FOSUserEvents::REGISTRATION_SUCCESS => 'handleUserRegistration',
+            FOSUserEvents::CHANGE_PASSWORD_SUCCESS => 'handlePasswordChangeSuccess',
+            FOSUserEvents::REGISTRATION_SUCCESS => 'handleUserRegistrationSuccess',
+            FOSUserEvents::REGISTRATION_COMPLETED => 'handleUserRegistrationComplete'
         );
 
         return $events;
     }
 
-    public function handlePasswordChange(FormEvent $event)
+    public function handlePasswordChangeSuccess(FormEvent $event)
     {
+        $form = $event->getForm();
+        $user = $form->getData();
 
+        if ($user instanceof PKEncryptionEnabledUserInterface) {
+            $currentPassword = $form->get('current_password')->getData();
+            $this->encryptionService->handleUserPasswordChangeSuccess($user, $currentPassword);
+        }
     }
 
-    public function handleUserRegistration(FormEvent $event)
+    public function handleUserRegistrationSuccess(FormEvent $event)
     {
         $user = $event->getForm()->getData();
 
         if ($user instanceof PKEncryptionEnabledUserInterface) {
-            $this->encryptionService->handleUserRegistration($user);
+            $this->encryptionService->handleUserRegistrationSuccess($user);
+        }
+    }
+
+    public function handleUserRegistrationComplete(FilterUserResponseEvent $event)
+    {
+        $user = $event->getUser();
+
+        if ($user instanceof PKEncryptionEnabledUserInterface) {
+            $this->encryptionService->handleUserRegistrationComplete($user);
         }
     }
 }
