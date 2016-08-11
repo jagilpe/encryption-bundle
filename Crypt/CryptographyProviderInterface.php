@@ -90,9 +90,13 @@ interface CryptographyProviderInterface
     public function generateSecureKey();
 
     /**
-     * Returns the hash of the password used to encrypt the private key of the user
+     * Returns the digest of the password used to encrypt the private key of the user
+     *
+     * @param string $password
+     * @param string $salt
+     * @param integer $iterations
      *
      * @return string
      */
-    public function getPasswordHash($password);
+    public function getPasswordDigest($password, $salt, $iterations);
 }

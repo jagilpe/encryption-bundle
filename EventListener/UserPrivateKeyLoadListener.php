@@ -5,6 +5,7 @@ namespace EHEncryptionBundle\EventListener;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use EHEncryptionBundle\Crypt\KeyManagerInterface;
+use EHEncryptionBundle\Crypt\KeyManager;
 
 class UserPrivateKeyLoadListener
 {
@@ -47,8 +48,14 @@ class UserPrivateKeyLoadListener
             $user = $this->getUser();
 
             if ($user) {
-                $privateKey = $this->keyManager->getUserPrivateKey($user);
-                $request->getSession()->set('pki_private_key', $privateKey);
+                $password = $request->request->get('_password');
+                $privateKey = $this->keyManager->getUserPrivateKey($user, array('password' => $password));
+                if ($privateKey) {
+                    $request->getSession()->set(KeyManager::SESSION_PRIVATE_KEY_PARAM, $privateKey);
+                }
+                else {
+                    throw new \EncryptionException('Could not load user\'s key');
+                }
             }
         }
     }

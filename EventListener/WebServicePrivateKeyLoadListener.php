@@ -4,6 +4,7 @@ namespace EHEncryptionBundle\EventListener;
 
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use AppWebServiceBundle\Security\Authentication\Token\WsseUserToken;
 use EHEncryptionBundle\Crypt\KeyManagerInterface;
 use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 
@@ -39,11 +40,16 @@ class WebServicePrivateKeyLoadListener
      */
     public function onKernelRequest(GetResponseEvent $event)
     {
-        $request = $event->getRequest();
-        $user = $this->getUser();
-        if ($user && $user instanceof PKEncryptionEnabledUserInterface) {
-            $privateKey = $this->keyManager->getUserPrivateKey($user);
-            $request->getSession()->set('pki_private_key', $privateKey);
+        // Check if we are authenticating the user using WSSE
+        $token = $this->tokenStorage->getToken();
+
+        if ($token instanceof WsseUserToken) {
+            $request = $event->getRequest();
+            $user = $this->getUser();
+            if ($user && $user instanceof PKEncryptionEnabledUserInterface) {
+                $privateKey = $this->keyManager->getUserPrivateKey($user);
+                $request->getSession()->set('pki_private_key', $privateKey);
+            }
         }
     }
 

@@ -112,9 +112,16 @@ class CryptographyProvider implements CryptographyProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function getPasswordHash($password)
+    public function getPasswordDigest($password, $salt, $iterations = 500)
     {
+        $saltedPassword = $password.'{'.$salt.'}';
 
+        $digest = hash('sha256', $saltedPassword, true);
+        for ($i = 1; $i < $iterations; $i++) {
+            $digest = hash('sha256', $digest.$saltedPassword, true);
+        }
+
+        return $digest;
     }
 
     /**
@@ -186,6 +193,7 @@ class CryptographyProvider implements CryptographyProviderInterface
     {
         switch ($type) {
             case CryptographyProviderInterface::PROPERTY_ENCRYPTION:
+            case CryptographyProviderInterface::PRIVATE_KEY_ENCRYPTION:
                 return 0;
             case CryptographyProviderInterface::FILE_ENCRYPTION:
                 return OPENSSL_RAW_DATA;

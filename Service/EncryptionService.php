@@ -326,7 +326,6 @@ class EncryptionService
             file_put_contents($filePath, $encryptedContent);
             $entity->setFileEncrypted(true);
         }
-        dump($entity);
     }
 
     /**
