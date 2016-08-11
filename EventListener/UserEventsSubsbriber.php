@@ -25,6 +25,7 @@ class UserEventsSubsbriber implements EventSubscriberInterface
     {
         $events = array(
             FOSUserEvents::CHANGE_PASSWORD_SUCCESS => 'handlePasswordChangeSuccess',
+            FOSUserEvents::RESETTING_RESET_SUCCESS => 'handlePasswordResetSuccess',
             FOSUserEvents::REGISTRATION_SUCCESS => 'handleUserRegistrationSuccess',
             FOSUserEvents::REGISTRATION_COMPLETED => 'handleUserRegistrationComplete'
         );
@@ -40,6 +41,16 @@ class UserEventsSubsbriber implements EventSubscriberInterface
         if ($user instanceof PKEncryptionEnabledUserInterface) {
             $currentPassword = $form->get('current_password')->getData();
             $this->encryptionService->handleUserPasswordChangeSuccess($user, $currentPassword);
+        }
+    }
+
+    public function handlePasswordResetSuccess(FormEvent $event)
+    {
+        $form = $event->getForm();
+        $user = $form->getData();
+
+        if ($user instanceof PKEncryptionEnabledUserInterface) {
+            $this->encryptionService->handleUserPasswordResetSuccess($user);
         }
     }
 

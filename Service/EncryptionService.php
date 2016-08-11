@@ -220,6 +220,16 @@ class EncryptionService
     }
 
     /**
+     * Handles the event of a password reset by the user
+     *
+     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     */
+    public function handleUserPasswordResetSuccess(PKEncryptionEnabledUserInterface $user)
+    {
+        $this->keyManager->handleUserPasswordReset($user);
+    }
+
+    /**
      * Checks if the entity has file encryption enabled and the file is actually encrypted
      *
      * @param mixed $entity

@@ -35,6 +35,14 @@ interface KeyManagerInterface
     public function handleUserPasswordChange(PKEncryptionEnabledUserInterface $user, $currentPassword);
 
     /**
+     * Handles a password reset by the user
+     *
+     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     *
+     */
+    public function handleUserPasswordReset(PKEncryptionEnabledUserInterface $user);
+
+    /**
      * Returns the key to be used to encrypt the entity
      *
      * @param mixed $entity
