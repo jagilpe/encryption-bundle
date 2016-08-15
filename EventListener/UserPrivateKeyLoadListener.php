@@ -5,7 +5,9 @@ namespace EHEncryptionBundle\EventListener;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use EHEncryptionBundle\Crypt\KeyManagerInterface;
+use EHEncryptionBundle\Crypt\KeyStoreInterface;
 use EHEncryptionBundle\Crypt\KeyManager;
+use PolavisConnectBundle\Security\SecurityCodeUser;
 
 class UserPrivateKeyLoadListener
 {
@@ -24,14 +26,21 @@ class UserPrivateKeyLoadListener
      */
     private $keyManager;
 
+    /**
+     * @var \EHEncryptionBundle\Crypt\KeyStoreInterface
+     */
+    private $keyStore;
+
     public function __construct(
                     array $settings,
                     TokenStorageInterface $tokenStorage,
-                    KeyManagerInterface $keyManager)
+                    KeyManagerInterface $keyManager,
+                    KeyStoreInterface $keyStore)
     {
         $this->settings = $settings;
         $this->tokenStorage = $tokenStorage;
         $this->keyManager = $keyManager;
+        $this->keyStore = $keyStore;
     }
 
     /**
@@ -48,13 +57,25 @@ class UserPrivateKeyLoadListener
             $user = $this->getUser();
 
             if ($user) {
-                $password = $request->request->get('_password');
-                $privateKey = $this->keyManager->getUserPrivateKey($user, array('password' => $password));
-                if ($privateKey) {
-                    $request->getSession()->set(KeyManager::SESSION_PRIVATE_KEY_PARAM, $privateKey);
+                if (!$user instanceof SecurityCodeUser) {
+                    $password = $request->request->get('_password');
+                    $privateKey = $this->keyManager->getUserPrivateKey($user, array('password' => $password));
+                    if ($privateKey) {
+                        $request->getSession()->set(KeyManager::SESSION_PRIVATE_KEY_PARAM, $privateKey);
+                    }
+                    else {
+                        throw new \EncryptionException('Could not load user\'s key');
+                    }
                 }
                 else {
-                    throw new \EncryptionException('Could not load user\'s key');
+                    $vivaUser = $user->getSecurityCode()->getUserProfile()->getUser();
+                    $privateKey = $privateKey = $this->keyStore->getPrivateKey($vivaUser);
+                    if ($privateKey) {
+                        $request->getSession()->set(KeyManager::SESSION_PRIVATE_KEY_PARAM, $privateKey);
+                    }
+                    else {
+                        throw new \EncryptionException('Could not load user\'s key');
+                    }
                 }
             }
         }

@@ -88,7 +88,7 @@ class EncryptionService
                 $keyField = array(
                     'fieldName' => 'key',
                     'columnName' => '_key',
-                    'type' => 'array',
+                    'type' => 'object',
                     'nullable' => true,
                 );
                 $metadata->mapField($keyField);

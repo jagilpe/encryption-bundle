@@ -84,11 +84,16 @@ class KeyStore implements KeyStoreInterface
 
     private function findKeyByUser(PKEncryptionEnabledUserInterface $user)
     {
-        $userClass = get_class($user);
+        $userClass = $this->getUserClass($user);
         $userId = $user->getId();
         $key = $this->getKeyRepository()->findOneBy(array('userClass' => $userClass, 'userId' => $userId));
 
         return $key;
+    }
+
+    private function getUserClass(PKEncryptionEnabledUserInterface $user)
+    {
+        return \Doctrine\Common\Util\ClassUtils::getRealClass(get_class($user));
     }
 
     private function deleteUserKey(PKEncryptionEnabledUserInterface$user, $flush = false)

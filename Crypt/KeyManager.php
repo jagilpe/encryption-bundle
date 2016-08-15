@@ -185,7 +185,7 @@ class KeyManager implements KeyManagerInterface
         $encryptedKey = $entity->getKey();
 
         if ($encryptedKey) {
-            $key = $this->decryptSymmetricKey($encryptedKey);
+            $key = $this->decryptSymmetricKey($encryptedKey, $entity);
         }
         else {
             $key = $this->generateSymmetricKey();
@@ -252,28 +252,33 @@ class KeyManager implements KeyManagerInterface
     {
         $users = $this->accessChecker->getAllowedUsers($entity);
 
-        $encryptedKeys = array();
+        $symmetricKey = new SymmetricKey();
 
         foreach ($users as $user) {
             $publicKey = $this->getPublicKey($user);
             $encryptedKey = base64_encode($this->cryptographyProvider->encryptWithPublicKey($clearKey, $publicKey));
-            $encryptedKeys[$user->getId()] = $encryptedKey;
+            $symmetricKey->addKey($user, $encryptedKey);
         }
 
-        return $encryptedKeys;
+        return $symmetricKey;
     }
 
-    private function decryptSymmetricKey($encryptedKey)
+    private function decryptSymmetricKey($encryptedKey, $entity)
     {
         $decryptedKey = null;
         $user = $this->getUser();
 
-        if ($user && isset($encryptedKey[$user->getId()])) {
-            $userKey = base64_decode($encryptedKey[$user->getId()]);
-            $privateKey = $this->getPrivateKey();
-
-            $decryptedKey = $this->cryptographyProvider->decryptWithPrivateKey($userKey, $privateKey);
+        if ($user instanceof PKEncryptionEnabledUserInterface && $userKey = $encryptedKey->getKey($user)) {
+            $userKey = base64_decode($userKey);
         }
+        elseif ($this->accessChecker->canUseVivaUserPrivateKey($entity, $user)) {
+            // Check if the logged in user can decrpyt the data without private key
+            $vivaUser = $entity->getUserProfile()->getUser();
+            $userKey = base64_decode($encryptedKey->getKey($vivaUser));
+        }
+
+        $privateKey = $this->getPrivateKey();
+        $decryptedKey = $this->cryptographyProvider->decryptWithPrivateKey($userKey, $privateKey);
 
         return $decryptedKey;
     }

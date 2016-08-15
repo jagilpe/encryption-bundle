@@ -57,8 +57,10 @@ services:
             - "%eh_encryption.settings%"
             - "@security.token_storage"
             - "@eh_encryption.key_manager"
+            - "@eh_encryption.key_store"
         tags:
             - { name: kernel.event_listener, event: kernel.response, priority: 2 }
+            
     eh_encryption.web_service_private_key_load_listener:
         class: EHEncryptionBundle\EventListener\WebServicePrivateKeyLoadListener
         arguments:
