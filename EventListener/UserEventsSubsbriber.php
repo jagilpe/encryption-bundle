@@ -9,6 +9,7 @@ use FOS\UserBundle\Event\FilterUserResponseEvent;
 use EHEncryptionBundle\Service\EncryptionService;
 use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 use AppWebServiceBundle\Event as WebServiceEvent;
+use PolavisConnectBundle\Event as PolavisConnectEvent;
 
 class UserEventsSubsbriber implements EventSubscriberInterface
 {
@@ -30,6 +31,9 @@ class UserEventsSubsbriber implements EventSubscriberInterface
             FOSUserEvents::REGISTRATION_SUCCESS => 'handleUserRegistrationSuccess',
             FOSUserEvents::REGISTRATION_COMPLETED => 'handleUserRegistrationComplete',
             WebServiceEvent\Events::PV_WS_PASSWORD_CHANGE_SUCCESS => 'handleWebServicePasswordChangeSuccess',
+            PolavisConnectEvent\Events::PC_USER_PRE_CREATE => 'onPolavisConnectUserPreCreate',
+            PolavisConnectEvent\Events::PC_USER_POST_CREATE => 'onPolavisConnectUserPostCreate',
+            PolavisConnectEvent\Events::PC_INSTITUTION_POST_CREATE => 'onPolavisConnectInstitutionPostCreate',
         );
 
         return $events;
@@ -63,6 +67,8 @@ class UserEventsSubsbriber implements EventSubscriberInterface
         if ($user instanceof PKEncryptionEnabledUserInterface) {
             $this->encryptionService->handleUserRegistrationSuccess($user);
         }
+
+        throw new \Exception();
     }
 
     public function handleUserRegistrationComplete(FilterUserResponseEvent $event)
@@ -82,6 +88,35 @@ class UserEventsSubsbriber implements EventSubscriberInterface
             // By now in the app the current password is not sent when the user wants to
             // change his password, so we have to simulate a password reset
             $this->encryptionService->handleUserPasswordResetSuccess($user);
+        }
+    }
+
+    public function onPolavisConnectUserPreCreate(PolavisConnectEvent\UserEvent $event)
+    {
+        $user = $event->getUser();
+
+        if ($user instanceof PKEncryptionEnabledUserInterface) {
+            $this->encryptionService->handleUserRegistrationSuccess($user);
+        }
+    }
+
+
+    public function onPolavisConnectUserPostCreate(PolavisConnectEvent\UserEvent $event)
+    {
+        $user = $event->getUser();
+
+        if ($user instanceof PKEncryptionEnabledUserInterface) {
+            $this->encryptionService->handleUserRegistrationComplete($user);
+        }
+    }
+
+    public function onPolavisConnectInstitutionPostCreate(PolavisConnectEvent\InstitutionEvent $event)
+    {
+        $institution = $event->getInstitution();
+        $user = $institution->getPrincipal();
+
+        if ($user && $user instanceof PKEncryptionEnabledUserInterface) {
+            $this->encryptionService->handleUserRegistrationSuccess($user);
         }
     }
 }
