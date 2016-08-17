@@ -51,11 +51,11 @@ class ChainedAccessChecker implements AccessCheckerInterface
     /**
      * {@inheritdoc}
      */
-    public function canUseVivaUserPrivateKey($entity, $user)
+    public function canUseOwnerPrivateKey($entity, $user)
     {
         $canAccess = false;
         foreach ($this->accessCheckers as $accessChecker) {
-            if ($accessChecker->canUseVivaUserPrivateKey($entity, $user)) {
+            if ($accessChecker->canUseOwnerPrivateKey($entity, $user)) {
                 $canAccess = true;
                 break;
             }
