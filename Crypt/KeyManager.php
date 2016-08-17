@@ -185,7 +185,7 @@ class KeyManager implements KeyManagerInterface
         $encryptedKey = $entity->getKey();
 
         if ($encryptedKey) {
-            $key = $this->decryptSymmetricKey($encryptedKey, $entity);
+            $key = $this->decryptSymmetricKey($entity);
         }
         else {
             $key = $this->generateSymmetricKey();
@@ -263,21 +263,35 @@ class KeyManager implements KeyManagerInterface
         return $symmetricKey;
     }
 
-    private function decryptSymmetricKey($encryptedKey, $entity)
+    /**
+     * Decrypts the Symmetric Key used to encrypt the fields of the entity
+     *
+     * @param mixed $entity
+     *
+     * @throws \PolavisConnectBundle\Exception\EncryptionException
+     *
+     * @return string
+     */
+    private function decryptSymmetricKey($entity)
     {
+        $encryptedKey = $entity->getKey();
         $decryptedKey = null;
         $user = $this->getUser();
 
         if ($user instanceof PKEncryptionEnabledUserInterface && $userKey = $encryptedKey->getKey($user)) {
             $userKey = base64_decode($userKey);
+            $privateKey = $this->getPrivateKey();
         }
         elseif ($this->accessChecker->canUseVivaUserPrivateKey($entity, $user)) {
             // Check if the logged in user can decrpyt the data without private key
             $vivaUser = $entity->getUserProfile()->getUser();
             $userKey = base64_decode($encryptedKey->getKey($vivaUser));
+            $privateKey = $this->keyStore->getPrivateKey($vivaUser);
+        }
+        else {
+            throw new EncryptionException('Could not access encryption key');
         }
 
-        $privateKey = $this->getPrivateKey();
         $decryptedKey = $this->cryptographyProvider->decryptWithPrivateKey($userKey, $privateKey);
 
         return $decryptedKey;

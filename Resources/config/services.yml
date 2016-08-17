@@ -40,7 +40,7 @@ services:
     eh_encryption.security.access_checker.chained:
         class: EHEncryptionBundle\Security\ChainedAccessChecker
         arguments:
-            - [ "@app.encrpytion.access_checker" ]
+            - [ "@app.encrpytion.access_checker", "@polavis_connect.encrpytion.access_checker" ]
             - "%eh_encryption.settings%"
             
     # Event subscribers and listeners
