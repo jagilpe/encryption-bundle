@@ -557,6 +557,8 @@ class EncryptionService
             case 'string':
                 return new FieldMapping\StringFieldMapping($this, $fieldMapping);
             case 'text':
+            case 'json_array':
+            case 'simple_array':
                 return new FieldMapping\TextFieldMapping($this, $fieldMapping);
             case 'date':
             case 'datetime':
@@ -591,6 +593,8 @@ class EncryptionService
                 break;
             case 'date':
             case 'datetime':
+            case 'json_array':
+            case 'simple_array':
                 $encrypterClass = FieldEncrypter\SerializableObjectFieldEncrypter::class;
                 break;
             default:
@@ -601,6 +605,7 @@ class EncryptionService
             $this->encrypters[$encrypterClass] = new $encrypterClass($this->cryptographyProvider);
         }
 
+        dump($encrypterClass);
         return $this->encrypters[$encrypterClass];
     }
 }
