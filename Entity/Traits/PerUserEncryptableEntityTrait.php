@@ -31,4 +31,18 @@ trait PerUserEncryptableEntityTrait
         $this->iv = $iv;
         return $this;
     }
+
+    public function getOwnerUser()
+    {
+        $reflection = new \ReflectionClass($this);
+
+        if ($reflection->hasMethod('getUser')) {
+            return $this->getUser();
+        }
+        elseif ($reflection->hasMethod('getUserProfile')) {
+            return $this->getUserProfile()->getUser();
+        }
+
+        return null;
+    }
 }
