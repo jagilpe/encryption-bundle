@@ -189,21 +189,21 @@ class EncryptionService
     }
 
     /**
-     * Initializes the registrered user to use the encryption
+     * Initializes user before is persisted
      *
      * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
-    public function handleUserRegistrationSuccess(PKEncryptionEnabledUserInterface $user)
+    public function handleUserPreCreation(PKEncryptionEnabledUserInterface $user)
     {
         $this->keyManager->generateUserPKIKeys($user);
     }
 
     /**
-     * Executes the required actions after the registration of user is completed
+     * Executes the required actions after the user is persisted
      *
      * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
-    public function handleUserRegistrationComplete(PKEncryptionEnabledUserInterface $user)
+    public function handleUserPostCreation(PKEncryptionEnabledUserInterface $user)
     {
         $this->keyManager->storeUserPKIKeys($user);
     }

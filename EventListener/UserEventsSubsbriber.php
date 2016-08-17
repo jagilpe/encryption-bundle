@@ -4,8 +4,8 @@ namespace EHEncryptionBundle\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use FOS\UserBundle\FOSUserEvents;
-use FOS\UserBundle\Event\FormEvent;
-use FOS\UserBundle\Event\FilterUserResponseEvent;
+use FOS\UserBundle\Event\FormEvent as FOSFormEvent;
+use FOS\UserBundle\Event\FilterUserResponseEvent as FOSFilterUserResponseEvent;
 use EHEncryptionBundle\Service\EncryptionService;
 use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 use AppWebServiceBundle\Event as WebServiceEvent;
@@ -33,13 +33,18 @@ class UserEventsSubsbriber implements EventSubscriberInterface
             WebServiceEvent\Events::PV_WS_PASSWORD_CHANGE_SUCCESS => 'handleWebServicePasswordChangeSuccess',
             PolavisConnectEvent\Events::PC_USER_PRE_CREATE => 'onPolavisConnectUserPreCreate',
             PolavisConnectEvent\Events::PC_USER_POST_CREATE => 'onPolavisConnectUserPostCreate',
-            PolavisConnectEvent\Events::PC_INSTITUTION_POST_CREATE => 'onPolavisConnectInstitutionPostCreate',
+            PolavisConnectEvent\Events::PC_USER_RESETTING_RESET_SUCCESS => 'handlePolavisConnectPasswordResetSuccess',
         );
 
         return $events;
     }
 
-    public function handlePasswordChangeSuccess(FormEvent $event)
+    /**
+     * Handles a successful password change using the FOSUserBundle forms
+     *
+     * @param \FOS\UserBundle\Event\FormEvent $event
+     */
+    public function handlePasswordChangeSuccess(FOSFormEvent $event)
     {
         $form = $event->getForm();
         $user = $form->getData();
@@ -50,7 +55,12 @@ class UserEventsSubsbriber implements EventSubscriberInterface
         }
     }
 
-    public function handlePasswordResetSuccess(FormEvent $event)
+    /**
+     * Handles a successful password reset using the FOSUserBundle forms
+     *
+     * @param \FOS\UserBundle\Event\FormEvent $event
+     */
+    public function handlePasswordResetSuccess(FOSFormEvent $event)
     {
         $form = $event->getForm();
         $user = $form->getData();
@@ -60,26 +70,40 @@ class UserEventsSubsbriber implements EventSubscriberInterface
         }
     }
 
-    public function handleUserRegistrationSuccess(FormEvent $event)
+    /**
+     * Handles a successful user registration using the FOSUserBundle forms
+     *
+     * @param \FOS\UserBundle\Event\FilterUserResponseEvent $event
+     * @throws \Exception
+     */
+    public function handleUserRegistrationSuccess(FOSFormEvent $event)
     {
         $user = $event->getForm()->getData();
 
         if ($user instanceof PKEncryptionEnabledUserInterface) {
-            $this->encryptionService->handleUserRegistrationSuccess($user);
+            $this->encryptionService->handleUserPreCreation($user);
         }
-
-        throw new \Exception();
     }
 
-    public function handleUserRegistrationComplete(FilterUserResponseEvent $event)
+    /**
+     * Handles the completion of a user registration using the FOSUserBundle forms
+     *
+     * @param \FOS\UserBundle\Event\FilterUserResponseEvent $event
+     */
+    public function handleUserRegistrationComplete(FOSFilterUserResponseEvent $event)
     {
         $user = $event->getUser();
 
         if ($user instanceof PKEncryptionEnabledUserInterface) {
-            $this->encryptionService->handleUserRegistrationComplete($user);
+            $this->encryptionService->handleUserPostCreation($user);
         }
     }
 
+    /**
+     * Handles a successful password reset through the Web Service
+     *
+     * @param \AppWebServiceBundle\Event\UserEvent $event
+     */
     public function handleWebServicePasswordChangeSuccess(WebServiceEvent\UserEvent $event)
     {
         $user = $event->getUser();
@@ -91,32 +115,46 @@ class UserEventsSubsbriber implements EventSubscriberInterface
         }
     }
 
+    /**
+     * Handles the pre creation of a Polavis Connect User
+     *
+     * @param \PolavisConnectBundle\Event\UserEvent $event
+     */
     public function onPolavisConnectUserPreCreate(PolavisConnectEvent\UserEvent $event)
     {
         $user = $event->getUser();
 
         if ($user instanceof PKEncryptionEnabledUserInterface) {
-            $this->encryptionService->handleUserRegistrationSuccess($user);
+            $this->encryptionService->handleUserPreCreation($user);
         }
     }
 
-
+    /**
+     * Handles the post creation of a Polavis Connect User
+     *
+     * @param \PolavisConnectBundle\Event\UserEvent $event
+     */
     public function onPolavisConnectUserPostCreate(PolavisConnectEvent\UserEvent $event)
     {
         $user = $event->getUser();
 
         if ($user instanceof PKEncryptionEnabledUserInterface) {
-            $this->encryptionService->handleUserRegistrationComplete($user);
+            $this->encryptionService->handleUserPostCreation($user);
         }
     }
 
-    public function onPolavisConnectInstitutionPostCreate(PolavisConnectEvent\InstitutionEvent $event)
+    /**
+     * Handles a successful password reset using the Polavis Connect forms
+     *
+     * @param \PolavisConnectBundle\Event\FormEvent $event
+     */
+    public function handlePolavisConnectPasswordResetSuccess(PolavisConnectEvent\FormEvent $event)
     {
-        $institution = $event->getInstitution();
-        $user = $institution->getPrincipal();
+        $form = $event->getForm();
+        $user = $form->getData();
 
-        if ($user && $user instanceof PKEncryptionEnabledUserInterface) {
-            $this->encryptionService->handleUserRegistrationSuccess($user);
+        if ($user instanceof PKEncryptionEnabledUserInterface) {
+            $this->encryptionService->handleUserPasswordResetSuccess($user);
         }
     }
 }
