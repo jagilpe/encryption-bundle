@@ -2,8 +2,6 @@
 
 namespace EHEncryptionBundle\Security;
 
-use PolavisConnectBundle\Security\SecurityCodeUser;
-
 class DefaultAccessChecker implements AccessCheckerInterface
 {
     private $settings;
@@ -18,7 +16,7 @@ class DefaultAccessChecker implements AccessCheckerInterface
      */
     public function getAllowedUsers($entity)
     {
-        return array($this->getUser($entity));
+        return array();
     }
 
     /**
@@ -26,11 +24,6 @@ class DefaultAccessChecker implements AccessCheckerInterface
      */
     public function canUseVivaUserPrivateKey($entity, $user)
     {
-        return $user instanceof SecurityCodeUser;
-    }
 
-    private function getUser($entity)
-    {
-        return $entity->getUser();
     }
 }
