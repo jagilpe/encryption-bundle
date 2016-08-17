@@ -605,7 +605,6 @@ class EncryptionService
             $this->encrypters[$encrypterClass] = new $encrypterClass($this->cryptographyProvider);
         }
 
-        dump($encrypterClass);
         return $this->encrypters[$encrypterClass];
     }
 }
