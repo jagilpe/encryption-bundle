@@ -5,6 +5,7 @@ namespace EHEncryptionBundle\Service;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Bundle\DoctrineBundle\Registry;
+use AppBundle\Util\EntitiesExtractor;
 use EHEncryptionBundle\Annotation\EncryptedEntity;
 use EHEncryptionBundle\Crypt\CryptographyProviderInterface;
 use EHEncryptionBundle\Crypt\KeyManagerInterface;
@@ -152,7 +153,7 @@ class EncryptionService
     public function processEntityPrePersist($entity)
     {
         // Process the encryption of the entity
-        $this->processEntity($entity, self::ENCRYPT);
+        $this->processEntityTree($entity, self::ENCRYPT);
 
         // Process the possible file associated with the entity
         $this->processFileEntity($entity, self::ENCRYPT);
@@ -168,7 +169,7 @@ class EncryptionService
     public function processEntityPreUpdate($entity)
     {
         // Process the encryption of the entity
-        $this->processEntity($entity, self::ENCRYPT);
+        $this->processEntityTree($entity, self::ENCRYPT);
     }
 
     /**
@@ -182,7 +183,7 @@ class EncryptionService
     {
         if ($entity) {
             // Process the encryption of the entity
-            $this->processEntity($entity, self::DECRYPT);
+            $this->processEntityTree($entity, self::DECRYPT);
 
             $this->processFileEntity($entity, self::DECRYPT);
         }
@@ -277,6 +278,23 @@ class EncryptionService
      *
      * @return mixed
      */
+    private function processEntityTree($entity, $operation)
+    {
+        if ($this->settings[$operation.'_on_backend']) {
+            // Get all the related entities
+            $entitiesExtractor = new EntitiesExtractor($entity);
+            $entities = $entitiesExtractor->getRelatedEntities();
+
+            $entities = array_merge(array($entity), $entities);
+
+            foreach ($entities as $entityToProcess) {
+                $this->processEntity($entity, $operation);
+            }
+        }
+
+        return $entity;
+    }
+
     private function processEntity($entity, $operation)
     {
         if ($this->settings[$operation.'_on_backend']) {
@@ -301,8 +319,6 @@ class EncryptionService
                 $entity->setEncrypted($operation === self::ENCRYPT);
             }
         }
-
-        return $entity;
     }
 
     /**
