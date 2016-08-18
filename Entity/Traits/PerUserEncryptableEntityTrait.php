@@ -40,7 +40,7 @@ trait PerUserEncryptableEntityTrait
             return $this->getUser();
         }
         elseif ($reflection->hasMethod('getUserProfile')) {
-            return $this->getUserProfile()->getUser();
+            return $this->getUserProfile() ? $this->getUserProfile()->getUser() : null;
         }
 
         return null;
