@@ -2,6 +2,8 @@
 
 namespace EHEncryptionBundle\Security;
 
+use Symfony\Component\Security\Core\User\UserInterface;
+
 interface AccessCheckerInterface
 {
     /**
@@ -19,9 +21,9 @@ interface AccessCheckerInterface
      * using the private key of its owner
      *
      * @param mixed $entity
-     * @param mixed $user
+     * @param \Symfony\Component\Security\Core\User\UserInterface $user
      *
      * return @boolean
      */
-    public function canUseOwnerPrivateKey($entity, $user);
+    public function canUseOwnerPrivateKey($entity, UserInterface $user);
 }

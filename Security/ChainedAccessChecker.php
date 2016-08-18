@@ -2,7 +2,7 @@
 
 namespace EHEncryptionBundle\Security;
 
-use PolavisConnectBundle\Security\SecurityCodeUser;
+use Symfony\Component\Security\Core\User\UserInterface;
 use EHEncryptionBundle\Exception\EncryptionException;
 
 class ChainedAccessChecker implements AccessCheckerInterface
@@ -51,7 +51,7 @@ class ChainedAccessChecker implements AccessCheckerInterface
     /**
      * {@inheritdoc}
      */
-    public function canUseOwnerPrivateKey($entity, $user)
+    public function canUseOwnerPrivateKey($entity, UserInterface $user)
     {
         $canAccess = false;
         foreach ($this->accessCheckers as $accessChecker) {

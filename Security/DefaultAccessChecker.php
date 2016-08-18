@@ -2,6 +2,8 @@
 
 namespace EHEncryptionBundle\Security;
 
+use Symfony\Component\Security\Core\User\UserInterface;
+
 class DefaultAccessChecker implements AccessCheckerInterface
 {
     private $settings;
@@ -22,7 +24,7 @@ class DefaultAccessChecker implements AccessCheckerInterface
     /**
      * {@inheritdoc}
      */
-    public function canUseOwnerPrivateKey($entity, $user)
+    public function canUseOwnerPrivateKey($entity, UserInterface $user)
     {
 
     }
