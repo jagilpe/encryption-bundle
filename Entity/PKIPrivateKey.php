@@ -47,6 +47,20 @@ class PKIPrivateKey
      */
     protected $encrypted = false;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="_key", type="text", nullable=true)
+     */
+    protected $key;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="_iv", type="text", nullable=true)
+     */
+    protected $iv;
+
     public function getUserClass()
     {
         return $this->userClass;
@@ -99,6 +113,33 @@ class PKIPrivateKey
     public function setEncrypted($encrypted)
     {
         $this->encrypted = $encrypted;
+        return $this;
+    }
+
+    public function isEncrypted()
+    {
+        return $this->getEncrypted();
+    }
+
+    public function getKey()
+    {
+        return $this->key;
+    }
+
+    public function setKey($key)
+    {
+        $this->key = $key;
+        return $this;
+    }
+
+    public function getIv()
+    {
+        return $this->iv;
+    }
+
+    public function setIv($iv)
+    {
+        $this->iv = $iv;
         return $this;
     }
 }

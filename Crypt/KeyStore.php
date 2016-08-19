@@ -19,12 +19,34 @@ class KeyStore implements KeyStoreInterface
      */
     private $cryptographyProvider;
 
+    /**
+     * @var array
+     */
+    private $masterKeyData;
+
+    /**
+     * @var resource
+     */
+    private $masterKey;
+
+    /**
+     * @var string
+     */
+    private $publicMasterKey;
+
+    /**
+     * @var string
+     */
+    private $privateMasterKey;
+
     public function __construct(
                     Doctrine $doctrine,
-                    CryptographyProviderInterface $cryptographyProvider)
+                    CryptographyProviderInterface $cryptographyProvider,
+                    array $masterKeyData)
     {
         $this->doctrine = $doctrine;
         $this->cryptographyProvider = $cryptographyProvider;
+        $this->masterKeyData = $masterKeyData;
     }
 
     /**
@@ -39,18 +61,20 @@ class KeyStore implements KeyStoreInterface
             throw new EncryptionException('Users must be persisted before storing his keys.');
         }
 
+        // Add the new key
+        $pkiKey = new PKIPrivateKey();
+        $pkiKey->setUserClass($userClass);
+        $pkiKey->setUserId($userId);
+        $pkiKey->setPrivateKey($clearPrivateKey);
+        $pkiKey->setPublicKey($user->getPublicKey());
+        $pkiKey->setEncrypted(false);
+
+        // Encrypt the private key
+        $this->encryptPrivateKey($pkiKey);
+
         // Remove the key if the user already has one
         $this->deleteUserKey($user, true);
-
-        // Add the new key
-        $key = new PKIPrivateKey();
-        $key->setUserClass($userClass);
-        $key->setUserId($userId);
-        $key->setPrivateKey($clearPrivateKey);
-        $key->setPublicKey($user->getPublicKey());
-        $key->setEncrypted(false);
-
-        $this->getEntityManager()->persist($key);
+        $this->getEntityManager()->persist($pkiKey);
         $this->getEntityManager()->flush();
     }
 
@@ -69,7 +93,12 @@ class KeyStore implements KeyStoreInterface
     {
         $key = $this->findKeyByUser($user);
 
-        return $key->getPrivateKey();
+        if ($key->isEncrypted()) {
+            return $this->decryptPrivateKey($key);
+        }
+        else {
+            return $key->getPrivateKey();
+        }
     }
 
     /**
@@ -121,5 +150,116 @@ class KeyStore implements KeyStoreInterface
     private function getKeyRepository()
     {
         return $this->getEntityManager()->getRepository('EHEncryptionBundle:PKIPrivateKey');
+    }
+
+    /**
+     * Encrypts the private key of the user using the app master public key
+     *
+     * @param \EHEncryptionBundle\Entity\PKIPrivateKey $pkiKey
+     */
+    private function encryptPrivateKey(PKIPrivateKey $pkiKey)
+    {
+        // Generate the symmetric key and iv to encrypt the users' key
+        $iv = $this->cryptographyProvider->generateIV(CryptographyProviderInterface::PRIVATE_KEY_ENCRYPTION);
+        $symmetricKey = $this->cryptographyProvider->generateSecureKey();
+        $keyData = new KeyData($symmetricKey, $iv);
+
+        // The private key of the user that we want to encrypt
+        $userPrivateKey = $pkiKey->getPrivateKey();
+        $encryptedUserPrivateKey = $this->cryptographyProvider->encrypt($userPrivateKey, $keyData);
+
+        if ($encryptedUserPrivateKey) {
+            $pkiKey->setPrivateKey($encryptedUserPrivateKey);
+            $pkiKey->setEncrypted(true);
+
+            // Now we have to encrypt the symmetric key with the public master key
+            $publicMasterKey = $this->getPublicMasterKey();
+            $encryptedKey = base64_encode($this->cryptographyProvider->encryptWithPublicKey($symmetricKey, $publicMasterKey));
+            $pkiKey->setKey($encryptedKey);
+            $pkiKey->setIv($iv);
+        }
+        else {
+            $pkiKey->setKey(null);
+            $pkiKey->setIv(null);
+            $pkiKey->setEncrypted(false);
+        }
+    }
+
+    /**
+     * Descrypts the private key of the user using the app master private key and returns it
+     *
+     * @param \EHEncryptionBundle\Entity\PKIPrivateKey $pkiKey
+     *
+     * @return string
+     */
+    private function decryptPrivateKey(PKIPrivateKey $pkiKey)
+    {
+        // Get the symmetric key used to encrypt the private key of the user
+        $encryptedKey = base64_decode($pkiKey->getKey());
+
+        $privateMasterKey = $this->getPrivateMasterKey();
+        $symmetricKey = $this->cryptographyProvider->decryptWithPrivateKey($encryptedKey, $privateMasterKey);
+
+        if ($symmetricKey) {
+            // Decrypt the private key of the user
+            $iv = $pkiKey->getIv();
+            $keyData = new KeyData($symmetricKey, $iv);
+
+            $encryptedUserPrivateKey = $pkiKey->getPrivateKey();
+            $userPrivateKey = $this->cryptographyProvider->decrypt($encryptedUserPrivateKey, $keyData);
+
+            return $userPrivateKey;
+        }
+        else {
+            throw new EncryptionException('Could not retrieve the encryption keys of the user');
+        }
+    }
+
+    /**
+     * Returns the public master key
+     *
+     * @return string
+     */
+    private function getPublicMasterKey()
+    {
+        if (!$this->publicMasterKey) {
+            $masterKey = $this->getMasterKey();
+            $publicKeyDetails = openssl_pkey_get_details($masterKey);
+            $this->publicMasterKey = $publicKeyDetails['key'];
+        }
+        return $this->publicMasterKey;
+    }
+
+    /**
+     * Returns the private master key
+     *
+     * @return string
+     */
+    private function getPrivateMasterKey()
+    {
+        if (!$this->privateMasterKey) {
+            $masterKey = $this->getMasterKey();
+            openssl_pkey_export($masterKey, $this->privateMasterKey);
+        }
+        return $this->privateMasterKey;
+    }
+
+    /**
+     * Returns the master key resource identifier
+     *
+     * @return resource
+     */
+    private function getMasterKey()
+    {
+        if (!$this->masterKey) {
+            $certificatePath = 'file://'.$this->masterKeyData['cert_file'];
+            $passPhrase = $this->masterKeyData['passphrase'];
+
+            $this->masterKey = openssl_pkey_get_private($certificatePath, $passPhrase);
+            if (!$this->masterKey) {
+                throw new EncryptionException('Could not open master encryption key');
+            }
+        }
+        return $this->masterKey;
     }
 }

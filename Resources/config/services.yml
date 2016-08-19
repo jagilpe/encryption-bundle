@@ -30,6 +30,7 @@ services:
         arguments:
             - "@doctrine"
             - "@eh_encryption.cryptography_provider"
+            - "%enc_master_key%"
     
     # default access checker
     eh_encryption.security.access_checker.default:
