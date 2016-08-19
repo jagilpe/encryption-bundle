@@ -55,7 +55,7 @@ class KeyStore implements KeyStoreInterface
     public function addKeys(PKEncryptionEnabledUserInterface $user, $clearPrivateKey)
     {
         $userId = $user->getId();
-        $userClass = get_class($user);
+        $userClass = $this->getUserClass($user);
 
         if (!$userId) {
             throw new EncryptionException('Users must be persisted before storing his keys.');

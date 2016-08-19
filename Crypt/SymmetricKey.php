@@ -19,7 +19,7 @@ class SymmetricKey
 
     public function addKey(PKEncryptionEnabledUserInterface $user, $encryptedKey)
     {
-        $userClass = get_class($user);
+        $userClass = $this->getUserClass($user);
         $userId = $user->getId();
         if (!isset($this->encryptedKeys[$userClass])) {
             $this->encryptedKeys[$userClass] = array();
