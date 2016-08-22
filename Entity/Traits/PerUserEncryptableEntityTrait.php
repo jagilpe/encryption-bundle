@@ -2,6 +2,8 @@
 
 namespace EHEncryptionBundle\Entity\Traits;
 
+use Doctrine\Common\Util\ClassUtils;
+
 trait PerUserEncryptableEntityTrait
 {
     use EncryptableEntityTrait;
@@ -34,7 +36,7 @@ trait PerUserEncryptableEntityTrait
 
     public function getOwnerUser()
     {
-        $reflection = new \ReflectionClass($this);
+        $reflection = ClassUtils::newReflectionObject($this);
 
         if ($reflection->hasMethod('getUser')) {
             return $this->getUser();

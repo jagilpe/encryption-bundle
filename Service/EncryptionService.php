@@ -3,6 +3,7 @@
 namespace EHEncryptionBundle\Service;
 
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\Common\Util\ClassUtils;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use AppBundle\Util\EntitiesExtractor;
@@ -239,7 +240,7 @@ class EncryptionService
      */
     private function isEntityFileEncrypted($entity)
     {
-        $reflection = new \ReflectionClass($entity);
+        $reflection = ClassUtils::newReflectionObject($entity);
 
         return $this->hasFileEncryptionEnabled($reflection)
         && $reflection->hasMethod('isFileEncrypted')
@@ -257,7 +258,7 @@ class EncryptionService
     {
         $isEncryptableFile = false;
 
-        $reflection = new \ReflectionClass($entity);
+        $reflection = ClassUtils::newReflectionObject($entity);
         if ($this->hasEncryptionEnabled($reflection)) {
             $encryptableFile = $this->reader->getClassAnnotation(
                 $reflection,
@@ -298,7 +299,7 @@ class EncryptionService
     private function processEntity($entity, $operation)
     {
         if ($this->settings[$operation.'_on_backend']) {
-            $reflection = new \ReflectionClass($entity);
+            $reflection = ClassUtils::newReflectionObject($entity);
 
             if ($this->hasEncryptionEnabled($reflection) && $this->toProcess($entity, $operation)) {
                 // Get the encryption key data
@@ -331,7 +332,7 @@ class EncryptionService
     private function processFileEntity($entity, $operation)
     {
         if ($this->settings[$operation.'_on_backend']) {
-            $reflection = new \ReflectionClass($entity);
+            $reflection = ClassUtils::newReflectionObject($entity);
 
             if ($this->hasFileEncryptionEnabled($reflection) && $this->toProcessFile($entity, $operation)) {
                 switch ($operation) {
@@ -473,7 +474,7 @@ class EncryptionService
      */
     private function isPKEncryptionEnabledUser($entity)
     {
-        $reflectionClass = new \ReflectionClass($entity);
+        $reflectionClass = ClassUtils::newReflectionObject($entity);
         return $this->userBasedEncryption()
             && ($reflectionClass->implementsInterface(PKEncryptionEnabledUserInterface::class));
     }
