@@ -55,16 +55,13 @@ class KeyStore implements KeyStoreInterface
     public function addKeys(PKEncryptionEnabledUserInterface $user, $clearPrivateKey)
     {
         $userId = $user->getId();
-        $userClass = $this->getUserClass($user);
 
         if (!$userId) {
             throw new EncryptionException('Users must be persisted before storing his keys.');
         }
 
-        // Add the new key
-        $pkiKey = new PKIPrivateKey();
-        $pkiKey->setUserClass($userClass);
-        $pkiKey->setUserId($userId);
+        // Reset the key data
+        $pkiKey = $this->getUserKey($user);
         $pkiKey->setPrivateKey($clearPrivateKey);
         $pkiKey->setPublicKey($user->getPublicKey());
         $pkiKey->setEncrypted(false);
@@ -72,8 +69,7 @@ class KeyStore implements KeyStoreInterface
         // Encrypt the private key
         $this->encryptPrivateKey($pkiKey);
 
-        // Remove the key if the user already has one
-        $this->deleteUserKey($user, true);
+        // Persist the key
         $this->getEntityManager()->persist($pkiKey);
         $this->getEntityManager()->flush();
     }
@@ -111,6 +107,35 @@ class KeyStore implements KeyStoreInterface
         return $key->getPublicKey();
     }
 
+    /**
+     * Returns the Key pair of the user or a new one if it has not already been persisted
+     *
+     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     *
+     * @return \EHEncryptionBundle\Entity\PKIPrivateKey
+     */
+    private function getUserKey(PKEncryptionEnabledUserInterface $user)
+    {
+        $pkiKey = $this->findKeyByUser($user);
+
+        if (!$pkiKey) {
+            $userId = $user->getId();
+            $userClass = $this->getUserClass($user);
+
+            $pkiKey = new PKIPrivateKey();
+            $pkiKey->setUserClass($userClass);
+            $pkiKey->setUserId($userId);
+        }
+
+        return $pkiKey;
+    }
+
+    /**
+     * Returns the previously persisted key pair of a user
+     *
+     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @return \EHEncryptionBundle\Entity\PKIPrivateKey
+     */
     private function findKeyByUser(PKEncryptionEnabledUserInterface $user)
     {
         $userClass = $this->getUserClass($user);
@@ -125,6 +150,11 @@ class KeyStore implements KeyStoreInterface
         return \Doctrine\Common\Util\ClassUtils::getRealClass(get_class($user));
     }
 
+    /**
+     * Deletes the key pair of a user
+     *
+     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     */
     private function deleteUserKey(PKEncryptionEnabledUserInterface$user, $flush = false)
     {
         $key = $this->findKeyByUser($user);
