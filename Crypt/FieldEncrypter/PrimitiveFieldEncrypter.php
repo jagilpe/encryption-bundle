@@ -11,10 +11,10 @@ class PrimitiveFieldEncrypter extends DefaultFieldEncrypter
 
     private static $allowedPrimitives = array(
         'boolean' => 'boolval',
-        'double' => 'doubleval',
+        'smallint' => 'intval',
+        'integer' => 'intval',
+        'bigint' => 'intval',
         'float' => 'floatval',
-        'int' => 'intval',
-        'str' => 'strval',
     );
 
     public function __construct($cryptographyProvider, $primitive)
@@ -40,8 +40,9 @@ class PrimitiveFieldEncrypter extends DefaultFieldEncrypter
      */
     public function decrypt($encryptedValue, KeyDataInterface $keyData)
     {
-        $primitiveValue = parent::decrypt($encryptedValue, $keyData);
+        $stringValue = parent::decrypt($encryptedValue, $keyData);
         $primitiveConversor = static::$allowedPrimitives[$this->primitive];
-        return $primitiveValue !== null ? call_user_func($primitiveConversor, $primitiveValue) : null;
+        $primivitveValue = $stringValue !== null ? call_user_func($primitiveConversor, $stringValue) : null;
+        return $primivitveValue;
     }
 }

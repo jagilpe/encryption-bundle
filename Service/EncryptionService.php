@@ -580,6 +580,10 @@ class EncryptionService
             case 'datetime':
                 return new FieldMapping\DateTimeFieldMapping($this, $fieldMapping);
             case 'boolean':
+            case 'smallint':
+            case 'integer':
+            case 'bigint':
+            case 'float':
                 return new FieldMapping\PrimitiveFieldMapping($this, $fieldMapping);
             default:
                 throw new EncryptionException('Field type '.$fieldMapping['type'].' not supported.');
@@ -616,6 +620,10 @@ class EncryptionService
                 $encrypterClass = FieldEncrypter\SerializableObjectFieldEncrypter::class;
                 break;
             case 'boolean':
+            case 'smallint':
+            case 'integer':
+            case 'bigint':
+            case 'float':
                 $encrypterClass = FieldEncrypter\PrimitiveFieldEncrypter::class;
                 $fieldType = $fieldMapping['_old_type'];
                 if (!isset($this->encrypters[$encrypterClass][$fieldType])) {

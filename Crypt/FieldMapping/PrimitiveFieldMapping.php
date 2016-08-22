@@ -8,6 +8,10 @@ class PrimitiveFieldMapping extends AbstractEncryptedFieldMapping
 {
     private static $allowedPrimitives = array(
         'boolean' => array('type' => 'string', 'length' => '50'),
+        'smallint' => array('type' => 'string', 'length' => '50'),
+        'integer' => array('type' => 'string', 'length' => '50'),
+        'bigint' => array('type' => 'string', 'length' => '100'),
+        'float' => array('type' => 'string', 'length' => '200'),
     );
 
     /**
