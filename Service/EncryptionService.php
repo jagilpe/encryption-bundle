@@ -131,7 +131,7 @@ class EncryptionService
         }
 
         // Add a field to check if the associated file is encrypted
-        if ($hasFileEncryptionEnabled = $this->hasFileEncryptionEnabled($reflection)) {
+        if ($this->hasFileEncryptionEnabled($reflection)) {
             $isFileEncryptedField = array(
                 'fieldName' => 'fileEncrypted',
                 'columnName' => '_file_encrypted',
@@ -288,7 +288,7 @@ class EncryptionService
             $entities = array_merge(array($entity), $entities);
 
             foreach ($entities as $entityToProcess) {
-                $this->processEntity($entity, $operation);
+                $this->processEntity($entityToProcess, $operation);
             }
         }
 
