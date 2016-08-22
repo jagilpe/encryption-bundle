@@ -119,6 +119,8 @@ class KeyManager implements KeyManagerInterface
         $user->setPrivateKeyEncrypted(false);
 
         $this->encryptPrivateKey($user);
+
+        $this->keyStore->addKeys($user, $privateKey);
     }
 
     /**
