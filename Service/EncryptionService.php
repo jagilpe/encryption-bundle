@@ -14,6 +14,7 @@ use EHEncryptionBundle\Crypt\FieldMapping;
 use EHEncryptionBundle\Crypt\FieldEncrypter;
 use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 use EHEncryptionBundle\Exception\EncryptionException;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 /**
  * Encapsulates the core encryption logic
@@ -60,6 +61,11 @@ class EncryptionService
      */
     private $fieldEncrypters;
 
+    /**
+     * @var array
+     */
+    private $encryptedEnabledClasses = array();
+
     public function __construct(
                     Registry $doctrine,
                     Reader $reader,
@@ -84,7 +90,7 @@ class EncryptionService
     {
         $reflection = $metadata->getReflectionClass();
 
-        if ($hasEncryptionEnabled = $this->hasEncryptionEnabled($reflection)) {
+        if ($hasEncryptionEnabled = $this->hasEncryptionEnabled($reflection, $metadata)) {
             if ($this->keyPerEntityRequired($hasEncryptionEnabled)) {
                 // Add the field required to hold the key used to encrypt this entity
                 $keyField = array(
@@ -310,7 +316,7 @@ class EncryptionService
 
                 // Encrypt the fields
                 foreach ($encryptionEnabledFields as $field) {
-                    $fieldEncrypter = $this->getFieldEncrypter($field);
+                    $fieldEncrypter = $this->getFieldEncrypter($field, $reflection);
                     $value = $this->getFieldValue($entity, $field);
                     $processedValue = $fieldEncrypter->{$operation}($value, $keyData);
                     $this->setFieldValue($entity, $field, $processedValue);
@@ -437,16 +443,30 @@ class EncryptionService
      * Checks if the class has been enabled for encryption
      *
      * @param \ReflectionClass $reflection
+     * @param \Doctrine\ORM\Mapping\ClassMetadataInfo $metadata
+     *
      * @return EHEncryptionBundle\Annotation\EncryptedEntity|null
      */
-    private function hasEncryptionEnabled(\ReflectionClass $reflection)
+    private function hasEncryptionEnabled(\ReflectionClass $reflection, ClassMetadataInfo $metadata = null)
     {
-        $encryptedEnabled = $this->reader->getClassAnnotation(
-            $reflection,
-            'EHEncryptionBundle\\Annotation\\EncryptedEntity'
-        );
+        $className = $reflection->getName();
 
-        return $encryptedEnabled;
+        if (!isset($this->encryptedEnabledClasses[$className]) && $metadata && !$metadata->isMappedSuperclass) {
+            $reflection = $metadata->getReflectionClass();
+            $encryptedEnabled = $this->reader->getClassAnnotation(
+                $reflection,
+                'EHEncryptionBundle\\Annotation\\EncryptedEntity'
+            );
+            if ($encryptedEnabled) {
+                $this->encryptedEnabledClasses[$className] = $encryptedEnabled;
+            }
+        }
+
+        $result = isset($this->encryptedEnabledClasses[$className])
+            ? $this->encryptedEnabledClasses[$className]
+            : null;
+
+        return $result;
     }
 
     /**
@@ -594,13 +614,14 @@ class EncryptionService
     /**
      * Factory method to get the right EncryptedFieldEncrypter object for a determined field
      *
-     * @param array $fieldMapping
+     * @param \ReflectionProperty $reflectionProperty
+     * @param \ReflectionClass $reflectionClass
      *
-     * @return \EHEncryptionBundle\Crypt\FieldMapping\EncryptedFieldMappingInterface
+     * @return \EHEncryptionBundle\Crypt\FieldEncrypter\EncryptedFieldEncrypterInterface
      */
-    private function getFieldEncrypter(\ReflectionProperty $reflectionProperty)
+    private function getFieldEncrypter(\ReflectionProperty $reflectionProperty, \ReflectionClass $reflectionClass)
     {
-        $classMetadata = $this->doctrine->getManager()->getMetadataFactory()->getMetadataFor($reflectionProperty->class);
+        $classMetadata = $this->doctrine->getManager()->getMetadataFactory()->getMetadataFor($reflectionClass->getName());
 
         $fieldName = $reflectionProperty->getName();
         $fieldMapping = $classMetadata->getFieldMapping($fieldName);
