@@ -7,6 +7,8 @@ use Doctrine\Common\Util\ClassUtils;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use AppBundle\Util\EntitiesExtractor;
+use AppBundle\Entity\User as PVUser;
+use PolavisConnectBundle\Entity\User as PCUser;
 use EHEncryptionBundle\Annotation\EncryptedEntity;
 use EHEncryptionBundle\Crypt\CryptographyProviderInterface;
 use EHEncryptionBundle\Crypt\KeyManagerInterface;
@@ -25,6 +27,11 @@ class EncryptionService
 {
     const ENCRYPT = 'encrypt';
     const DECRYPT = 'decrypt';
+
+    private static $excludedClases = array(
+        PVUser::class,
+        PCUser::class,
+    );
 
     /**
      * Supported entity encryption modes
@@ -278,7 +285,7 @@ class EncryptionService
     }
 
     /**
-     * Processes an entity is it has encryption enabled and it's not already processed
+     * Processes an entity and its children if it has encryption enabled and it's not already processed
      *
      * @param mixed $entity
      * @param string $operation
@@ -287,7 +294,8 @@ class EncryptionService
      */
     private function processEntityTree($entity, $operation)
     {
-        if ($this->settings[$operation.'_on_backend']) {
+        $entityClass = ClassUtils::getClass($entity);
+        if ($this->settings[$operation.'_on_backend'] && !in_array($entityClass, self::$excludedClases)) {
             // Get all the related entities
             $entitiesExtractor = new EntitiesExtractor($entity);
             $entities = $entitiesExtractor->getRelatedEntities();
@@ -302,6 +310,14 @@ class EncryptionService
         return $entity;
     }
 
+    /**
+     * Processes an entity if it has encryption enabled and it's not already processed
+     *
+     * @param mixed $entity
+     * @param string $operation
+     *
+     * @return mixed
+     */
     private function processEntity($entity, $operation)
     {
         if ($this->settings[$operation.'_on_backend']) {
@@ -310,20 +326,21 @@ class EncryptionService
             if ($this->hasEncryptionEnabled($reflection) && $this->toProcess($entity, $operation)) {
                 // Get the encryption key data
                 $keyData = $this->keyManager->getEntityEncryptionKeyData($entity);
+                if ($keyData) {
+                    // get the encrypted fields
+                    $encryptionEnabledFields = $this->getEncryptionEnabledFields($reflection);
 
-                // get the encrypted fields
-                $encryptionEnabledFields = $this->getEncryptionEnabledFields($reflection);
+                    // Encrypt the fields
+                    foreach ($encryptionEnabledFields as $field) {
+                        $fieldEncrypter = $this->getFieldEncrypter($field, $reflection);
+                        $value = $this->getFieldValue($entity, $field);
+                        $processedValue = $fieldEncrypter->{$operation}($value, $keyData);
+                        $this->setFieldValue($entity, $field, $processedValue);
+                    }
 
-                // Encrypt the fields
-                foreach ($encryptionEnabledFields as $field) {
-                    $fieldEncrypter = $this->getFieldEncrypter($field, $reflection);
-                    $value = $this->getFieldValue($entity, $field);
-                    $processedValue = $fieldEncrypter->{$operation}($value, $keyData);
-                    $this->setFieldValue($entity, $field, $processedValue);
+                    // Set the encryption flag
+                    $entity->setEncrypted($operation === self::ENCRYPT);
                 }
-
-                // Set the encryption flag
-                $entity->setEncrypted($operation === self::ENCRYPT);
             }
         }
     }
@@ -373,12 +390,14 @@ class EncryptionService
             // Get the encryption key data
             $keyData = $this->keyManager->getEntityEncryptionKeyData($entity);
 
-            $encType = CryptographyProviderInterface::FILE_ENCRYPTION;
-            $encryptedContent = $this->cryptographyProvider->encrypt($fileContent, $keyData, $encType);
+            if ($keyData) {
+                $encType = CryptographyProviderInterface::FILE_ENCRYPTION;
+                $encryptedContent = $this->cryptographyProvider->encrypt($fileContent, $keyData, $encType);
 
-            // Replace the file content with the encrypted
-            file_put_contents($filePath, $encryptedContent);
-            $entity->setFileEncrypted(true);
+                // Replace the file content with the encrypted
+                file_put_contents($filePath, $encryptedContent);
+                $entity->setFileEncrypted(true);
+            }
         }
     }
 
@@ -392,11 +411,13 @@ class EncryptionService
         // Get the encryption key data
         $keyData = $this->keyManager->getEntityEncryptionKeyData($fileEntity);
 
-        $encryptedContent = $fileEntity->getContent();
-        $encType = CryptographyProviderInterface::FILE_ENCRYPTION;
-        $decryptedContent = $this->cryptographyProvider->decrypt($encryptedContent, $keyData, $encType);
+        if ($keyData) {
+            $encryptedContent = $fileEntity->getContent();
+            $encType = CryptographyProviderInterface::FILE_ENCRYPTION;
+            $decryptedContent = $this->cryptographyProvider->decrypt($encryptedContent, $keyData, $encType);
 
-        $fileEntity->setContent($decryptedContent);
+            $fileEntity->setContent($decryptedContent);
+        }
     }
 
     /**

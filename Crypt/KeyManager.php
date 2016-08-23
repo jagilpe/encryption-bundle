@@ -147,7 +147,7 @@ class KeyManager implements KeyManagerInterface
         $key = $this->getEntityEncryptionKey($entity);
         $iv = $this->getEntityEncryptionIv($entity);
 
-        $keyData = new KeyData($key, $iv);
+        $keyData = $key ? new KeyData($key, $iv) : null;
 
         return $keyData;
     }
@@ -291,7 +291,7 @@ class KeyManager implements KeyManagerInterface
             $privateKey = $this->keyStore->getPrivateKey($vivaUser);
         }
         else {
-            throw new EncryptionException('Could not access encryption key');
+            return null;
         }
 
         $decryptedKey = $this->cryptographyProvider->decryptWithPrivateKey($userKey, $privateKey);

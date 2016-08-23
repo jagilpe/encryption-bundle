@@ -25,5 +25,5 @@ interface AccessCheckerInterface
      *
      * return @boolean
      */
-    public function canUseOwnerPrivateKey($entity, UserInterface $user);
+    public function canUseOwnerPrivateKey($entity, UserInterface $user = null);
 }
