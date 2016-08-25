@@ -399,10 +399,12 @@ class EncryptionService
 
         if ($keyData) {
             $encryptedContent = $fileEntity->getContent();
-            $encType = CryptographyProviderInterface::FILE_ENCRYPTION;
-            $decryptedContent = $this->cryptographyProvider->decrypt($encryptedContent, $keyData, $encType);
+            if ($encryptedContent) {
+                $encType = CryptographyProviderInterface::FILE_ENCRYPTION;
+                $decryptedContent = $this->cryptographyProvider->decrypt($encryptedContent, $keyData, $encType);
 
-            $fileEntity->setContent($decryptedContent);
+                $fileEntity->setContent($decryptedContent);
+            }
         }
     }
 
