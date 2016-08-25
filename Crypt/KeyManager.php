@@ -253,7 +253,6 @@ class KeyManager implements KeyManagerInterface
     private function encryptSymmetricKey($clearKey, $entity)
     {
         $users = $this->accessChecker->getAllowedUsers($entity);
-
         $symmetricKey = new SymmetricKey();
 
         foreach ($users as $user) {
