@@ -34,6 +34,7 @@ class EncryptionSubscriber implements EventSubscriber
         return array(
             Events::loadClassMetadata,
             Events::prePersist,
+            Events::postPersist,
             Events::preUpdate,
             Events::postLoad,
         );
@@ -54,6 +55,14 @@ class EncryptionSubscriber implements EventSubscriber
     public function prePersist(LifecycleEventArgs $args)
     {
         $this->encryptionService->processEntityPrePersist($args->getEntity());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function postPersist(LifecycleEventArgs $args)
+    {
+        $this->encryptionService->processEntityPostPersist($args->getEntity());
     }
 
     /**

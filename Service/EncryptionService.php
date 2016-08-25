@@ -175,6 +175,23 @@ class EncryptionService
      *
      * @return mixed
      */
+    public function processEntityPostPersist($entity)
+    {
+        if ($entity instanceof PVUser) {
+            // The id of the User was not set when the entity was processed before
+            $userProfile = $entity->getMainProfile();
+            $encryptionKey = $userProfile->getKey();
+            $encryptionKey->updateUnidentifiedKey($entity);
+        }
+    }
+
+    /**
+     * Process all encryption related actions on an Entity pre persist event
+     *
+     * @param mixed $entity
+     *
+     * @return mixed
+     */
     public function processEntityPreUpdate($entity)
     {
         // Process the encryption of the entity
