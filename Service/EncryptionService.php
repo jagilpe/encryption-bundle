@@ -28,11 +28,6 @@ class EncryptionService
     const ENCRYPT = 'encrypt';
     const DECRYPT = 'decrypt';
 
-    private static $excludedClases = array(
-        PVUser::class,
-        PCUser::class,
-    );
-
     /**
      * Supported entity encryption modes
      */
@@ -167,7 +162,7 @@ class EncryptionService
     public function processEntityPrePersist($entity)
     {
         // Process the encryption of the entity
-        $this->processEntityTree($entity, self::ENCRYPT);
+        $this->processEntity($entity, self::ENCRYPT);
 
         // Process the possible file associated with the entity
         $this->processFileEntity($entity, self::ENCRYPT);
@@ -183,7 +178,7 @@ class EncryptionService
     public function processEntityPreUpdate($entity)
     {
         // Process the encryption of the entity
-        $this->processEntityTree($entity, self::ENCRYPT);
+        $this->processEntity($entity, self::ENCRYPT);
     }
 
     /**
@@ -197,7 +192,7 @@ class EncryptionService
     {
         if ($entity) {
             // Process the encryption of the entity
-            $this->processEntityTree($entity, self::DECRYPT);
+            $this->processEntity($entity, self::DECRYPT);
 
             $this->processFileEntity($entity, self::DECRYPT);
         }
@@ -282,32 +277,6 @@ class EncryptionService
         }
 
         return $isEncryptableFile;
-    }
-
-    /**
-     * Processes an entity and its children if it has encryption enabled and it's not already processed
-     *
-     * @param mixed $entity
-     * @param string $operation
-     *
-     * @return mixed
-     */
-    private function processEntityTree($entity, $operation)
-    {
-        $entityClass = ClassUtils::getClass($entity);
-        if ($this->settings[$operation.'_on_backend'] && !in_array($entityClass, self::$excludedClases)) {
-            // Get all the related entities
-            $entitiesExtractor = new EntitiesExtractor($entity);
-            $entities = $entitiesExtractor->getRelatedEntities();
-
-            $entities = array_merge(array($entity), $entities);
-
-            foreach ($entities as $entityToProcess) {
-                $this->processEntity($entityToProcess, $operation);
-            }
-        }
-
-        return $entity;
     }
 
     /**
