@@ -75,7 +75,8 @@ class EncryptionEntityRepositoryDecorator implements ObjectRepository, Selectabl
         }
         else {
             // We can use the usual repository logic
-            return $this->wrapped->findBy($criteria, $orderBy, $limit, $offset);
+            $entities = $this->wrapped->findBy($criteria, $orderBy, $limit, $offset);
+            return $entities;
         }
     }
 
@@ -85,7 +86,7 @@ class EncryptionEntityRepositoryDecorator implements ObjectRepository, Selectabl
     */
     public function findOneBy(array $criteria)
     {
-        return $this->findOneBy($criteria);
+        return $this->wrapped->findOneBy($criteria);
     }
 
     /**
