@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityRepository;
 use EHEncryptionBundle\Service\EncryptionService;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Doctrine\Common\Collections\ArrayCollection;
 
 class EncryptionEntityRepositoryDecorator implements ObjectRepository, Selectable
 {
@@ -102,7 +103,10 @@ class EncryptionEntityRepositoryDecorator implements ObjectRepository, Selectabl
     */
     public function matching(Criteria $criteria)
     {
-        return $this->wrapped->matching($criteria);
+        $allEntities = $this->wrapped->findAll();
+        $collection = new ArrayCollection($allEntities);
+
+        return $collection->matching($criteria);
     }
 
     /**
