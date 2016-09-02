@@ -456,7 +456,7 @@ class EncryptionService
      *
      * @return EHEncryptionBundle\Annotation\EncryptedEntity|null
      */
-    private function hasEncryptionEnabled(\ReflectionClass $reflection, ClassMetadataInfo $metadata = null)
+    public function hasEncryptionEnabled(\ReflectionClass $reflection, ClassMetadataInfo $metadata = null)
     {
         $className = $reflection->getName();
 
@@ -536,7 +536,7 @@ class EncryptionService
      *
      * @return array
      */
-    private function getEncryptionEnabledFields(\ReflectionClass $reflectionClass)
+    public function getEncryptionEnabledFields(\ReflectionClass $reflectionClass)
     {
         $encryptionEnabledFields = array();
 
@@ -549,7 +549,7 @@ class EncryptionService
             );
 
             if ($encryptedField) {
-                $encryptionEnabledFields[] = $reflectionProperty;
+                $encryptionEnabledFields[$reflectionProperty->name] = $reflectionProperty;
             }
         }
 

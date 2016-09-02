@@ -31,11 +31,13 @@ services:
             - "@doctrine"
             - "@eh_encryption.cryptography_provider"
             - "%enc_master_key%"
-            
+
     eh_encryption.decorating_entity_manager:
-        class: EHEncryptionBundle\Doctrine\ORM\EntityManager
-        decorates: doctrine.orm.entity_manager
-        arguments: ['@eh_encryption.decorating_entity_manager.inner']
+        class: EHEncryptionBundle\Doctrine\ORM\EncryptionEntityManagerDecorator
+        decorates: doctrine.orm.default_entity_manager
+        arguments: 
+            - "@eh_encryption.decorating_entity_manager.inner"
+            - "@eh_encryption.encryption.service"
         public: false
     
     # default access checker
