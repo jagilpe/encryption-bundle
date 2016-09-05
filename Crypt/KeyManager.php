@@ -395,9 +395,11 @@ class KeyManager implements KeyManagerInterface
 
         if (!$passwordDigest) {
             $password = $user->getPlainPassword();
-            $salt = $user->getSalt();
 
-            $passwordDigest = $this->cryptographyProvider->getPasswordDigest($password, $salt);
+            if ($password) {
+                $salt = $user->getSalt();
+                $passwordDigest = $this->cryptographyProvider->getPasswordDigest($password, $salt);
+            }
         }
 
         return $passwordDigest;
