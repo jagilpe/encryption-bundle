@@ -8,6 +8,7 @@ use EHEncryptionBundle\Crypt\KeyManagerInterface;
 use EHEncryptionBundle\Crypt\KeyStoreInterface;
 use EHEncryptionBundle\Crypt\KeyManager;
 use PolavisConnectBundle\Security\SecurityCodeUser;
+use EHEncryptionBundle\Exception\EncryptionException;
 
 class UserPrivateKeyLoadListener
 {
@@ -64,7 +65,7 @@ class UserPrivateKeyLoadListener
                         $request->getSession()->set(KeyManager::SESSION_PRIVATE_KEY_PARAM, $privateKey);
                     }
                     else {
-                        throw new \EncryptionException('Could not load user\'s key');
+                        throw new EncryptionException('Could not load user\'s key');
                     }
                 }
                 else {
@@ -74,7 +75,7 @@ class UserPrivateKeyLoadListener
                         $request->getSession()->set(KeyManager::SESSION_PRIVATE_KEY_PARAM, $privateKey);
                     }
                     else {
-                        throw new \EncryptionException('Could not load user\'s key');
+                        throw new EncryptionException('Could not load user\'s key');
                     }
                 }
             }
