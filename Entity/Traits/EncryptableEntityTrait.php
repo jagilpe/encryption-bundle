@@ -6,6 +6,8 @@ trait EncryptableEntityTrait
 {
     protected $encrypted = false;
 
+    protected $migrated = false;
+
     public function getEncrypted()
     {
         return $this->encrypted;
@@ -20,5 +22,16 @@ trait EncryptableEntityTrait
     public function isEncrypted()
     {
         return $this->getEncrypted();
+    }
+
+    public function setMigrated($migrated)
+    {
+        $this->migrated = $migrated;
+        return $this;
+    }
+
+    public function isMigrated()
+    {
+        return $this->migrated;
     }
 }

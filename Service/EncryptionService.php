@@ -6,7 +6,6 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use AppBundle\Util\EntitiesExtractor;
 use AppBundle\Entity\User as PVUser;
 use PolavisConnectBundle\Entity\User as PCUser;
 use EHEncryptionBundle\Annotation\EncryptedEntity;
@@ -18,6 +17,7 @@ use EHEncryptionBundle\Crypt\FieldNormalizer;
 use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 use EHEncryptionBundle\Exception\EncryptionException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use EHEncryptionBundle\Crypt\KeyData;
 
 /**
  * Encapsulates the core encryption logic
@@ -118,8 +118,9 @@ class EncryptionService
     {
         $reflection = $metadata->getReflectionClass();
 
-        if ($hasEncryptionEnabled = $this->hasEncryptionEnabled($reflection, $metadata)) {
-            if ($this->keyPerEntityRequired($hasEncryptionEnabled)) {
+        if ($this->hasEncryptionEnabled($reflection, $metadata)) {
+            $encryptedEnabled = $this->getEncryptionEnabledAnnotation($reflection);
+            if ($this->keyPerEntityRequired($encryptedEnabled)) {
                 // Add the field required to hold the key used to encrypt this entity
                 $keyField = array(
                     'fieldName' => 'key',
@@ -146,6 +147,14 @@ class EncryptionService
                 'type' => 'boolean',
             );
             $metadata->mapField($isEncryptedField);
+
+            // Field to force the persitence of the entity in the migration process
+            $isMigratedField = array(
+                'fieldName' => 'migrated',
+                'columnName' => '_migrated',
+                'type' => 'boolean',
+            );
+            $metadata->mapField($isMigratedField);
 
             // Modify the metadata of the encrypted fields of the entity
             $encryptedFields = $this->getEncryptionEnabledFields($reflection);
@@ -189,9 +198,6 @@ class EncryptionService
     {
         // Process the encryption of the entity
         $this->processEntity($entity, self::ENCRYPT);
-
-        // Process the possible file associated with the entity
-        $this->processFileEntity($entity, self::ENCRYPT);
     }
 
     /**
@@ -236,8 +242,6 @@ class EncryptionService
         if ($entity) {
             // Process the encryption of the entity
             $this->processEntity($entity, self::DECRYPT);
-
-            $this->processFileEntity($entity, self::DECRYPT);
         }
     }
 
@@ -302,6 +306,8 @@ class EncryptionService
                     $processedValue = $fieldNormalizer->normalize($value);
                     $this->setFieldValue($entity, $field, $processedValue);
                 }
+
+                $entity->setMigrated(true);
             }
         }
     }
@@ -376,39 +382,15 @@ class EncryptionService
 
                     // Set the encryption flag
                     $entity->setEncrypted($operation === self::ENCRYPT);
+
+                    // If this entity has an encryptable file, process it
+                    if ($this->isEncryptableFile($entity) && $this->toProcessFile($entity, $operation)) {
+                        $method = $operation.'File';
+                        $this->{$method}($entity, $keyData);
+                    }
                 }
             }
         }
-    }
-
-    /**
-     * Processes an entity is it has file encryption enabled and it's not already processed
-     *
-     * @param mixed $entity
-     *
-     * @return mixed
-     */
-    private function processFileEntity($entity, $operation)
-    {
-        if ($this->settings[$operation.'_on_backend']) {
-            $reflection = ClassUtils::newReflectionObject($entity);
-
-            if ($this->hasFileEncryptionEnabled($reflection) && $this->toProcessFile($entity, $operation)) {
-                switch ($operation) {
-                    case self::ENCRYPT:
-                        $this->encryptFile($entity);
-                        break;
-                    case self::DECRYPT:
-                        $this->decryptFile($entity);
-                        break;
-                    default:
-                        throw new EncryptionException('Operation '.$operation.' not supported.');
-                        break;
-                }
-            }
-        }
-
-        return $entity;
     }
 
     /**
@@ -416,23 +398,31 @@ class EncryptionService
      *
      * @param mixed $entity
      */
-    private function encryptFile($entity)
+    private function encryptFile($fileEntity, KeyData $keyData)
     {
-        $file = $entity->getFile();
+        $file = $fileEntity->getFile();
+        $encrypt = false;
 
         if ($file) {
             $filePath = $file->getRealPath();
+            $encrypt = true;
+        }
+        elseif ($fileEntity->getId() && $fileEntity->fileExists() && !$fileEntity->isFileEncrypted()) {
+            // The document was persisted but somehow the file was not encrypted
+            $filePath = $fileEntity->getAbsolutePath();
+            $encrypt = true;
+        }
+
+        if ($encrypt) {
             $fileContent = file_get_contents($filePath);
             // Get the encryption key data
-            $keyData = $this->keyManager->getEntityEncryptionKeyData($entity);
-
             if ($keyData) {
                 $encType = CryptographyProviderInterface::FILE_ENCRYPTION;
                 $encryptedContent = $this->cryptographyProvider->encrypt($fileContent, $keyData, $encType);
 
                 // Replace the file content with the encrypted
                 file_put_contents($filePath, $encryptedContent);
-                $entity->setFileEncrypted(true);
+                $fileEntity->setFileEncrypted(true);
             }
         }
     }
@@ -442,11 +432,8 @@ class EncryptionService
      *
      * @param mixed $entity
      */
-    private function decryptFile($fileEntity)
+    private function decryptFile($fileEntity, KeyData $keyData)
     {
-        // Get the encryption key data
-        $keyData = $this->keyManager->getEntityEncryptionKeyData($fileEntity);
-
         if ($keyData) {
             $encryptedContent = $fileEntity->getContent();
             if ($encryptedContent) {
@@ -504,26 +491,42 @@ class EncryptionService
      * @param \ReflectionClass $reflection
      * @param \Doctrine\ORM\Mapping\ClassMetadataInfo $metadata
      *
-     * @return EHEncryptionBundle\Annotation\EncryptedEntity|null
+     * @return boolean
      */
     public function hasEncryptionEnabled(\ReflectionClass $reflection, ClassMetadataInfo $metadata = null)
+    {
+        $encryptedEnabled = $this->getEncryptionEnabledAnnotation($reflection, $metadata);
+        $hasEncryptionEnabled = $encryptedEnabled ? $encryptedEnabled->enabled : false;
+
+        return $hasEncryptionEnabled;
+    }
+
+    /**
+     * Returns the encryption annotation for the class if exists
+     *
+     * @param \ReflectionClass $reflection
+     * @param \Doctrine\ORM\Mapping\ClassMetadataInfo $metadata
+     *
+     * @return EHEncryptionBundle\Annotation\EncryptedEntity|null
+     */
+    private function getEncryptionEnabledAnnotation(\ReflectionClass $reflection, ClassMetadataInfo $metadata = null)
     {
         $className = $reflection->getName();
 
         if (!isset($this->encryptedEnabledClasses[$className]) && $metadata && !$metadata->isMappedSuperclass) {
             $reflection = $metadata->getReflectionClass();
             $encryptedEnabled = $this->reader->getClassAnnotation(
-                $reflection,
-                'EHEncryptionBundle\\Annotation\\EncryptedEntity'
-            );
+                            $reflection,
+                            'EHEncryptionBundle\\Annotation\\EncryptedEntity'
+                            );
             if ($encryptedEnabled) {
                 $this->encryptedEnabledClasses[$className] = $encryptedEnabled;
             }
         }
 
         $result = isset($this->encryptedEnabledClasses[$className])
-            ? $this->encryptedEnabledClasses[$className]
-            : null;
+        ? $this->encryptedEnabledClasses[$className]
+        : null;
 
         return $result;
     }
@@ -574,7 +577,7 @@ class EncryptionService
      * @param string $mode
      * @return boolean
      */
-    private function keyPerEntityRequired(EncryptedEntity $hasEncryptionEnabled)
+    private function keyPerEntityRequired(EncryptedEntity $entity)
     {
         return $this->userBasedEncryption();
     }
