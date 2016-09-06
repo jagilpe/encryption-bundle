@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use AppBundle\Entity\User;
 use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Symfony\Component\Console\Helper\ProgressBar;
 
 class CreateUserKeysCommand extends ContainerAwareCommand
 {
@@ -66,10 +67,17 @@ class CreateUserKeysCommand extends ContainerAwareCommand
 
         $users = $this->getUsers($userName, $app);
 
+        $total = count($users);
+        $message = "Generating the encryption keys for $total users";
+        $output->writeln($message);
+        $progress = new ProgressBar($output, $total);
         foreach ($users as $user) {
             $this->generateKeys($user, $app);
             $this->saveUser($user, $app);
+            $progress->advance();
         }
+        $progress->finish();
+        $output->writeln('');
     }
 
     private function getUsers($userName, $app)
