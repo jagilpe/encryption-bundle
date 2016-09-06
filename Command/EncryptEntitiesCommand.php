@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Input\InputOption;
 
 class EncryptEntitiesCommand extends ContainerAwareCommand
 {
@@ -17,6 +18,12 @@ class EncryptEntitiesCommand extends ContainerAwareCommand
     {
         $this->setName('ehealth_crypt:migrate:encrypt_entities')
             ->setDescription('Converts the unencrypted values of the encrypted enabled field to a compatible form')
+            ->addOption(
+                'force',
+                null,
+                InputOption::VALUE_NONE,
+                'If the process should really be executed.'
+            )
         ;
     }
 
@@ -26,6 +33,11 @@ class EncryptEntitiesCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $force = $input->getOption('force');
+
+        if (!$force) {
+            throw new \RuntimeException('Include --force option if you really want to proceed');
+        }
 
         $container = $this->getContainer();
         $entityManager = $container->get('doctrine')->getManager();
