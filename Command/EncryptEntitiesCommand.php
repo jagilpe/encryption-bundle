@@ -7,7 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 
-class ConvertMappedFieldsCommand extends ContainerAwareCommand
+class EncryptEntitiesCommand extends ContainerAwareCommand
 {
     /**
      * {@inheritDoc}
@@ -26,6 +26,7 @@ class ConvertMappedFieldsCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+
         $container = $this->getContainer();
         $entityManager = $container->get('doctrine')->getManager();
         $encryptionService = $container->get('eh_encryption.encryption.service');

@@ -18,7 +18,7 @@ class JsonArrayFieldNormalizer implements EncryptedFieldNormalizerInterface
 
         if ($clearValue !== null) {
             if (is_string($clearValue)) {
-                $normalizedValue = json_decode($clearValue);
+                $normalizedValue = (array) json_decode($clearValue);
             }
             elseif (is_array($clearValue)) {
                 $normalizedValue = $clearValue;
