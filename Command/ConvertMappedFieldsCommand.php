@@ -5,6 +5,7 @@ namespace EHEncryptionBundle\Command;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Helper\ProgressBar;
 
 class ConvertMappedFieldsCommand extends ContainerAwareCommand
 {
@@ -28,16 +29,28 @@ class ConvertMappedFieldsCommand extends ContainerAwareCommand
         $container = $this->getContainer();
         $entityManager = $container->get('doctrine')->getManager();
         $encryptionService = $container->get('eh_encryption.encryption.service');
-        $encryptedEntityTypes = $encryptionService->getEncryptionEnabledEntitiesMetadata();
 
+        // Encrypt the entities in the database
+        $encryptedEntityTypes = $encryptionService->getEncryptionEnabledEntitiesMetadata();
         foreach ($encryptedEntityTypes as $encryptedEntityType) {
-            $repository = $entityManager->getRepository($encryptedEntityType->name);
+            $entityClass = $encryptedEntityType->name;
+            $repository = $entityManager->getRepository($entityClass);
             $entities = $repository->findAll();
-            foreach ($entities as $entity) {
-                if (!$entity->isEncrypted()) {
-                    $encryptionService->processEntityMigration($entity);
-                    $repository->save($entity);
+            $total = count($entities);
+            if ($total > 0){
+                $message = "Encrypting $total entities of type $entityClass";
+                $output->writeln($message);
+                $progress = new ProgressBar($output, $total);
+                foreach ($entities as $entity) {
+                    if (!$entity->isEncrypted()) {
+                        $encryptionService->processEntityMigration($entity);
+                        $repository->save($entity);
+                    }
+                    $progress->advance();
                 }
+
+                $progress->finish();
+                $output->writeln('');
             }
         }
     }
