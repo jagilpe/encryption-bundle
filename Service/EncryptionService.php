@@ -14,6 +14,7 @@ use EHEncryptionBundle\Crypt\CryptographyProviderInterface;
 use EHEncryptionBundle\Crypt\KeyManagerInterface;
 use EHEncryptionBundle\Crypt\FieldMapping;
 use EHEncryptionBundle\Crypt\FieldEncrypter;
+use EHEncryptionBundle\Crypt\FieldNormalizer;
 use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 use EHEncryptionBundle\Exception\EncryptionException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -61,12 +62,17 @@ class EncryptionService
     /**
      * @var array
      */
-    private $fieldEncrypters;
+    private $encrypters = array();
 
     /**
      * @var array
      */
     private $encryptedEnabledClasses = array();
+
+    /**
+     * @var array
+     */
+    private $normalizers = array();
 
     public function __construct(
                     Registry $doctrine,
@@ -80,6 +86,26 @@ class EncryptionService
         $this->cryptographyProvider = $cryptographyProvider;
         $this->keyManager = $keyManager;
         $this->settings = $settings;
+    }
+
+    /**
+     * Returns the metadata of all the encryption enabled entities
+     *
+     * @return array
+     */
+    public function getEncryptionEnabledEntitiesMetadata()
+    {
+        $entityManager = $this->doctrine->getManager();
+        $metadata = $entityManager->getMetadataFactory()->getAllMetadata();
+
+        $encryptedEnabledTypes = array();
+        foreach ($metadata as $entityMetadata) {
+            if ($this->hasEncryptionEnabled($entityMetadata->getReflectionClass(), $entityMetadata)) {
+                $encryptedEnabledTypes[] = $entityMetadata;
+            }
+        }
+
+        return $encryptedEnabledTypes;
     }
 
     /**
@@ -254,6 +280,30 @@ class EncryptionService
     public function handleUserPasswordResetSuccess(PKEncryptionEnabledUserInterface $user)
     {
         $this->keyManager->handleUserPasswordReset($user);
+    }
+
+    /**
+     * Normalizes the data of the entity fields to the one required by the encryption
+     * after the encryption has been activated
+     *
+     * @param mixed $entity
+     */
+    public function processEntityMigration($entity)
+    {
+        if ($entity) {
+            $reflection = ClassUtils::newReflectionObject($entity);
+            if ($this->hasEncryptionEnabled($reflection) && !$entity->isEncrypted()) {
+                $encryptionEnabledFields = $this->getEncryptionEnabledFields($reflection);
+
+                // Normalize the field
+                foreach ($encryptionEnabledFields as $field) {
+                    $fieldNormalizer = $this->getFieldNormalizer($field, $reflection);
+                    $value = $this->getFieldValue($entity, $field);
+                    $processedValue = $fieldNormalizer->normalize($value);
+                    $this->setFieldValue($entity, $field, $processedValue);
+                }
+            }
+        }
     }
 
     /**
@@ -658,7 +708,7 @@ class EncryptionService
                 $encrypterClass = FieldEncrypter\PrimitiveFieldEncrypter::class;
                 $fieldType = $fieldMapping['_old_type'];
                 if (!isset($this->encrypters[$encrypterClass][$fieldType])) {
-                    $this->encrypters[FieldEncrypter\PrimitiveFieldEncrypter::class][$fieldType] =
+                    $this->encrypters[$encrypterClass][$fieldType] =
                         new $encrypterClass($this->cryptographyProvider, $fieldType);
                 }
                 return $this->encrypters[$encrypterClass][$fieldType];
@@ -672,5 +722,63 @@ class EncryptionService
         }
 
         return $this->encrypters[$encrypterClass];
+    }
+
+    /**
+     * Factory method to get the right EncryptedFieldNormalizer object for a determined field
+     *
+     * @param \ReflectionProperty $reflectionProperty
+     * @param \ReflectionClass $reflectionClass
+     *
+     * @return \EHEncryptionBundle\Crypt\FieldEncrypter\EncryptedFieldNormalizerInterface
+     */
+    private function getFieldNormalizer(\ReflectionProperty $reflectionProperty, \ReflectionClass $reflectionClass)
+    {
+        $classMetadata = $this->doctrine->getManager()->getMetadataFactory()->getMetadataFor($reflectionClass->getName());
+
+        $fieldName = $reflectionProperty->getName();
+        $fieldMapping = $classMetadata->getFieldMapping($fieldName);
+
+        if (!isset($fieldMapping['_old_type'])) {
+            throw new EncryptionException('Field metadata not updated');
+        }
+
+        switch ($fieldMapping['_old_type']) {
+            case 'string':
+            case 'text':
+                $normalizerClass = FieldNormalizer\DefaultFieldNormalizer::class;
+                break;
+            case 'date':
+            case 'datetime':
+                $normalizerClass = FieldNormalizer\DateTimeFieldNormalizer::class;
+                break;
+            case 'json_array':
+                $normalizerClass = FieldNormalizer\JsonArrayFieldNormalizer::class;
+                break;
+            case 'simple_array':
+                $normalizerClass = FieldNormalizer\SimpleArrayFieldNormalizer::class;
+                break;
+            case 'boolean':
+            case 'smallint':
+            case 'integer':
+            case 'bigint':
+            case 'float':
+                $normalizerClass = FieldNormalizer\PrimitiveFieldNormalizer::class;
+                $fieldType = $fieldMapping['_old_type'];
+                if (!isset($this->normalizers[$normalizerClass][$fieldType])) {
+                    $this->normalizers[$normalizerClass][$fieldType] =
+                    new $normalizerClass($fieldType);
+                }
+                return $this->normalizers[$normalizerClass][$fieldType];
+                break;
+            default:
+                throw new EncryptionException('Field type '.$fieldMapping['_old_type'].' not supported.');
+        }
+
+        if (!isset($this->normalizers[$normalizerClass])) {
+            $this->normalizers[$normalizerClass] = new $normalizerClass();
+        }
+
+        return $this->normalizers[$normalizerClass];
     }
 }

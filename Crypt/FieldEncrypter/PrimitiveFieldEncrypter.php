@@ -21,7 +21,7 @@ class PrimitiveFieldEncrypter extends DefaultFieldEncrypter
     {
         parent::__construct($cryptographyProvider);
         if (!in_array($primitive, array_keys(static::$allowedPrimitives))) {
-            throw new EncryptionException('Primitive not type '.$primitive.' not supported');
+            throw new EncryptionException('Primitive type '.$primitive.' not supported');
         }
         $this->primitive = $primitive;
     }
