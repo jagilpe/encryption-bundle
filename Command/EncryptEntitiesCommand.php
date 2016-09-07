@@ -1,6 +1,6 @@
 <?php
 
-namespace EHEncryptionBundle\Command;
+namespace Module7\EncryptionBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -8,6 +8,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputOption;
 
+/**
+ * Command to encrypt the entities that existed before the activation of the encryption
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 class EncryptEntitiesCommand extends ContainerAwareCommand
 {
     /**
@@ -16,7 +21,7 @@ class EncryptEntitiesCommand extends ContainerAwareCommand
      */
     protected function configure()
     {
-        $this->setName('ehealth_crypt:migrate:encrypt_entities')
+        $this->setName('m7_crypt:migrate:encrypt_entities')
             ->setDescription('Converts the unencrypted values of the encrypted enabled field to a compatible form')
             ->addOption(
                 'force',

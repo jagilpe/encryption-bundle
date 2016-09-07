@@ -1,9 +1,14 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt\FieldEncrypter;
+namespace Module7\EncryptionBundle\Crypt\FieldEncrypter;
 
-use EHEncryptionBundle\Crypt\KeyDataInterface;
+use Module7\EncryptionBundle\Crypt\KeyDataInterface;
 
+/**
+ * Implementation of the FieldEncrypterInterface for serializable objects
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 class SerializableObjectFieldEncrypter extends DefaultFieldEncrypter
 {
     /**

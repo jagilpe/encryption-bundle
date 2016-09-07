@@ -1,7 +1,12 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt\FieldMapping;
+namespace Module7\EncryptionBundle\Crypt\FieldMapping;
 
+/**
+ * Implementation of the FieldMappintInterface for DateTime fields
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 class DateTimeFieldMapping extends AbstractEncryptedFieldMapping
 {
     /**

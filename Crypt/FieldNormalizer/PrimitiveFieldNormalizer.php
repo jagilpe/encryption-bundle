@@ -1,9 +1,14 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt\FieldNormalizer;
+namespace Module7\EncryptionBundle\Crypt\FieldNormalizer;
 
-use EHEncryptionBundle\Exception\EncryptionException;
+use Module7\EncryptionBundle\Exception\EncryptionException;
 
+/**
+ * Implementation of the EncryptedFieldNormalizerInterface for primitive fields other than the text ones
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 class PrimitiveFieldNormalizer extends DefaultFieldNormalizer
 {
     private $primitive;
@@ -27,7 +32,7 @@ class PrimitiveFieldNormalizer extends DefaultFieldNormalizer
 
     /**
      * {@inheritDoc}
-     * @see \EHEncryptionBundle\Crypt\FieldNormalizer\DefaultFieldNormalizer::normalize()
+     * @see \Module7\EncryptionBundle\Crypt\FieldNormalizer\DefaultFieldNormalizer::normalize()
      */
     public function normalize($clearValue)
     {

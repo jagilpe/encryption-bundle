@@ -1,6 +1,6 @@
 <?php
 
-namespace EHEncryptionBundle\Service;
+namespace Module7\EncryptionBundle\Service;
 
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Common\Util\ClassUtils;
@@ -8,16 +8,16 @@ use Doctrine\Common\Annotations\Reader;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use AppBundle\Entity\User as PVUser;
 use PolavisConnectBundle\Entity\User as PCUser;
-use EHEncryptionBundle\Annotation\EncryptedEntity;
-use EHEncryptionBundle\Crypt\CryptographyProviderInterface;
-use EHEncryptionBundle\Crypt\KeyManagerInterface;
-use EHEncryptionBundle\Crypt\FieldMapping;
-use EHEncryptionBundle\Crypt\FieldEncrypter;
-use EHEncryptionBundle\Crypt\FieldNormalizer;
-use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
-use EHEncryptionBundle\Exception\EncryptionException;
+use Module7\EncryptionBundle\Annotation\EncryptedEntity;
+use Module7\EncryptionBundle\Crypt\CryptographyProviderInterface;
+use Module7\EncryptionBundle\Crypt\KeyManagerInterface;
+use Module7\EncryptionBundle\Crypt\FieldMapping;
+use Module7\EncryptionBundle\Crypt\FieldEncrypter;
+use Module7\EncryptionBundle\Crypt\FieldNormalizer;
+use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Module7\EncryptionBundle\Exception\EncryptionException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use EHEncryptionBundle\Crypt\KeyData;
+use Module7\EncryptionBundle\Crypt\KeyData;
 
 /**
  * Encapsulates the core encryption logic
@@ -45,12 +45,12 @@ class EncryptionService
     private $reader;
 
     /**
-     * @var \EHEncryptionBundle\Crypt\CryptographyProviderInterface
+     * @var \Module7\EncryptionBundle\Crypt\CryptographyProviderInterface
      */
     private $cryptographyProvider;
 
     /**
-     * @var \EHEncryptionBundle\Crypt\KeyManagerInterface
+     * @var \Module7\EncryptionBundle\Crypt\KeyManagerInterface
      */
     private $keyManager;
 
@@ -248,7 +248,7 @@ class EncryptionService
     /**
      * Initializes user before is persisted
      *
-     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
     public function handleUserPreCreation(PKEncryptionEnabledUserInterface $user)
     {
@@ -258,7 +258,7 @@ class EncryptionService
     /**
      * Executes the required actions after the user is persisted
      *
-     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
     public function handleUserPostCreation(PKEncryptionEnabledUserInterface $user)
     {
@@ -268,7 +268,7 @@ class EncryptionService
     /**
      * Handles the event of a password change by the user
      *
-     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      * @param string $currenctPassword
      */
     public function handleUserPasswordChangeSuccess(PKEncryptionEnabledUserInterface $user, $currentPassword)
@@ -279,7 +279,7 @@ class EncryptionService
     /**
      * Handles the event of a password reset by the user
      *
-     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
     public function handleUserPasswordResetSuccess(PKEncryptionEnabledUserInterface $user)
     {
@@ -343,7 +343,7 @@ class EncryptionService
         if ($this->hasEncryptionEnabled($reflection)) {
             $encryptableFile = $this->reader->getClassAnnotation(
                 $reflection,
-                'EHEncryptionBundle\\Annotation\\EncryptedFile'
+                'Module7\\EncryptionBundle\\Annotation\\EncryptedFile'
             );
 
             $isEncryptableFile = $encryptableFile ? $encryptableFile->enabled : false;
@@ -507,7 +507,7 @@ class EncryptionService
      * @param \ReflectionClass $reflection
      * @param \Doctrine\ORM\Mapping\ClassMetadataInfo $metadata
      *
-     * @return EHEncryptionBundle\Annotation\EncryptedEntity|null
+     * @return Module7\EncryptionBundle\Annotation\EncryptedEntity|null
      */
     private function getEncryptionEnabledAnnotation(\ReflectionClass $reflection, ClassMetadataInfo $metadata = null)
     {
@@ -517,7 +517,7 @@ class EncryptionService
             $reflection = $metadata->getReflectionClass();
             $encryptedEnabled = $this->reader->getClassAnnotation(
                             $reflection,
-                            'EHEncryptionBundle\\Annotation\\EncryptedEntity'
+                            'Module7\\EncryptionBundle\\Annotation\\EncryptedEntity'
                             );
             if ($encryptedEnabled) {
                 $this->encryptedEnabledClasses[$className] = $encryptedEnabled;
@@ -535,13 +535,13 @@ class EncryptionService
      * Checks if the class is a File entity and has the file encryption enabled
      *
      * @param \ReflectionClass $reflection
-     * @return EHEncryptionBundle\Annotation\EncryptedFile|null
+     * @return Module7\EncryptionBundle\Annotation\EncryptedFile|null
      */
     private function hasFileEncryptionEnabled(\ReflectionClass $reflection)
     {
         $fileEncryptionEnabled = $this->reader->getClassAnnotation(
             $reflection,
-            'EHEncryptionBundle\\Annotation\\EncryptedFile'
+            'Module7\\EncryptionBundle\\Annotation\\EncryptedFile'
         );
 
         return $fileEncryptionEnabled;
@@ -552,7 +552,7 @@ class EncryptionService
      *
      * @param mixed $entity
      *
-     * @return EHEncryptionBundle\Annotation\PKEncryptionEnabledUser / null
+     * @return Module7\EncryptionBundle\Annotation\PKEncryptionEnabledUser / null
      */
     private function isPKEncryptionEnabledUser($entity)
     {
@@ -598,7 +598,7 @@ class EncryptionService
         foreach ($reflectionProperties as $reflectionProperty) {
             $encryptedField = $this->reader->getPropertyAnnotation(
                 $reflectionProperty,
-                'EHEncryptionBundle\\Annotation\\EncryptedField'
+                'Module7\\EncryptionBundle\\Annotation\\EncryptedField'
             );
 
             if ($encryptedField) {
@@ -648,7 +648,7 @@ class EncryptionService
      *
      * @param array $fieldMapping
      *
-     * @return \EHEncryptionBundle\Crypt\FieldMapping\EncryptedFieldMappingInterface
+     * @return \Module7\EncryptionBundle\Crypt\FieldMapping\EncryptedFieldMappingInterface
      */
     private function getEncryptedFieldMapping(array $fieldMapping)
     {
@@ -679,7 +679,7 @@ class EncryptionService
      * @param \ReflectionProperty $reflectionProperty
      * @param \ReflectionClass $reflectionClass
      *
-     * @return \EHEncryptionBundle\Crypt\FieldEncrypter\EncryptedFieldEncrypterInterface
+     * @return \Module7\EncryptionBundle\Crypt\FieldEncrypter\EncryptedFieldEncrypterInterface
      */
     private function getFieldEncrypter(\ReflectionProperty $reflectionProperty, \ReflectionClass $reflectionClass)
     {
@@ -733,7 +733,7 @@ class EncryptionService
      * @param \ReflectionProperty $reflectionProperty
      * @param \ReflectionClass $reflectionClass
      *
-     * @return \EHEncryptionBundle\Crypt\FieldEncrypter\EncryptedFieldNormalizerInterface
+     * @return \Module7\EncryptionBundle\Crypt\FieldEncrypter\EncryptedFieldNormalizerInterface
      */
     private function getFieldNormalizer(\ReflectionProperty $reflectionProperty, \ReflectionClass $reflectionClass)
     {

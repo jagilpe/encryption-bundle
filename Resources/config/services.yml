@@ -1,86 +1,86 @@
 services:
     # Encryption services
-    eh_encryption.encryption.service:
-        class: EHEncryptionBundle\Service\EncryptionService
+    module7_encryption.encryption.service:
+        class: Module7\EncryptionBundle\Service\EncryptionService
         arguments:
             - "@doctrine"
             - "@annotation_reader"
-            - "@eh_encryption.cryptography_provider"
-            - "@eh_encryption.key_manager"
-            - "%eh_encryption.settings%"
+            - "@module7_encryption.cryptography_provider"
+            - "@module7_encryption.key_manager"
+            - "%module7_encryption.settings%"
             
-    eh_encryption.cryptography_provider:
-        class: EHEncryptionBundle\Crypt\CryptographyProvider
+    module7_encryption.cryptography_provider:
+        class: Module7\EncryptionBundle\Crypt\CryptographyProvider
         arguments:
-            - "%eh_encryption.settings%"
+            - "%module7_encryption.settings%"
         
-    eh_encryption.key_manager:
-        class: EHEncryptionBundle\Crypt\KeyManager
+    module7_encryption.key_manager:
+        class: Module7\EncryptionBundle\Crypt\KeyManager
         arguments:
             - "@security.token_storage"
             - "@session"
-            - "@eh_encryption.cryptography_provider"
-            - "@eh_encryption.key_store"
+            - "@module7_encryption.cryptography_provider"
+            - "@module7_encryption.key_store"
             - "@event_dispatcher"
-            - "@eh_encryption.access_checker"
-            - "%eh_encryption.settings%"
+            - "@module7_encryption.access_checker"
+            - "%module7_encryption.settings%"
 
-    eh_encryption.key_store:
-        class: EHEncryptionBundle\Crypt\KeyStore
+    module7_encryption.key_store:
+        class: Module7\EncryptionBundle\Crypt\KeyStore
         arguments:
             - "@doctrine"
-            - "@eh_encryption.cryptography_provider"
+            - "@module7_encryption.cryptography_provider"
             - "%enc_master_key%"
 
-    eh_encryption.decorating_entity_manager:
-        class: EHEncryptionBundle\Doctrine\ORM\EncryptionEntityManagerDecorator
+    module7_encryption.decorating_entity_manager:
+        class: Module7\EncryptionBundle\Doctrine\ORM\EncryptionEntityManagerDecorator
         decorates: doctrine.orm.default_entity_manager
         arguments: 
-            - "@eh_encryption.decorating_entity_manager.inner"
-            - "@eh_encryption.encryption.service"
+            - "@module7_encryption.decorating_entity_manager.inner"
+            - "@module7_encryption.encryption.service"
         public: false
     
     # default access checker
-    eh_encryption.security.access_checker.default:
-        class: EHEncryptionBundle\Security\DefaultAccessChecker
+    module7_encryption.security.access_checker.default:
+        class: Module7\EncryptionBundle\Security\DefaultAccessChecker
         arguments:
-            - "%eh_encryption.settings%"
+            - "%module7_encryption.settings%"
             
-    eh_encryption.security.access_checker.chained:
-        class: EHEncryptionBundle\Security\ChainedAccessChecker
+    module7_encryption.security.access_checker.chained:
+        class: Module7\EncryptionBundle\Security\ChainedAccessChecker
         arguments:
             - [ "@app.encrpytion.access_checker", "@polavis_connect.encrpytion.access_checker" ]
-            - "%eh_encryption.settings%"
+            - "%module7_encryption.settings%"
             
     # Event subscribers and listeners
-    eh_encryption.doctrine_subscriber:
-        class: EHEncryptionBundle\EventListener\EncryptionSubscriber
+    module7_encryption.doctrine_subscriber:
+        class: Module7\EncryptionBundle\EventListener\EncryptionSubscriber
         arguments:
-            - "@eh_encryption.encryption.service"
+            - "@module7_encryption.encryption.service"
         tags:
             - { name: doctrine.event_subscriber, connection: default, priority: -10 }
-    eh_encryption.user_events.subscriber:
-        class: EHEncryptionBundle\EventListener\UserEventsSubsbriber
+    module7_encryption.user_events.subscriber:
+        class: Module7\EncryptionBundle\EventListener\UserEventsSubsbriber
         arguments:
-            - "@eh_encryption.encryption.service"
+            - "@module7_encryption.encryption.service"
         tags:
             - { name: kernel.event_subscriber }
             
-    eh_encryption.user_private_key_load_listener:
-        class: EHEncryptionBundle\EventListener\UserPrivateKeyLoadListener
+    module7_encryption.user_private_key_load_listener:
+        class: Module7\EncryptionBundle\EventListener\UserPrivateKeyLoadListener
         arguments:
-            - "%eh_encryption.settings%"
+            - "%module7_encryption.settings%"
             - "@security.token_storage"
-            - "@eh_encryption.key_manager"
-            - "@eh_encryption.key_store"
+            - "@module7_encryption.key_manager"
+            - "@module7_encryption.key_store"
         tags:
             - { name: kernel.event_listener, event: kernel.response, priority: 2 }
             
-    eh_encryption.web_service_private_key_load_listener:
-        class: EHEncryptionBundle\EventListener\WebServicePrivateKeyLoadListener
+    module7_encryption.web_service_private_key_load_listener:
+        class: Module7\EncryptionBundle\EventListener\WebServicePrivateKeyLoadListener
         arguments:
-            - "%eh_encryption.settings%"
+            - "%module7_encryption.settings%"
             - "@security.token_storage"
-            - "@eh_encryption.key_manager"
+            - "@module7_encryption.key_manager"
         tags:
             - { name: kernel.event_listener, event: kernel.request }

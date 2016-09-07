@@ -1,12 +1,17 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt;
+namespace Module7\EncryptionBundle\Crypt;
 
 use Doctrine\Bundle\DoctrineBundle\Registry as Doctrine;
-use EHEncryptionBundle\Exception\EncryptionException;
-use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
-use EHEncryptionBundle\Entity\PKIPrivateKey;
+use Module7\EncryptionBundle\Exception\EncryptionException;
+use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Module7\EncryptionBundle\Entity\PKIPrivateKey;
 
+/**
+ * Default implementation of the KeyStore
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 class KeyStore implements KeyStoreInterface
 {
     /**
@@ -15,7 +20,7 @@ class KeyStore implements KeyStoreInterface
     private $doctrine;
 
     /**
-     * @var \EHEncryptionBundle\Crypt\CryptographyProviderInterface
+     * @var \Module7\EncryptionBundle\Crypt\CryptographyProviderInterface
      */
     private $cryptographyProvider;
 
@@ -110,9 +115,9 @@ class KeyStore implements KeyStoreInterface
     /**
      * Returns the Key pair of the user or a new one if it has not already been persisted
      *
-     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      *
-     * @return \EHEncryptionBundle\Entity\PKIPrivateKey
+     * @return \Module7\EncryptionBundle\Entity\PKIPrivateKey
      */
     private function getUserKey(PKEncryptionEnabledUserInterface $user)
     {
@@ -133,8 +138,8 @@ class KeyStore implements KeyStoreInterface
     /**
      * Returns the previously persisted key pair of a user
      *
-     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
-     * @return \EHEncryptionBundle\Entity\PKIPrivateKey
+     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @return \Module7\EncryptionBundle\Entity\PKIPrivateKey
      */
     private function findKeyByUser(PKEncryptionEnabledUserInterface $user)
     {
@@ -153,7 +158,7 @@ class KeyStore implements KeyStoreInterface
     /**
      * Deletes the key pair of a user
      *
-     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
     private function deleteUserKey(PKEncryptionEnabledUserInterface$user, $flush = false)
     {
@@ -179,13 +184,13 @@ class KeyStore implements KeyStoreInterface
      */
     private function getKeyRepository()
     {
-        return $this->getEntityManager()->getRepository('EHEncryptionBundle:PKIPrivateKey');
+        return $this->getEntityManager()->getRepository('EncryptionBundle:PKIPrivateKey');
     }
 
     /**
      * Encrypts the private key of the user using the app master public key
      *
-     * @param \EHEncryptionBundle\Entity\PKIPrivateKey $pkiKey
+     * @param \Module7\EncryptionBundle\Entity\PKIPrivateKey $pkiKey
      */
     private function encryptPrivateKey(PKIPrivateKey $pkiKey)
     {
@@ -218,7 +223,7 @@ class KeyStore implements KeyStoreInterface
     /**
      * Descrypts the private key of the user using the app master private key and returns it
      *
-     * @param \EHEncryptionBundle\Entity\PKIPrivateKey $pkiKey
+     * @param \Module7\EncryptionBundle\Entity\PKIPrivateKey $pkiKey
      *
      * @return string
      */

@@ -1,7 +1,12 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt;
+namespace Module7\EncryptionBundle\Crypt;
 
+/**
+ * Default implementation of the KeyData
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 class KeyData implements KeyDataInterface
 {
     /**

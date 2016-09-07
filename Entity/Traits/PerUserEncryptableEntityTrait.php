@@ -1,9 +1,15 @@
 <?php
 
-namespace EHEncryptionBundle\Entity\Traits;
+namespace Module7\EncryptionBundle\Entity\Traits;
 
 use Doctrine\Common\Util\ClassUtils;
 
+/**
+ * Trait with the properties and methods needed by the encryptable entities for the
+ * per user encryptable mode
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 trait PerUserEncryptableEntityTrait
 {
     use EncryptableEntityTrait;

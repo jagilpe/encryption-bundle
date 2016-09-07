@@ -1,7 +1,12 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt\FieldNormalizer;
+namespace Module7\EncryptionBundle\Crypt\FieldNormalizer;
 
+/**
+ * Defines an interface to get convert the original values of a field to the one required by the encryption module
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 interface EncryptedFieldNormalizerInterface
 {
     /**

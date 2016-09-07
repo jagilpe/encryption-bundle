@@ -1,11 +1,13 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt;
+namespace Module7\EncryptionBundle\Crypt;
 
-use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 
 /**
  * Holds the symmetric key used to encrypt the fields of an entity
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
  */
 class SymmetricKey
 {
@@ -20,7 +22,7 @@ class SymmetricKey
     /**
      * Adds a new version of the key encrypted with the key of a new user
      *
-     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      * @param unknown $encryptedKey
      */
     public function addKey(PKEncryptionEnabledUserInterface $user, $encryptedKey)

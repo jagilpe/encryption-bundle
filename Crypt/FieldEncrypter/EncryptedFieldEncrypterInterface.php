@@ -1,16 +1,21 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt\FieldEncrypter;
+namespace Module7\EncryptionBundle\Crypt\FieldEncrypter;
 
-use EHEncryptionBundle\Crypt\KeyDataInterface;
+use Module7\EncryptionBundle\Crypt\KeyDataInterface;
 
+/**
+ * Defines an interface for the encryption of the content of a determined field
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 interface EncryptedFieldEncrypterInterface
 {
     /**
      * Encrypts the value of the field
      *
      * @param mixed $clearValue
-     * @param \EHEncryptionBundle\Crypt\KeyDataInterface $keyData
+     * @param \Module7\EncryptionBundle\Crypt\KeyDataInterface $keyData
      *
      * @return string
      */
@@ -20,7 +25,7 @@ interface EncryptedFieldEncrypterInterface
      * Decrypts the value of the field
      *
      * @param string $encryptedValue
-     * @param \EHEncryptionBundle\Crypt\KeyDataInterface $keyData
+     * @param \Module7\EncryptionBundle\Crypt\KeyDataInterface $keyData
      *
      * @return mixed
      */

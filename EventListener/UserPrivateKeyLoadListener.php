@@ -1,15 +1,21 @@
 <?php
 
-namespace EHEncryptionBundle\EventListener;
+namespace Module7\EncryptionBundle\EventListener;
 
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use EHEncryptionBundle\Crypt\KeyManagerInterface;
-use EHEncryptionBundle\Crypt\KeyStoreInterface;
-use EHEncryptionBundle\Crypt\KeyManager;
+use Module7\EncryptionBundle\Crypt\KeyManagerInterface;
+use Module7\EncryptionBundle\Crypt\KeyStoreInterface;
+use Module7\EncryptionBundle\Crypt\KeyManager;
 use PolavisConnectBundle\Security\SecurityCodeUser;
-use EHEncryptionBundle\Exception\EncryptionException;
+use Module7\EncryptionBundle\Exception\EncryptionException;
 
+/**
+ * Event listener to load the private key of the logged in user
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ *
+ */
 class UserPrivateKeyLoadListener
 {
     /**
@@ -23,12 +29,12 @@ class UserPrivateKeyLoadListener
     private $tokenStorage;
 
     /**
-     * @var \EHEncryptionBundle\Crypt\KeyManagerInterface
+     * @var \Module7\EncryptionBundle\Crypt\KeyManagerInterface
      */
     private $keyManager;
 
     /**
-     * @var \EHEncryptionBundle\Crypt\KeyStoreInterface
+     * @var \Module7\EncryptionBundle\Crypt\KeyStoreInterface
      */
     private $keyStore;
 
@@ -85,7 +91,7 @@ class UserPrivateKeyLoadListener
     /**
      * Returns the logged in user
      *
-     * @return \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface
+     * @return \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface
      */
     private function getUser()
     {

@@ -1,14 +1,19 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt\FieldEncrypter;
+namespace Module7\EncryptionBundle\Crypt\FieldEncrypter;
 
-use EHEncryptionBundle\Crypt\CryptographyProviderInterface;
-use EHEncryptionBundle\Crypt\KeyDataInterface;
+use Module7\EncryptionBundle\Crypt\CryptographyProviderInterface;
+use Module7\EncryptionBundle\Crypt\KeyDataInterface;
 
+/**
+ * Default implementation of the FieldEncrypterInterface
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 class DefaultFieldEncrypter implements EncryptedFieldEncrypterInterface
 {
     /**
-     * @var \EHEncryptionBundle\Crypt\CryptographyProviderInterface
+     * @var \Module7\EncryptionBundle\Crypt\CryptographyProviderInterface
      */
     private $cryptographyProvider;
 

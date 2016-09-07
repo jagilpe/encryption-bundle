@@ -1,9 +1,14 @@
 <?php
 
-namespace EHEncryptionBundle\Entity\Traits;
+namespace Module7\EncryptionBundle\Entity\Traits;
 
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Trait with the properties and methods needed by the encryption enabled user entity
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 trait EncryptionEnabledUserTrait
 {
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace EHEncryptionBundle\Command;
+namespace Module7\EncryptionBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -8,9 +8,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use AppBundle\Entity\User;
-use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 
+/**
+ * Command class to create the encryption keys for existent users
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 class CreateUserKeysCommand extends ContainerAwareCommand
 {
     const APP_VIVA = 'viva';
@@ -23,7 +28,7 @@ class CreateUserKeysCommand extends ContainerAwareCommand
 
     protected function configure()
     {
-        $this->setName('ehealth_crypt:user:generate_keys')
+        $this->setName('m7_crypt:user:generate_keys')
             ->setDescription('Generates the encryption keys of a user')
             ->addArgument(
                 'usename',

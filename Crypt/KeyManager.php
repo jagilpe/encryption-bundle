@@ -1,16 +1,16 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt;
+namespace Module7\EncryptionBundle\Crypt;
 
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
-use EHEncryptionBundle\Exception\EncryptionException;
-use EHEncryptionBundle\Security\AccessCheckerInterface;
+use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Module7\EncryptionBundle\Exception\EncryptionException;
+use Module7\EncryptionBundle\Security\AccessCheckerInterface;
 
 /**
- * Manages the different encryption keys
+ * Default implementation of the KeyManagerInterface
  *
  * @author Javier Gil Pereda <javier.gil@module-7.com>
  */
@@ -29,17 +29,17 @@ class KeyManager implements KeyManagerInterface
     private $session;
 
     /**
-     * @var \EHEncryptionBundle\Crypt\CryptographyProviderInterface
+     * @var \Module7\EncryptionBundle\Crypt\CryptographyProviderInterface
      */
     private $cryptographyProvider;
 
     /**
-     * @var \EHEncryptionBundle\Crypt\KeyStoreInterface
+     * @var \Module7\EncryptionBundle\Crypt\KeyStoreInterface
      */
     private $keyStore;
 
     /**
-     * @var \EHEncryptionBundle\Security\AccessCheckerInterface
+     * @var \Module7\EncryptionBundle\Security\AccessCheckerInterface
      */
     private $accessChecker;
 
@@ -340,7 +340,7 @@ class KeyManager implements KeyManagerInterface
     /**
      * Encrypts the Private key of the user using his password
      *
-     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      *
      * @return array
      */
@@ -385,7 +385,7 @@ class KeyManager implements KeyManagerInterface
     /**
      * Returns the password digest of the password of the user
      *
-     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      *
      * @return string
      */
@@ -408,7 +408,7 @@ class KeyManager implements KeyManagerInterface
     /**
      * Encrypts the Private key of the user using his password or a digest of it
      *
-     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      * @param array $params
      *
      * @return string|boolean

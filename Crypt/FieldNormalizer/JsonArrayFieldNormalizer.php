@@ -1,16 +1,21 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt\FieldNormalizer;
+namespace Module7\EncryptionBundle\Crypt\FieldNormalizer;
 
-use EHEncryptionBundle\Exception\EncryptionException;
+use Module7\EncryptionBundle\Exception\EncryptionException;
 
+/**
+ * Implementation of the EncryptedFieldNormalizerInterface for json array fields
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 class JsonArrayFieldNormalizer implements EncryptedFieldNormalizerInterface
 {
     /**
      *
      * {@inheritdoc}
      *
-     * @see \EHEncryptionBundle\Crypt\FieldNormalizer\EncryptedFieldNormalizerInterface::normalize()
+     * @see \Module7\EncryptionBundle\Crypt\FieldNormalizer\EncryptedFieldNormalizerInterface::normalize()
      */
     public function normalize($clearValue)
     {

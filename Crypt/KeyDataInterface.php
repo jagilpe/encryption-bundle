@@ -1,7 +1,13 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt;
+namespace Module7\EncryptionBundle\Crypt;
 
+/**
+ * Interface for the key data required for symetric encryption
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ *
+ */
 interface KeyDataInterface
 {
     /**

@@ -1,8 +1,8 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt;
+namespace Module7\EncryptionBundle\Crypt;
 
-use EHEncryptionBundle\Exception\EncryptionException;
+use Module7\EncryptionBundle\Exception\EncryptionException;
 
 /**
  * Manages all the encryption modes and algorithms

@@ -1,10 +1,15 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt\FieldEncrypter;
+namespace Module7\EncryptionBundle\Crypt\FieldEncrypter;
 
-use EHEncryptionBundle\Crypt\KeyDataInterface;
-use EHEncryptionBundle\Exception\EncryptionException;
+use Module7\EncryptionBundle\Crypt\KeyDataInterface;
+use Module7\EncryptionBundle\Exception\EncryptionException;
 
+/**
+ * Implementation of the FieldEncrypterInterface for primitive values other than the text ones
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 class PrimitiveFieldEncrypter extends DefaultFieldEncrypter
 {
     private $primitive;

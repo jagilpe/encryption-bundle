@@ -3,11 +3,11 @@
 /**
  * This file holds the definition of the main bundle of the application
  */
-namespace EHEncryptionBundle;
+namespace EncryptionBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class EHEncryptionBundle extends Bundle
+class EncryptionBundle extends Bundle
 {
 
 }

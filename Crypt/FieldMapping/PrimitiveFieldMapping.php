@@ -1,9 +1,14 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt\FieldMapping;
+namespace Module7\EncryptionBundle\Crypt\FieldMapping;
 
-use EHEncryptionBundle\Exception\EncryptionException;
+use Module7\EncryptionBundle\Exception\EncryptionException;
 
+/**
+ * Implementation of the EncryptedFieldMappingInterface for primitive values other than the text ones
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 class PrimitiveFieldMapping extends AbstractEncryptedFieldMapping
 {
     private static $allowedPrimitives = array(

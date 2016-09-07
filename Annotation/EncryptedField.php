@@ -1,6 +1,6 @@
 <?php
 
-namespace EHEncryptionBundle\Annotation;
+namespace Module7\EncryptionBundle\Annotation;
 
 use Doctrine\Common\Annotations\Annotation;
 

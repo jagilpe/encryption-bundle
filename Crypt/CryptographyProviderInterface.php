@@ -1,6 +1,6 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt;
+namespace Module7\EncryptionBundle\Crypt;
 
 /**
  * Manages all the encryption modes and algorithms

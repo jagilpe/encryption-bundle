@@ -1,15 +1,20 @@
 <?php
 
-namespace EHEncryptionBundle\Doctrine\ORM;
+namespace Module7\EncryptionBundle\Doctrine\ORM;
 
 use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\Common\Collections\Selectable;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityRepository;
-use EHEncryptionBundle\Service\EncryptionService;
+use Module7\EncryptionBundle\Service\EncryptionService;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Collections\ArrayCollection;
 
+/**
+ * Decorator for the Doctrine Entity Repository to support the decryption of entities' lists
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 class EncryptionEntityRepositoryDecorator implements ObjectRepository, Selectable
 {
     /**
@@ -23,7 +28,7 @@ class EncryptionEntityRepositoryDecorator implements ObjectRepository, Selectabl
     private $classMetadata;
 
     /**
-     * @var \EHEncryptionBundle\Service\EncryptionService
+     * @var \Module7\EncryptionBundle\Service\EncryptionService
      */
     private $encryptionService;
 

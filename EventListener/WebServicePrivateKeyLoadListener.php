@@ -1,13 +1,19 @@
 <?php
 
-namespace EHEncryptionBundle\EventListener;
+namespace Module7\EncryptionBundle\EventListener;
 
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use AppWebServiceBundle\Security\Authentication\Token\WsseUserToken;
-use EHEncryptionBundle\Crypt\KeyManagerInterface;
-use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Module7\EncryptionBundle\Crypt\KeyManagerInterface;
+use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 
+/**
+ * Event listener to load the private key of user in the Web Service
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ *
+ */
 class WebServicePrivateKeyLoadListener
 {
     const PASSWORD_DIGEST_HEADER = 'pv-pd';
@@ -23,7 +29,7 @@ class WebServicePrivateKeyLoadListener
     private $tokenStorage;
 
     /**
-     * @var \EHEncryptionBundle\Crypt\KeyManagerInterface
+     * @var \Module7\EncryptionBundle\Crypt\KeyManagerInterface
      */
     private $keyManager;
 
@@ -61,7 +67,7 @@ class WebServicePrivateKeyLoadListener
     /**
      * Returns the logged in user
      *
-     * @return \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface
+     * @return \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface
      */
     private function getUser()
     {

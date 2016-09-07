@@ -1,7 +1,12 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt\FieldMapping;
+namespace Module7\EncryptionBundle\Crypt\FieldMapping;
 
+/**
+ * Defines an interface to get the new mapping metadata for the encrypted fields
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 interface EncryptedFieldMappingInterface
 {
     /**

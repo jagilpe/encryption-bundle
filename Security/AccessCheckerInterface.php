@@ -1,9 +1,14 @@
 <?php
 
-namespace EHEncryptionBundle\Security;
+namespace Module7\EncryptionBundle\Security;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ * Defines the interface to check the different permissions of the users related with the encryption
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 interface AccessCheckerInterface
 {
     /**

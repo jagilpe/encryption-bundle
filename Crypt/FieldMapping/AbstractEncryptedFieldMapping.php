@@ -1,13 +1,18 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt\FieldMapping;
+namespace Module7\EncryptionBundle\Crypt\FieldMapping;
 
-use EHEncryptionBundle\Service\EncryptionService;
+use Module7\EncryptionBundle\Service\EncryptionService;
 
+/**
+ * Base implementation for the Field Mapping
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 abstract class AbstractEncryptedFieldMapping implements EncryptedFieldMappingInterface
 {
     /**
-     * @var \EHEncryptionBundle\Service\EncryptionService
+     * @var \Module7\EncryptionBundle\Service\EncryptionService
      */
     protected $encryptionService;
 

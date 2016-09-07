@@ -1,7 +1,12 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt\FieldMapping;
+namespace Module7\EncryptionBundle\Crypt\FieldMapping;
 
+/**
+ * Implementation of the FieldEncrypterInterface for text fields
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 class TextFieldMapping extends AbstractEncryptedFieldMapping
 {
     /**

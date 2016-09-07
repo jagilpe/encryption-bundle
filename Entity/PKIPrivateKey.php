@@ -5,6 +5,10 @@ namespace EHEncryptionBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * Private key entity for the default implementation of the Key Store
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ *
  * @ORM\Entity
  * @ORM\Table(name="_pki_user_keys")
  */

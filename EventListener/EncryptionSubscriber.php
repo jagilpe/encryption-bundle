@@ -1,12 +1,12 @@
 <?php
 
-namespace EHEncryptionBundle\EventListener;
+namespace Module7\EncryptionBundle\EventListener;
 
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
-use EHEncryptionBundle\Service\EncryptionService;
+use Module7\EncryptionBundle\Service\EncryptionService;
 
 /**
  * Event subscriber for all the doctrine related events for the encryption
@@ -17,7 +17,7 @@ use EHEncryptionBundle\Service\EncryptionService;
 class EncryptionSubscriber implements EventSubscriber
 {
     /**
-     * @var EHEncryptionBundle\Service\EncryptionService
+     * @var Module7\EncryptionBundle\Service\EncryptionService
      */
     private $encryptionService;
 

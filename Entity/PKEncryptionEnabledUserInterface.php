@@ -1,7 +1,12 @@
 <?php
 
-namespace EHEncryptionBundle\Entity;
+namespace Module7\EncryptionBundle\Entity;
 
+/**
+ * Defines the interface to treat with an encription enabled user entity
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 interface PKEncryptionEnabledUserInterface
 {
     /**

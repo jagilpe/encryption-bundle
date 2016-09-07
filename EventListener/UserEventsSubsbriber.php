@@ -1,20 +1,26 @@
 <?php
 
-namespace EHEncryptionBundle\EventListener;
+namespace Module7\EncryptionBundle\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use FOS\UserBundle\FOSUserEvents;
 use FOS\UserBundle\Event\FormEvent as FOSFormEvent;
 use FOS\UserBundle\Event\FilterUserResponseEvent as FOSFilterUserResponseEvent;
-use EHEncryptionBundle\Service\EncryptionService;
-use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Module7\EncryptionBundle\Service\EncryptionService;
+use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 use AppWebServiceBundle\Event as WebServiceEvent;
 use PolavisConnectBundle\Event as PolavisConnectEvent;
 
+/**
+ * Event subscriber for all the user related events for the encryption
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ *
+ */
 class UserEventsSubsbriber implements EventSubscriberInterface
 {
     /**
-     * @var \EHEncryptionBundle\Service\EncryptionService
+     * @var \Module7\EncryptionBundle\Service\EncryptionService
      */
     private $encryptionService;
 

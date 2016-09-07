@@ -1,11 +1,15 @@
 <?php
 
-namespace EHEncryptionBundle\Annotation;
+namespace Module7\EncryptionBundle\Annotation;
 
 use Doctrine\Common\Annotations\Annotation;
-use EHEncryptionBundle\Service\EncryptionService;
+use Module7\EncryptionBundle\Service\EncryptionService;
 
 /**
+ * Annotation to mark an entity as an encryptable file
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ *
  * @Annotation
  * @Target("CLASS")
  */

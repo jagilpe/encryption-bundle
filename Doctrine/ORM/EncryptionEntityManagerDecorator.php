@@ -1,10 +1,16 @@
 <?php
 
-namespace EHEncryptionBundle\Doctrine\ORM;
+namespace Module7\EncryptionBundle\Doctrine\ORM;
 
 use Doctrine\ORM\Decorator\EntityManagerDecorator;
-use EHEncryptionBundle\Service\EncryptionService;
+use Module7\EncryptionBundle\Service\EncryptionService;
 
+/**
+ * Decorator for the Doctrine Entity Manager. Returns decorated versions of the Repositories
+ * for the encrypted entities
+ *
+ * @author Javier Gil Pereda <javier.gil@module-7.com>
+ */
 class EncryptionEntityManagerDecorator extends EntityManagerDecorator
 {
     /**

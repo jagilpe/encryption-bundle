@@ -1,8 +1,8 @@
 <?php
 
-namespace EHEncryptionBundle\Crypt;
+namespace Module7\EncryptionBundle\Crypt;
 
-use EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 
 /**
  * Manages the different encryption keys
@@ -14,21 +14,21 @@ interface KeyManagerInterface
     /**
      * Generates the required keys for the PKI
      *
-     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
     public function generateUserPKIKeys(PKEncryptionEnabledUserInterface $user);
 
     /**
      * Stores the keys of the user in the configured key store
      *
-     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
     public function storeUserPKIKeys(PKEncryptionEnabledUserInterface $user);
 
     /**
      * Handles a password change by the user
      *
-     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      * @param $currentPassword
      *
      */
@@ -37,7 +37,7 @@ interface KeyManagerInterface
     /**
      * Handles a password reset by the user
      *
-     * @param \EHEncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      *
      */
     public function handleUserPasswordReset(PKEncryptionEnabledUserInterface $user);
@@ -48,7 +48,7 @@ interface KeyManagerInterface
      * @param mixed $entity
      * @param array $params
      *
-     * @return \EHEncryptionBundle\Crypt\KeyDataInterface
+     * @return \Module7\EncryptionBundle\Crypt\KeyDataInterface
      */
     public function getEntityEncryptionKeyData($entity);
 
