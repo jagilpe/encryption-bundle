@@ -1,0 +1,36 @@
+{
+	"name" : "module7/encryption",
+	"type" : "symfony-bundle",
+	"description" : "Module 7 Encryption Bundle",
+	"keywords" : [
+		"Module7 Encryption"
+	],
+	"homepage" : "https://www.module-7.com",
+	"license" : "MIT",
+	"authors" : [{
+			"name" : "Javier Gil",
+			"email" : "javier.gil@module-7.com"
+		}, {
+			"name" : "Module-7",
+			"homepage" : "https://www.module-7.com"
+		}
+	],
+	"require" : {
+		"php" : ">=5.6.0",
+		"symfony/framework-bundle" : ">=2.7"
+	},
+	"require-dev" : {
+		"symfony/yaml" : ">=2.3"
+	},
+	"autoload" : {
+		"psr-0" : {
+			"Module7\\EncryptionBundle\\" : ""
+		}
+	},
+	"target-dir" : "Module7/EncryptionBundle",
+	"extra" : {
+		"branch-alias" : {
+			"dev-master" : "dev-master"
+		}
+	}
+}
