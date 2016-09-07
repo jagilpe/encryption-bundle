@@ -2,6 +2,7 @@
 
 namespace Module7\EncryptionBundle\Command;
 
+use Doctrine\Common\Util\ClassUtils;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -18,17 +19,9 @@ use Symfony\Component\Console\Helper\ProgressBar;
  */
 class CreateUserKeysCommand extends ContainerAwareCommand
 {
-    const APP_VIVA = 'viva';
-    const APP_CONNECT = 'connect';
-
-    private static $apps = array(
-        self::APP_VIVA,
-        self::APP_CONNECT,
-    );
-
     protected function configure()
     {
-        $this->setName('m7_crypt:user:generate_keys')
+        $this->setName('module7_crypt:user:generate_keys')
             ->setDescription('Generates the encryption keys of a user')
             ->addArgument(
                 'usename',
@@ -41,13 +34,6 @@ class CreateUserKeysCommand extends ContainerAwareCommand
                 InputOption::VALUE_NONE,
                 'If the keys of all users should be generated.'
             )
-            ->addOption(
-                'app',
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'The application in which to look the user up. It can be Viva or Connect',
-                self::APP_VIVA
-            )
         ;
     }
 
@@ -56,7 +42,6 @@ class CreateUserKeysCommand extends ContainerAwareCommand
         // Input parameters
         $userName = $input->getArgument('usename');
         $allUsers = $input->getOption('all');
-        $app = $input->getOption('app');
 
         if (!$userName && !$allUsers) {
             throw new \RuntimeException('Wrong parameters given');
@@ -66,57 +51,40 @@ class CreateUserKeysCommand extends ContainerAwareCommand
             throw new \RuntimeException('Ambiguous parameters given');
         }
 
-        if (!in_array(strtolower($app), self::$apps)) {
-            throw new \RuntimeException('Wrong application selected');
-        }
-
-        $users = $this->getUsers($userName, $app);
+        $users = $this->getUsers($userName);
 
         $total = count($users);
         $message = "Generating the encryption keys for $total users";
         $output->writeln($message);
         $progress = new ProgressBar($output, $total);
         foreach ($users as $user) {
-            $this->generateKeys($user, $app);
-            $this->saveUser($user, $app);
+            $this->generateKeys($user);
+            $this->saveUser($user);
             $progress->advance();
         }
         $progress->finish();
         $output->writeln('');
     }
 
-    private function getUsers($userName, $app)
+    private function getUsers($userName)
     {
-        switch ($app) {
-            case self::APP_VIVA:
-                $em = $this->getContainer()->get('doctrine')->getManager();
-                $userRepo = $em->getRepository('AppBundle:User');
-                if ($userName) {
-                    $user = $userRepo->findOneBy(array('username' => $userName));
-                    if (!$user) {
-                        throw new \RuntimeException('User not found');
-                    }
+        $container = $this->getContainer();
+        $entityManager = $container->get('doctrine')->getManager();
+        $encryptionSettings = $container->getParameter('module7_encryption.settings');
+        $userClasses = $encryptionSettings['user_classes'];
 
-                    $users = array($user);
-                }
-                else {
-                    $users = $userRepo->findAll();
-                }
-                break;
-            case self::APP_CONNECT:
-                $userManager = $this->getContainer()->get('polavis_connect.user_manager');
-                if ($userName) {
-                    $user = $userManager->findUserByUsername($userName);
-                    if (!$user) {
-                        throw new \RuntimeException('User not found');
-                    }
+        $users = array();
+        foreach ($userClasses as $userClass) {
+            $userRepo = $entityManager->getRepository($userClass);
 
-                    $users = array($user);
-                }
-                else {
-                    $users = $userManager->findUsersBy(array());
-                }
+            if ($userName) {
+                $user = $userRepo->findOneBy(array('username' => $userName));
+                $users = array($user);
                 break;
+            }
+            else {
+                $users = array_merge($users, $userRepo->findAll());
+            }
         }
 
         return $users;
@@ -131,18 +99,10 @@ class CreateUserKeysCommand extends ContainerAwareCommand
         }
     }
 
-    private function saveUser(PKEncryptionEnabledUserInterface $user, $app)
+    private function saveUser(PKEncryptionEnabledUserInterface $user)
     {
-        switch ($app) {
-            case self::APP_VIVA:
-                $em = $this->getContainer()->get('doctrine')->getManager();
-                $userRepo = $em->getRepository('AppBundle:User');
-                $userRepo->save($user);
-                break;
-            case self::APP_CONNECT:
-                $userManager = $this->getContainer()->get('polavis_connect.user_manager');
-                $userManager->updateUser($user);
-                break;
-        }
+        $userClass = ClassUtils::getClass($user);
+        $userRepo = $this->getContainer()->get('doctrine')->getManager()->getRepository($userClass);
+        $userRepo->save($user);
     }
 }

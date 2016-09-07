@@ -8,8 +8,6 @@ use FOS\UserBundle\Event\FormEvent as FOSFormEvent;
 use FOS\UserBundle\Event\FilterUserResponseEvent as FOSFilterUserResponseEvent;
 use Module7\EncryptionBundle\Service\EncryptionService;
 use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
-use AppWebServiceBundle\Event as WebServiceEvent;
-use PolavisConnectBundle\Event as PolavisConnectEvent;
 
 /**
  * Event subscriber for all the user related events for the encryption
@@ -29,6 +27,9 @@ class UserEventsSubsbriber implements EventSubscriberInterface
         $this->encryptionService = $encryptionService;
     }
 
+    /**
+     * @TODO remove dependencies with Polavis Viva Bundles
+     */
     public static function getSubscribedEvents()
     {
         $events = array(
@@ -36,11 +37,17 @@ class UserEventsSubsbriber implements EventSubscriberInterface
             FOSUserEvents::RESETTING_RESET_SUCCESS => 'handlePasswordResetSuccess',
             FOSUserEvents::REGISTRATION_SUCCESS => 'handleUserRegistrationSuccess',
             FOSUserEvents::REGISTRATION_COMPLETED => 'handleUserRegistrationComplete',
-            WebServiceEvent\Events::PV_WS_PASSWORD_CHANGE_SUCCESS => 'handleWebServicePasswordChangeSuccess',
-            PolavisConnectEvent\Events::PC_USER_PRE_CREATE => 'onPolavisConnectUserPreCreate',
-            PolavisConnectEvent\Events::PC_USER_POST_CREATE => 'onPolavisConnectUserPostCreate',
-            PolavisConnectEvent\Events::PC_USER_RESETTING_RESET_SUCCESS => 'handlePolavisConnectPasswordResetSuccess',
         );
+
+        if (class_exists(\AppWebServiceBundle\Event\Events::class)) {
+            $events[\AppWebServiceBundle\Event\Events::PV_WS_PASSWORD_CHANGE_SUCCESS] = 'handleWebServicePasswordChangeSuccess';
+        }
+
+        if (class_exists(\PolavisConnectBundle\Event\Events::class)) {
+            $events[\PolavisConnectBundle\Event\Events::PC_USER_PRE_CREATE] = 'onPolavisConnectUserPreCreate';
+            $events[\PolavisConnectBundle\Event\Events::PC_USER_POST_CREATE] = 'onPolavisConnectUserPostCreate';
+            $events[\PolavisConnectBundle\Event\Events::PC_USER_RESETTING_RESET_SUCCESS] = 'handlePolavisConnectPasswordResetSuccess';
+        }
 
         return $events;
     }

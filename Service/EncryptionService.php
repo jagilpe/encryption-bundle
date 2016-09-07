@@ -6,7 +6,6 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use AppBundle\Entity\User as PVUser;
 use PolavisConnectBundle\Entity\User as PCUser;
 use Module7\EncryptionBundle\Annotation\EncryptedEntity;
 use Module7\EncryptionBundle\Crypt\CryptographyProviderInterface;
@@ -203,13 +202,16 @@ class EncryptionService
     /**
      * Process all encryption related actions on an Entity pre persist event
      *
+     * @TODO remove Polavis Viva AppBundle dependency
+     *
      * @param mixed $entity
      *
      * @return mixed
      */
     public function processEntityPostPersist($entity)
     {
-        if ($entity instanceof PVUser) {
+        $userClass = \AppBundle\Entity\User::class;
+        if (class_exists($userClass) && $entity instanceof $userClass) {
             // The id of the User was not set when the entity was processed before
             $userProfile = $entity->getMainProfile();
             $encryptionKey = $userProfile->getKey();
