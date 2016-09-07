@@ -3,7 +3,7 @@
 /**
  * This file holds the definition of the main bundle of the application
  */
-namespace EncryptionBundle;
+namespace Module7\EncryptionBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
