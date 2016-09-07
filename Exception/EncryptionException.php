@@ -1,6 +1,6 @@
 <?php
 
-namespace EHEncryptionBundle\Exception;
+namespace Module7\EncryptionBundle\Exception;
 
 /**
  * Base Exception for the EncryptionBundle

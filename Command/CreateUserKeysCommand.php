@@ -126,7 +126,7 @@ class CreateUserKeysCommand extends ContainerAwareCommand
     {
         if (!$user->getPublicKey() || !$user->getPrivateKey()) {
             $container = $this->getContainer();
-            $keyManager = $container->get('eh_encryption.key_manager');
+            $keyManager = $container->get('module7_encryption.key_manager');
             $keyManager->generateUserPKIKeys($user);
         }
     }

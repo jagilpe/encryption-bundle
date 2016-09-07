@@ -46,7 +46,7 @@ class EncryptEntitiesCommand extends ContainerAwareCommand
 
         $container = $this->getContainer();
         $entityManager = $container->get('doctrine')->getManager();
-        $encryptionService = $container->get('eh_encryption.encryption.service');
+        $encryptionService = $container->get('module7_encryption.encryption.service');
 
         // Encrypt the entities in the database
         $encryptedEntityTypes = $encryptionService->getEncryptionEnabledEntitiesMetadata();

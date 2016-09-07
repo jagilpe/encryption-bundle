@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\Loader;
  *
  * @author Javier Gil Pereda <javier.gil@module-7.com>
  */
-class EncryptionExtension extends Extension
+class Module7EncryptionExtension extends Extension
 {
     /**
      * {@inheritdoc}
