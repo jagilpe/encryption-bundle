@@ -92,14 +92,26 @@ class KeyStore implements KeyStoreInterface
      */
     public function getPrivateKey(PKEncryptionEnabledUserInterface $user)
     {
-        $key = $this->findKeyByUser($user);
-
-        if ($key->isEncrypted()) {
-            return $this->decryptPrivateKey($key);
+        if (!$user->isPrivateKeyEncrypted()) {
+            return $user->getPrivateKey();
         }
         else {
-            return $key->getPrivateKey();
+            $key = $this->findKeyByUser($user);
+
+            if ($key) {
+                if ($key->isEncrypted()) {
+                    return $this->decryptPrivateKey($key);
+                }
+                else {
+                    return $key->getPrivateKey();
+                }
+            }
+            else {
+                return null;
+            }
         }
+
+
     }
 
     /**
@@ -184,7 +196,7 @@ class KeyStore implements KeyStoreInterface
      */
     private function getKeyRepository()
     {
-        return $this->getEntityManager()->getRepository('EncryptionBundle:PKIPrivateKey');
+        return $this->getEntityManager()->getRepository('Module7EncryptionBundle:PKIPrivateKey');
     }
 
     /**
