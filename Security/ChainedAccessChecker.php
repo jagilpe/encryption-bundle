@@ -56,7 +56,7 @@ class ChainedAccessChecker implements AccessCheckerInterface
     /**
      * {@inheritdoc}
      */
-    public function canUseOwnerPrivateKey($entity, UserInterface $user = null)
+    public function canUseOwnerPrivateKey($entity, $user = null)
     {
         $canAccess = false;
         foreach ($this->accessCheckers as $accessChecker) {
