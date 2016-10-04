@@ -117,7 +117,7 @@ class UserEventsSubsbriber implements EventSubscriberInterface
      *
      * @param \AppWebServiceBundle\Event\UserEvent $event
      */
-    public function handleWebServicePasswordChangeSuccess(WebServiceEvent\UserEvent $event)
+    public function handleWebServicePasswordChangeSuccess(\AppWebServiceBundle\Event\UserEvent $event)
     {
         $user = $event->getUser();
 
@@ -133,7 +133,7 @@ class UserEventsSubsbriber implements EventSubscriberInterface
      *
      * @param \PolavisConnectBundle\Event\UserEvent $event
      */
-    public function onPolavisConnectUserPreCreate(PolavisConnectEvent\UserEvent $event)
+    public function onPolavisConnectUserPreCreate(\PolavisConnectBundle\Event\UserEvent $event)
     {
         $user = $event->getUser();
 
@@ -147,7 +147,7 @@ class UserEventsSubsbriber implements EventSubscriberInterface
      *
      * @param \PolavisConnectBundle\Event\UserEvent $event
      */
-    public function onPolavisConnectUserPostCreate(PolavisConnectEvent\UserEvent $event)
+    public function onPolavisConnectUserPostCreate(\PolavisConnectBundle\Event\UserEvent $event)
     {
         $user = $event->getUser();
 
@@ -161,7 +161,7 @@ class UserEventsSubsbriber implements EventSubscriberInterface
      *
      * @param \PolavisConnectBundle\Event\FormEvent $event
      */
-    public function handlePolavisConnectPasswordResetSuccess(PolavisConnectEvent\FormEvent $event)
+    public function handlePolavisConnectPasswordResetSuccess(\PolavisConnectBundle\Event\FormEvent $event)
     {
         $form = $event->getForm();
         $user = $form->getData();

@@ -20,7 +20,8 @@
 		"symfony/framework-bundle" : ">=2.7"
 	},
 	"require-dev" : {
-		"symfony/yaml" : ">=2.3"
+		"symfony/yaml" : ">=2.3",
+		"phpunit/phpunit": "^5.5"
 	},
 	"autoload" : {
 		"psr-0" : {
