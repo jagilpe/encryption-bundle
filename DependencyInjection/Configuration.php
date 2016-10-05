@@ -27,7 +27,7 @@ class Configuration implements ConfigurationInterface
             ->addDefaultsIfNotSet()
             ->children()
                 ->scalarNode('enabled')->defaultValue(false)->end()
-                ->scalarNode('access_checker')->defaultValue('module7_encryption.security.access_checker.default')->end()
+                ->scalarNode('access_checker')->defaultValue('module7_encryption.security.access_checker.chained')->end()
                 ->arrayNode('settings')
                     ->addDefaultsIfNotSet()
                     ->children()
