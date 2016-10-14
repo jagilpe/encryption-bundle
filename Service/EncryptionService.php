@@ -214,8 +214,10 @@ class EncryptionService
         if (class_exists($userClass) && $entity instanceof $userClass) {
             // The id of the User was not set when the entity was processed before
             $userProfile = $entity->getMainProfile();
-            $encryptionKey = $userProfile->getKey();
-            $encryptionKey->updateUnidentifiedKey($entity);
+            if ($userProfile) {
+                $encryptionKey = $userProfile->getKey();
+                $encryptionKey->updateUnidentifiedKey($entity);
+            }
         }
     }
 
