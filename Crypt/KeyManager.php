@@ -129,14 +129,28 @@ class KeyManager implements KeyManagerInterface
      */
     public function handleUserPasswordReset(PKEncryptionEnabledUserInterface $user)
     {
-        // We don't have the user's password so we have to get the key from the key store
-        $privateKey = $this->keyStore->getPrivateKey($user);
+
+        // Check if the private key was already encrypted
+        if ($user->isPrivateKeyEncrypted()) {
+            // We don't have the user's password so we have to get the key from the key store
+            $privateKey = $this->keyStore->getPrivateKey($user);
+            $keyInStore = true;
+        }
+        else {
+            // Get the private key from the user and save it in the key store
+            $privateKey = $user->getPrivateKey();
+            $keyInStore = false;
+        }
 
         $user->setPrivateKey($privateKey);
         $user->setPrivateKeyIv(null);
         $user->setPrivateKeyEncrypted(false);
 
         $this->encryptPrivateKey($user);
+
+        if (!$keyInStore) {
+            $this->keyStore->addKeys($user, $privateKey);
+        }
     }
 
     /**
