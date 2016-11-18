@@ -31,7 +31,8 @@
 	"target-dir" : "Module7/EncryptionBundle",
 	"extra" : {
 		"branch-alias" : {
-			"dev-master" : "dev-master"
+			"dev-master" : "dev-master",
+			"dev-develop" : "dev-develop"
 		}
 	}
 }
