@@ -49,7 +49,6 @@ services:
     module7_encryption.security.access_checker.chained:
         class: Module7\EncryptionBundle\Security\ChainedAccessChecker
         arguments:
-            - [ "@app.encrpytion.access_checker", "@polavis_connect.encrpytion.access_checker" ]
             - "%module7_encryption.settings%"
             
     # Event subscribers and listeners

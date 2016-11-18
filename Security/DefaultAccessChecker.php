@@ -29,7 +29,7 @@ class DefaultAccessChecker implements AccessCheckerInterface
     /**
      * {@inheritdoc}
      */
-    public function canUseOwnerPrivateKey($entity, UserInterface $user = null)
+    public function canUseOwnerPrivateKey($entity, $user = null)
     {
 
     }

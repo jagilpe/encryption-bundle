@@ -26,9 +26,9 @@ interface AccessCheckerInterface
      * using the private key of its owner
      *
      * @param mixed $entity
-     * @param \Symfony\Component\Security\Core\User\UserInterface $user
+     * @param mixed $user
      *
      * return @boolean
      */
-    public function canUseOwnerPrivateKey($entity, UserInterface $user = null);
+    public function canUseOwnerPrivateKey($entity, $user = null);
 }

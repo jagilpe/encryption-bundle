@@ -26,18 +26,8 @@ class ChainedAccessChecker implements AccessCheckerInterface
      */
     private $accessCheckers;
 
-    public function __construct(array $accessCheckers, array $settings)
+    public function __construct(array $settings)
     {
-        if (empty($accessCheckers)) {
-            throw new EncryptionException('At least one AccessChecker must be provider to be chained');
-        }
-
-        foreach ($accessCheckers as $accessChecker) {
-            if (!($accessChecker instanceof AccessCheckerInterface)) {
-                throw new EncryptionException('The access checkers must implement the AccessCheckerInterface interface');
-            }
-        }
-        $this->accessCheckers = $accessCheckers;
         $this->settings = $settings;
     }
 
@@ -56,7 +46,7 @@ class ChainedAccessChecker implements AccessCheckerInterface
     /**
      * {@inheritdoc}
      */
-    public function canUseOwnerPrivateKey($entity, UserInterface $user = null)
+    public function canUseOwnerPrivateKey($entity, $user = null)
     {
         $canAccess = false;
         foreach ($this->accessCheckers as $accessChecker) {
@@ -66,6 +56,16 @@ class ChainedAccessChecker implements AccessCheckerInterface
             }
         }
         return $canAccess;
+    }
+
+    /**
+     * Adds an Access Checker to the chain
+     *
+     * @param AccessCheckerInterface $accessChecker
+     */
+    public function addAccessChecker(AccessCheckerInterface $accessChecker)
+    {
+        $this->accessCheckers[] = $accessChecker;
     }
 
     private function getUser($entity)
