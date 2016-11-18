@@ -21,7 +21,7 @@
 	},
 	"require-dev" : {
 		"symfony/yaml" : ">=2.3",
-		"phpunit/phpunit": "^5.5"
+		"phpunit/phpunit" : "^5.5"
 	},
 	"autoload" : {
 		"psr-0" : {
@@ -31,8 +31,7 @@
 	"target-dir" : "Module7/EncryptionBundle",
 	"extra" : {
 		"branch-alias" : {
-			"dev-master" : "dev-master",
-			"dev-develop" : "dev-develop"
+			"dev-master" : "dev-master"
 		}
 	}
 }
