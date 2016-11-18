@@ -7,7 +7,14 @@ services:
             - "@annotation_reader"
             - "@module7_encryption.cryptography_provider"
             - "@module7_encryption.key_manager"
+            - "@module7_encryption.metadata_factory"
             - "%module7_encryption.settings%"
+
+    module7_encryption.metadata_factory:
+        class: Module7\EncryptionBundle\Metadata\ClassMetadataFactory
+        arguments:
+            - "@annotation_reader"
+            - "@doctrine"
             
     module7_encryption.cryptography_provider:
         class: Module7\EncryptionBundle\Crypt\CryptographyProvider

@@ -78,4 +78,14 @@ class AnnotationDriver implements DriverInterface
 
         return $classMetadata;
     }
+
+    /**
+     * Returns the entity classes
+     *
+     * @return array
+     */
+    private function getEntityClasses()
+    {
+
+    }
 }

@@ -10,7 +10,7 @@ use Doctrine\Common\Util\ClassUtils;
  *
  * @author Javier Gil Pereda <javier.gil@module-7.com>
  */
-trait PerUserEncryptableEntityTrait
+trait SystemEncryptableEntityTrait
 {
     use EncryptableEntityTrait;
 

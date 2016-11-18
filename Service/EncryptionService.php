@@ -2,10 +2,14 @@
 
 namespace Module7\EncryptionBundle\Service;
 
+use AppBundle\Entity\Appointment;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Bundle\DoctrineBundle\Registry;
+use Module7\EncryptionBundle\Metadata\ClassMetadata;
+use Module7\EncryptionBundle\Metadata\ClassMetadataFactory;
+use Module7\EncryptionBundle\Metadata\PropertyMetadata;
 use PolavisConnectBundle\Entity\User as PCUser;
 use Module7\EncryptionBundle\Annotation\EncryptedEntity;
 use Module7\EncryptionBundle\Crypt\CryptographyProviderInterface;
@@ -54,6 +58,11 @@ class EncryptionService
     private $keyManager;
 
     /**
+     * @var ClassMetadataFactory
+     */
+    private $metadataFactory;
+
+    /**
      * @var array
      */
     private $settings;
@@ -74,34 +83,37 @@ class EncryptionService
     private $normalizers = array();
 
     public function __construct(
-                    Registry $doctrine,
-                    Reader $reader,
-                    CryptographyProviderInterface $cryptographyProvider,
-                    KeyManagerInterface $keyManager,
-                    $settings)
+        Registry $doctrine,
+        Reader $reader,
+        CryptographyProviderInterface $cryptographyProvider,
+        KeyManagerInterface $keyManager,
+        ClassMetadataFactory $metadataFactory,
+        $settings)
     {
         $this->doctrine = $doctrine;
         $this->reader = $reader;
         $this->cryptographyProvider = $cryptographyProvider;
         $this->keyManager = $keyManager;
+        $this->metadataFactory = $metadataFactory;
         $this->settings = $settings;
     }
 
     /**
-     * Returns the metadata of all the encryption enabled entities
+     * Returns the doctrine metadata of all the encryption enabled entities
      *
      * @return array
      */
     public function getEncryptionEnabledEntitiesMetadata()
     {
         $entityManager = $this->doctrine->getManager();
-        $metadata = $entityManager->getMetadataFactory()->getAllMetadata();
+        $doctrineMetadataFactory = $entityManager->getMetadataFactory();
 
         $encryptedEnabledTypes = array();
-        foreach ($metadata as $entityMetadata) {
-            if ($this->hasEncryptionEnabled($entityMetadata->getReflectionClass(), $entityMetadata)) {
-                $encryptedEnabledTypes[] = $entityMetadata;
-            }
+        $encryptionMetadata = $this->metadataFactory->getAllMetadata();
+        /** @var ClassMetadata $encryptionClassMetadata */
+        foreach ($encryptionMetadata as $encryptionClassMetadata) {
+            $className = $encryptionClassMetadata->name;
+            $encryptedEnabledTypes[] = $doctrineMetadataFactory->getMetadataFor($className);
         }
 
         return $encryptedEnabledTypes;
@@ -115,11 +127,15 @@ class EncryptionService
      */
     public function addEncryptionMetadata(ClassMetadataInfo $metadata)
     {
-        $reflection = $metadata->getReflectionClass();
+        if ($metadata->isMappedSuperclass) {
+            return;
+        }
 
-        if ($this->hasEncryptionEnabled($reflection, $metadata)) {
-            $encryptedEnabled = $this->getEncryptionEnabledAnnotation($reflection);
-            if ($this->keyPerEntityRequired($encryptedEnabled)) {
+        $reflection = $metadata->getReflectionClass();
+        $encryptionClassMetadata = $this->metadataFactory->getMetadataFor($reflection->getName());
+
+        if ($encryptionClassMetadata && $encryptionClassMetadata->encryptionEnabled) {
+            if ($this->keyPerEntityRequired($encryptionClassMetadata)) {
                 // Add the field required to hold the key used to encrypt this entity
                 $keyField = array(
                     'fieldName' => 'key',
@@ -171,16 +187,16 @@ class EncryptionService
                  */
                 $metadata->fieldMappings[$fieldName] = $override;
             }
-        }
 
-        // Add a field to check if the associated file is encrypted
-        if ($this->hasFileEncryptionEnabled($reflection)) {
-            $isFileEncryptedField = array(
-                'fieldName' => 'fileEncrypted',
-                'columnName' => '_file_encrypted',
-                'type' => 'boolean',
-            );
-            $metadata->mapField($isFileEncryptedField);
+            // Add a field to check if the associated file is encrypted
+            if ($encryptionClassMetadata->encryptedFile) {
+                $isFileEncryptedField = array(
+                    'fieldName' => 'fileEncrypted',
+                    'columnName' => '_file_encrypted',
+                    'type' => 'boolean',
+                );
+                $metadata->mapField($isFileEncryptedField);
+            }
         }
 
         return $metadata;
@@ -511,7 +527,7 @@ class EncryptionService
      * @param \ReflectionClass $reflection
      * @param \Doctrine\ORM\Mapping\ClassMetadataInfo $metadata
      *
-     * @return Module7\EncryptionBundle\Annotation\EncryptedEntity|null
+     * @return \Module7\EncryptionBundle\Annotation\EncryptedEntity|null
      */
     private function getEncryptionEnabledAnnotation(\ReflectionClass $reflection, ClassMetadataInfo $metadata = null)
     {
@@ -539,7 +555,7 @@ class EncryptionService
      * Checks if the class is a File entity and has the file encryption enabled
      *
      * @param \ReflectionClass $reflection
-     * @return Module7\EncryptionBundle\Annotation\EncryptedFile|null
+     * @return \Module7\EncryptionBundle\Annotation\EncryptedFile|null
      */
     private function hasFileEncryptionEnabled(\ReflectionClass $reflection)
     {
@@ -556,7 +572,7 @@ class EncryptionService
      *
      * @param mixed $entity
      *
-     * @return Module7\EncryptionBundle\Annotation\PKEncryptionEnabledUser / null
+     * @return \Module7\EncryptionBundle\Annotation\PKEncryptionEnabledUser / null
      */
     private function isPKEncryptionEnabledUser($entity)
     {
@@ -581,7 +597,7 @@ class EncryptionService
      * @param string $mode
      * @return boolean
      */
-    private function keyPerEntityRequired(EncryptedEntity $entity)
+    private function keyPerEntityRequired(ClassMetadata $classMetadata)
     {
         return $this->userBasedEncryption();
     }
@@ -597,16 +613,15 @@ class EncryptionService
     {
         $encryptionEnabledFields = array();
 
-        $reflectionProperties = $reflectionClass->getProperties();
+        $classMetadata = $this->metadataFactory->getMetadataFor($reflectionClass->getName());
 
-        foreach ($reflectionProperties as $reflectionProperty) {
-            $encryptedField = $this->reader->getPropertyAnnotation(
-                $reflectionProperty,
-                'Module7\\EncryptionBundle\\Annotation\\EncryptedField'
-            );
-
-            if ($encryptedField) {
-                $encryptionEnabledFields[$reflectionProperty->name] = $reflectionProperty;
+        if ($classMetadata->encryptionEnabled) {
+            /** @var PropertyMetadata $propertyMetadata */
+            foreach ($classMetadata->propertyMetadata as $propertyMetadata) {
+                if ($propertyMetadata->encrypted) {
+                    $reflectionProperty = $reflectionClass->getProperty($propertyMetadata->name);
+                    $encryptionEnabledFields[$reflectionProperty->name] = $reflectionProperty;
+                }
             }
         }
 
