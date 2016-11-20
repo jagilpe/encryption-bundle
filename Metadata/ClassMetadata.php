@@ -11,11 +11,11 @@ use Metadata\MergeableClassMetadata;
  */
 class ClassMetadata  extends MergeableClassMetadata
 {
-    public $encryptionEnabled;
+    public $encryptionEnabled = false;
 
     public $encryptionMode;
 
-    public $encryptedFile;
+    public $encryptedFile = false;
 
     public $encryptedFileMode;
 

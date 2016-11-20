@@ -34,18 +34,15 @@ class AnnotationDriver implements DriverInterface
      */
     public function loadMetadataForClass(\ReflectionClass $reflectionClass)
     {
-        $classMetadata = null;
+        $classMetadata = new ClassMetadata($name = $reflectionClass->getName());
+        $classMetadata->fileResources[] = $reflectionClass->getFileName();
 
         $encryptionAnnotation = $this->reader->getClassAnnotation(
             $reflectionClass,
             'Module7\\EncryptionBundle\\Annotation\\EncryptedEntity'
         );
-
         /** @var EncryptedEntity $encryptionAnnotation */
         if ($encryptionAnnotation) {
-            $classMetadata = new ClassMetadata($name = $reflectionClass->getName());
-            $classMetadata->fileResources[] = $reflectionClass->getFileName();
-
             $classMetadata->encryptionEnabled = $encryptionAnnotation->enabled;
             $classMetadata->encryptionMode = $encryptionAnnotation->mode;
 
@@ -75,17 +72,10 @@ class AnnotationDriver implements DriverInterface
                 }
             }
         }
+        else {
+            $classMetadata->encryptionEnabled = false;
+        }
 
         return $classMetadata;
-    }
-
-    /**
-     * Returns the entity classes
-     *
-     * @return array
-     */
-    private function getEntityClasses()
-    {
-
     }
 }
