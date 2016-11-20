@@ -267,7 +267,7 @@ class KeyStore implements KeyStoreInterface
      *
      * @return string
      */
-    private function getPublicMasterKey()
+    public function getPublicMasterKey()
     {
         if (!$this->publicMasterKey) {
             $masterKey = $this->getMasterKey();
@@ -282,7 +282,7 @@ class KeyStore implements KeyStoreInterface
      *
      * @return string
      */
-    private function getPrivateMasterKey()
+    public function getPrivateMasterKey()
     {
         if (!$this->privateMasterKey) {
             $masterKey = $this->getMasterKey();

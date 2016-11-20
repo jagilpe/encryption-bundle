@@ -2,6 +2,7 @@
 
 namespace Module7\EncryptionBundle\EventListener;
 
+use Module7\EncryptionBundle\Service\EncryptionService;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Module7\EncryptionBundle\Crypt\KeyManagerInterface;
@@ -38,50 +39,61 @@ class UserPrivateKeyLoadListener
      */
     private $keyStore;
 
+    /**
+     * @var EncryptionService
+     */
+    private $encryptionService;
+
     public function __construct(
-                    array $settings,
-                    TokenStorageInterface $tokenStorage,
-                    KeyManagerInterface $keyManager,
-                    KeyStoreInterface $keyStore)
+        array $settings,
+        TokenStorageInterface $tokenStorage,
+        KeyManagerInterface $keyManager,
+        KeyStoreInterface $keyStore,
+        EncryptionService $encryptionService)
     {
         $this->settings = $settings;
         $this->tokenStorage = $tokenStorage;
         $this->keyManager = $keyManager;
         $this->keyStore = $keyStore;
+        $this->encryptionService = $encryptionService;
     }
 
     /**
-     * @param Symfony\Component\HttpKernel\Event\FilterControllerEvent $event
+     * @param FilterResponseEvent $event
+     *
+     * @throws EncryptionException
      */
     public function onKernelResponse(FilterResponseEvent $event)
     {
-        $request = $event->getRequest();
+        if ($this->encryptionService->isPerUserEncryptionEnabled()) {
+            $request = $event->getRequest();
 
-        // Check if this is one of the security_check routes
-        $securityCheckRoutes = $this->settings['security_check_routes'];
-        $route = $request->attributes->get('_route');
-        if ($route && in_array($route, $securityCheckRoutes)) {
-            $user = $this->getUser();
+            // Check if this is one of the security_check routes
+            $securityCheckRoutes = $this->settings['security_check_routes'];
+            $route = $request->attributes->get('_route');
+            if ($route && in_array($route, $securityCheckRoutes)) {
+                $user = $this->getUser();
 
-            if ($user) {
-                if (!$user instanceof SecurityCodeUser) {
-                    $password = $request->request->get('_password');
-                    $privateKey = $this->keyManager->getUserPrivateKey($user, array('password' => $password));
-                    if ($privateKey) {
-                        $request->getSession()->set(KeyManager::SESSION_PRIVATE_KEY_PARAM, $privateKey);
+                if ($user) {
+                    if (!$user instanceof SecurityCodeUser) {
+                        $password = $request->request->get('_password');
+                        $privateKey = $this->keyManager->getUserPrivateKey($user, array('password' => $password));
+                        if ($privateKey) {
+                            $request->getSession()->set(KeyManager::SESSION_PRIVATE_KEY_PARAM, $privateKey);
+                        }
+                        else {
+                            throw new EncryptionException('Could not load user\'s key');
+                        }
                     }
                     else {
-                        throw new EncryptionException('Could not load user\'s key');
-                    }
-                }
-                else {
-                    $vivaUser = $user->getSecurityCode()->getUserProfile()->getUser();
-                    $privateKey = $privateKey = $this->keyStore->getPrivateKey($vivaUser);
-                    if ($privateKey) {
-                        $request->getSession()->set(KeyManager::SESSION_PRIVATE_KEY_PARAM, $privateKey);
-                    }
-                    else {
-                        throw new EncryptionException('Could not load user\'s key');
+                        $vivaUser = $user->getSecurityCode()->getUserProfile()->getUser();
+                        $privateKey = $privateKey = $this->keyStore->getPrivateKey($vivaUser);
+                        if ($privateKey) {
+                            $request->getSession()->set(KeyManager::SESSION_PRIVATE_KEY_PARAM, $privateKey);
+                        }
+                        else {
+                            throw new EncryptionException('Could not load user\'s key');
+                        }
                     }
                 }
             }

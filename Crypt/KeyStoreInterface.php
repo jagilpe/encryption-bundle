@@ -39,4 +39,18 @@ interface KeyStoreInterface
      * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
     public function getPublicKey(PKEncryptionEnabledUserInterface $user);
+
+    /**
+     * Returns the public master key
+     *
+     * @return string
+     */
+    public function getPublicMasterKey();
+
+    /**
+     * Returns the private master key
+     *
+     * @return string
+     */
+    public function getPrivateMasterKey();
 }

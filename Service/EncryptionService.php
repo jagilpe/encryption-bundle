@@ -109,6 +109,29 @@ class EncryptionService
     }
 
     /**
+     *  Checks if the Per User Encryption must be enabled
+     *
+     * @return bool
+     */
+    public function isPerUserEncryptionEnabled()
+    {
+        $perUserEncryptionEnabled = false;
+
+        if ($this->settings['per_user_encryption_enabled']) {
+            $encryptionMetadata = $this->metadataFactory->getAllMetadata();
+            /** @var ClassMetadata $classEncryptionMetadata */
+            foreach ($encryptionMetadata as $classEncryptionMetadata) {
+                if (self::MODE_PER_USER_SHAREABLE === $classEncryptionMetadata->encryptionMode) {
+                    $perUserEncryptionEnabled = true;
+                    break;
+                }
+            }
+        }
+
+        return $perUserEncryptionEnabled;
+    }
+
+    /**
      * Returns the doctrine metadata of all the encryption enabled entities
      *
      * @return array
@@ -241,9 +264,12 @@ class EncryptionService
             if (class_exists($userClass) && $entity instanceof $userClass) {
                 $relatedEntities = $this->getUserRelatedEntities($entity);
                 foreach ($relatedEntities as $relatedEntity) {
-                    $encryptionKey = $relatedEntity->getKey();
-                    if ($encryptionKey) {
-                        $encryptionKey->updateUnidentifiedKey($entity);
+                    $classMetadata = $this->getEncryptionMetadataFor(ClassUtils::getClass($relatedEntity));
+                    if (EncryptionService::MODE_PER_USER_SHAREABLE === $classMetadata->encryptionMode) {
+                        $encryptionKey = $relatedEntity->getKey();
+                        if ($encryptionKey) {
+                            $encryptionKey->updateUnidentifiedKey($entity);
+                        }
                     }
                 }
             }
@@ -523,25 +549,23 @@ class EncryptionService
     }
 
     /**
-     * Checks if the encryption mode is user based
-     *
-     * @return boolean
-     */
-    private function userBasedEncryption()
-    {
-        return $this->settings['mode'] === self::MODE_PER_USER_SHAREABLE;
-    }
-
-    /**
      * Checks if the entity needs a field to store a key for each instance
      *
-     * @param \ReflectionClass $classMetadata
+     * @param \ReflectionClass $reflectionClass
      *
      * @return boolean
      */
-    private function keyPerEntityRequired(\ReflectionClass $classMetadata)
+    private function keyPerEntityRequired(\ReflectionClass $reflectionClass)
     {
-        return $this->userBasedEncryption();
+        $classMetadata = $this->getEncryptionMetadataFor($reflectionClass->getName());
+
+        $keyPerEntityModes = array(
+            EncryptionService::MODE_PER_USER_SHAREABLE,
+            EncryptionService::MODE_SYSTEM_ENCRYPTION,
+        );
+
+        return $classMetadata->encryptionEnabled
+            && in_array($classMetadata->encryptionMode, $keyPerEntityModes);
     }
 
     /**
@@ -757,15 +781,24 @@ class EncryptionService
      * in the same moment as the user entity. For this entities the user id is not set
      * in the moment they are persisted and therefore not saved with the key
      *
+     * @TODO Remove depencency from Polavis Viva code
+     *
      * @param mixed $user
      *
      * @return array
      */
     private function getUserRelatedEntities($user)
     {
-        // The id of the User was not set when the entity was processed before
-        $userProfile = $user->getMainProfile();
-        return $userProfile ? array($userProfile) : null;
+        $relatedEntities =array();
+
+        $reflectionClass = ClassUtils::newReflectionObject($user);
+
+        if ($reflectionClass->hasMethod('getMainProfile')) {
+            $userProfile = $user->getMainProfile();
+            $relatedEntities =  $userProfile ? array($userProfile) : array();
+        }
+
+        return $relatedEntities;
     }
 
     /**

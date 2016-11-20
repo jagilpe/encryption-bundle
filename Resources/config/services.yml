@@ -32,6 +32,7 @@ services:
             - "@module7_encryption.key_store"
             - "@event_dispatcher"
             - "@module7_encryption.access_checker"
+            - "@module7_encryption.metadata_factory"
             - "%module7_encryption.settings%"
 
     module7_encryption.key_store:
@@ -49,17 +50,6 @@ services:
             - "@module7_encryption.encryption.service"
         public: false
     
-    # default access checker
-    module7_encryption.security.access_checker.default:
-        class: Module7\EncryptionBundle\Security\DefaultAccessChecker
-        arguments:
-            - "%module7_encryption.settings%"
-            
-    module7_encryption.security.access_checker.chained:
-        class: Module7\EncryptionBundle\Security\ChainedAccessChecker
-        arguments:
-            - "%module7_encryption.settings%"
-            
     # Event subscribers and listeners
     module7_encryption.doctrine_subscriber:
         class: Module7\EncryptionBundle\EventListener\EncryptionSubscriber
@@ -67,28 +57,14 @@ services:
             - "@module7_encryption.encryption.service"
         tags:
             - { name: doctrine.event_subscriber, connection: default, priority: -10 }
-    module7_encryption.user_events.subscriber:
-        class: Module7\EncryptionBundle\EventListener\UserEventsSubsbriber
-        arguments:
-            - "@module7_encryption.encryption.service"
-        tags:
-            - { name: kernel.event_subscriber }
-            
-    module7_encryption.user_private_key_load_listener:
-        class: Module7\EncryptionBundle\EventListener\UserPrivateKeyLoadListener
+
+    # default access checker
+    module7_encryption.security.access_checker.default:
+        class: Module7\EncryptionBundle\Security\DefaultAccessChecker
         arguments:
             - "%module7_encryption.settings%"
-            - "@security.token_storage"
-            - "@module7_encryption.key_manager"
-            - "@module7_encryption.key_store"
-        tags:
-            - { name: kernel.event_listener, event: kernel.response, priority: 2 }
-            
-    module7_encryption.web_service_private_key_load_listener:
-        class: Module7\EncryptionBundle\EventListener\WebServicePrivateKeyLoadListener
+
+    module7_encryption.security.access_checker.chained:
+        class: Module7\EncryptionBundle\Security\ChainedAccessChecker
         arguments:
             - "%module7_encryption.settings%"
-            - "@security.token_storage"
-            - "@module7_encryption.key_manager"
-        tags:
-            - { name: kernel.event_listener, event: kernel.request }

@@ -11,6 +11,8 @@ use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
  */
 class SymmetricKey
 {
+    const SYSTEM_IDENTIFIER = '_system';
+
     /**
      * The symmetric key encrypted with all the public keys of the
      * users with permissions to access the entity
@@ -20,10 +22,32 @@ class SymmetricKey
     protected $encryptedKeys = array();
 
     /**
+     * Adds a new version of the key encrypted with the master key of the system
+     *
+     * @param string $encryptedKey
+     */
+    public function addSystemKey($encryptedKey)
+    {
+        $this->encryptedKeys[self::SYSTEM_IDENTIFIER] = $encryptedKey;
+    }
+
+    /**
+     * Returns the encrypted key that corresponds to the system master key
+     *
+     * @return NULL|string
+     */
+    public function getSystemKey()
+    {
+        return isset($this->encryptedKeys[self::SYSTEM_IDENTIFIER])
+            ? $this->encryptedKeys[self::SYSTEM_IDENTIFIER]
+            : null;
+    }
+
+    /**
      * Adds a new version of the key encrypted with the key of a new user
      *
      * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
-     * @param unknown $encryptedKey
+     * @param string $encryptedKey
      */
     public function addKey(PKEncryptionEnabledUserInterface $user, $encryptedKey)
     {
@@ -56,7 +80,7 @@ class SymmetricKey
      * There are some cases that a key can be persisted without the user id.
      * (All entities that are persisted at the same time as the user)
      *
-     * @param unknown $userClass
+     * @param string $userClass
      */
     public function updateUnidentifiedKey($user)
     {

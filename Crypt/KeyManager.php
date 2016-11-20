@@ -2,6 +2,10 @@
 
 namespace Module7\EncryptionBundle\Crypt;
 
+use Doctrine\Common\Util\ClassUtils;
+use Module7\EncryptionBundle\Metadata\ClassMetadata;
+use Module7\EncryptionBundle\Metadata\ClassMetadataFactory;
+use Module7\EncryptionBundle\Service\EncryptionService;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -53,14 +57,21 @@ class KeyManager implements KeyManagerInterface
      */
     private $dispatcher;
 
+    /**
+     * @var ClassMetadataFactory
+     */
+    private $metadataFactory;
+
     public function __construct(
-                    TokenStorageInterface $tokenStorage,
-                    SessionInterface $session,
-                    CryptographyProviderInterface $cryptographyProvider,
-                    KeyStoreInterface $keyStore,
-                    EventDispatcherInterface $dispatcher,
-                    AccessCheckerInterface $accessChecker,
-                    $settings)
+        TokenStorageInterface $tokenStorage,
+        SessionInterface $session,
+        CryptographyProviderInterface $cryptographyProvider,
+        KeyStoreInterface $keyStore,
+        EventDispatcherInterface $dispatcher,
+        AccessCheckerInterface $accessChecker,
+        ClassMetadataFactory $classMetadataFactory,
+        $settings
+    )
     {
         $this->tokenStorage = $tokenStorage;
         $this->session = $session;
@@ -69,6 +80,7 @@ class KeyManager implements KeyManagerInterface
         $this->dispatcher = $dispatcher;
         $this->accessChecker = $accessChecker;
         $this->settings = $settings;
+        $this->metadataFactory = $classMetadataFactory;
     }
 
     /**
@@ -264,7 +276,38 @@ class KeyManager implements KeyManagerInterface
         return $this->cryptographyProvider->generateSecureKey();
     }
 
+    /**
+     * @param string $clearKey
+     * @param mixed $entity
+     * @return SymmetricKey
+     * @throws EncryptionException
+     */
     private function encryptSymmetricKey($clearKey, $entity)
+    {
+        $encryptionMode = $this->getEncryptionMode($entity);
+        switch ($encryptionMode) {
+            case EncryptionService::MODE_PER_USER_SHAREABLE:
+                $symmetricKey = $this->encryptSymmetricKeyWithUserKey($clearKey, $entity);
+                break;
+            case EncryptionService::MODE_SYSTEM_ENCRYPTION:
+                $symmetricKey = $this->encryptSymmetricKeyWithSystemKey($clearKey, $entity);
+                break;
+            default:
+                throw new EncryptionException(sprintf('Encryption mode %s not supported.', $encryptionMode));
+        }
+
+        return $symmetricKey;
+    }
+
+    /**
+     * Encrypts the Symmetric Key of the entity using Per User Encryption
+     *
+     * @param string $clearKey
+     * @param mixed $entity
+     *
+     * @return SymmetricKey
+     */
+    private function encryptSymmetricKeyWithUserKey($clearKey, $entity)
     {
         $users = $this->accessChecker->getAllowedUsers($entity);
         $symmetricKey = new SymmetricKey();
@@ -279,15 +322,59 @@ class KeyManager implements KeyManagerInterface
     }
 
     /**
+     * Encrypts the Symmetric Key of the entity using System Encryption
+     *
+     * @param string $clearKey
+     * @param mixed $entity
+     *
+     * @return SymmetricKey
+     */
+    private function encryptSymmetricKeyWithSystemKey($clearKey, $entity)
+    {
+        $publicMasterKey = $this->keyStore->getPublicMasterKey();
+        $symmetricKey = new SymmetricKey();
+        $encryptedKey = base64_encode($this->cryptographyProvider->encryptWithPublicKey($clearKey, $publicMasterKey));
+        $symmetricKey->addSystemKey($encryptedKey);
+
+        return $symmetricKey;
+    }
+
+    /**
      * Decrypts the Symmetric Key used to encrypt the fields of the entity
      *
      * @param mixed $entity
      *
-     * @throws \PolavisConnectBundle\Exception\EncryptionException
+     * @throws EncryptionException
      *
      * @return string
      */
     private function decryptSymmetricKey($entity)
+    {
+        $decryptedKey = null;
+
+        $encryptionMode = $this->getEncryptionMode($entity);
+        switch ($encryptionMode) {
+            case EncryptionService::MODE_PER_USER_SHAREABLE:
+                $decryptedKey = $this->decryptSymmetricKeyWithUserKey($entity);
+                break;
+            case EncryptionService::MODE_SYSTEM_ENCRYPTION:
+                $decryptedKey = $this->decryptSymmetricKeyWithSystemKey($entity);
+                break;
+            default:
+                throw new EncryptionException(sprintf('Encryption mode %s not supported.', $encryptionMode));
+        }
+
+        return $decryptedKey;
+    }
+
+    /**
+     * Decrypts the Symmetric Key of the entity using Per User Encryption
+     *
+     * @param $entity
+     *
+     * @return string
+     */
+    private function decryptSymmetricKeyWithUserKey($entity)
     {
         $encryptedKey = $entity->getKey();
         $decryptedKey = null;
@@ -308,6 +395,30 @@ class KeyManager implements KeyManagerInterface
         }
 
         $decryptedKey = $this->cryptographyProvider->decryptWithPrivateKey($userKey, $privateKey);
+
+        return $decryptedKey;
+    }
+
+    /**
+     * Decrypts the Symmetric Key of the entity using System Encryption
+     *
+     * @param $entity
+     *
+     * @return string
+     */
+    private function decryptSymmetricKeyWithSystemKey($entity)
+    {
+        /** @var SymmetricKey $encryptedKey */
+        $encryptedKey = $entity->getKey();
+        $decryptedKey = null;
+
+        $systemKey = $encryptedKey->getSystemKey();
+        $privateKey = $this->keyStore->getPrivateMasterKey();
+
+        if ($systemKey) {
+            $systemKey = base64_decode($systemKey);
+            $decryptedKey = $this->cryptographyProvider->decryptWithPrivateKey($systemKey, $privateKey);
+        }
 
         return $decryptedKey;
     }
@@ -426,6 +537,8 @@ class KeyManager implements KeyManagerInterface
      * @param array $params
      *
      * @return string|boolean
+     *
+     * @throws EncryptionException
      */
     private function decryptPrivateKey(PKEncryptionEnabledUserInterface $user, array $params = array())
     {
@@ -452,5 +565,20 @@ class KeyManager implements KeyManagerInterface
                         CryptographyProviderInterface::PRIVATE_KEY_ENCRYPTION);
 
         return $privateKey;
+    }
+
+    /**
+     * Returns the encryption mode for the given entity
+     *
+     * @param $entity
+     *
+     * @return ClassMetadata
+     */
+    private function getEncryptionMode($entity)
+    {
+        $className = ClassUtils::getClass($entity);
+        $classMetadata = $this->metadataFactory->getMetadataFor($className);
+
+        return $classMetadata->encryptionMode;
     }
 }
