@@ -15,7 +15,8 @@ services:
         arguments:
             - "@annotation_reader"
             - "@doctrine"
-            
+            - "@kernel"
+
     module7_encryption.cryptography_provider:
         class: Module7\EncryptionBundle\Crypt\CryptographyProvider
         arguments:

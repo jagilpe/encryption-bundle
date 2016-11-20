@@ -7,7 +7,15 @@ use Doctrine\Common\Util\ClassUtils;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Metadata\Driver\DriverChain;
 use Metadata\Driver\DriverInterface;
+use Metadata\Driver\FileLocator;
 use Module7\EncryptionBundle\Metadata\Driver\AnnotationDriver;
+use Module7\EncryptionBundle\Metadata\Driver\YamlDriver;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  * Class ClassMetadataFactory
@@ -26,6 +34,8 @@ class ClassMetadataFactory
      */
     private $doctrine;
 
+    private $kernel;
+
     /**
      * @var array
      */
@@ -37,18 +47,20 @@ class ClassMetadataFactory
     private $metadataLoaded = false;
 
     /**
+     * @var array
+     */
+    private $metadataDirs;
+
+    /**
      * @var DriverInterface
      */
     private $driver;
 
-    public function __construct(Reader $reader, Registry $doctrine)
+    public function __construct(Reader $reader, Registry $doctrine, KernelInterface $kernel)
     {
         $this->reader = $reader;
         $this->doctrine = $doctrine;
-        // Initialize the metadata driver
-        $this->driver = new DriverChain(array(
-            new AnnotationDriver($this->reader),
-        ));
+        $this->kernel = $kernel;
     }
 
     /**
@@ -116,6 +128,61 @@ class ClassMetadataFactory
      */
     private function getClassMetadata(\ReflectionClass $reflectionClass)
     {
-        return $this->driver->loadMetadataForClass($reflectionClass);
+        return $this->getMetadataDriver()->loadMetadataForClass($reflectionClass);
+    }
+
+    /**
+     * Returns the directories in which to look for the encryption metadata
+     *
+     * @return array
+     */
+    private function getMetadataDirs()
+    {
+        if (null === $this->metadataDirs) {
+            $this->metadataDirs = array();
+            $bundles = $this->kernel->getBundles();
+            $fs = new Filesystem();
+
+            /**
+             * @var string $bundleName
+             * @var BundleInterface $bundle
+             */
+            foreach ($bundles as $bundleName => $bundle) {
+                $directory = $this->kernel->locateResource("@$bundleName/Resources");
+                $directory .= '/config/m7_encryption';
+                if ($fs->exists($directory)) {
+                    $nameSpace = $bundle->getNamespace();
+                    $this->metadataDirs[$nameSpace] = $directory;
+                }
+            }
+        }
+
+        return $this->metadataDirs;
+    }
+
+    /**
+     * Returns the metadata driver
+     *
+     * @return DriverInterface
+     */
+    private function getMetadataDriver()
+    {
+        if (null === $this->driver) {
+            $metadataDirs = $this->getMetadataDirs();
+
+            $annotationDriver = new AnnotationDriver($this->reader);
+            if (!empty($metadataDirs)) {
+                $fileLocator = new FileLocator($metadataDirs);
+                $this->driver = new DriverChain(array(
+                    new YamlDriver($fileLocator),
+                    $annotationDriver,
+                ));
+            }
+            else {
+                $this->driver = $annotationDriver;
+            }
+        }
+
+        return $this->driver;
     }
 }

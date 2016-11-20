@@ -32,6 +32,20 @@ class EncryptionService
      * Supported entity encryption modes
      */
     const MODE_PER_USER_SHAREABLE = 'PER_USER_SHAREABLE';
+    const MODE_SYSTEM_ENCRYPTION = 'SYSTEM_ENCRYPTION';
+
+    /**
+     * Returns the supported encryption modes
+     *
+     * @return array
+     */
+    public static function getSupportedEncryptionModes()
+    {
+        return array(
+            self::MODE_PER_USER_SHAREABLE,
+            self::MODE_SYSTEM_ENCRYPTION,
+        );
+    }
 
     /**
      * @var \Doctrine\Bundle\DoctrineBundle\Registry

@@ -34,7 +34,8 @@ class AnnotationDriver implements DriverInterface
      */
     public function loadMetadataForClass(\ReflectionClass $reflectionClass)
     {
-        $classMetadata = new ClassMetadata($name = $reflectionClass->getName());
+        $className = $reflectionClass->getName();
+        $classMetadata = new ClassMetadata($className);
         $classMetadata->fileResources[] = $reflectionClass->getFileName();
 
         $encryptionAnnotation = $this->reader->getClassAnnotation(
