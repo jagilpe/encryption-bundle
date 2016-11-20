@@ -3,6 +3,7 @@
 namespace Module7\EncryptionBundle\Metadata\Driver;
 
 use Metadata\Driver\AbstractFileDriver;
+use Metadata\Driver\DriverInterface;
 use Module7\EncryptionBundle\Exception\EncryptionException;
 use Module7\EncryptionBundle\Metadata\ClassMetadata;
 use Module7\EncryptionBundle\Metadata\PropertyMetadata;
@@ -17,6 +18,16 @@ use Symfony\Component\Yaml\Yaml;
 class YamlDriver extends AbstractFileDriver
 {
     /**
+     * @var DriverInterface
+     */
+    private $driver;
+
+    public function setDriver(DriverInterface $driver)
+    {
+        $this->driver = $driver;
+    }
+
+    /**
      * Loads the class metadata for the given class from the given file
      *
      * @param \ReflectionClass $reflectionClass
@@ -29,9 +40,7 @@ class YamlDriver extends AbstractFileDriver
     protected function loadMetadataFromFile(\ReflectionClass $reflectionClass, $file)
     {
         $className = $reflectionClass->getName();
-        $classMetadata = new ClassMetadata($className);
-        $classMetadata->fileResources[] = $reflectionClass->getFileName();
-
+        $classMetadata = $this->generateClassMetadata($reflectionClass);
 
         $config = Yaml::parse(file_get_contents($file));
         if ( ! isset($config[$className])) {
@@ -39,9 +48,12 @@ class YamlDriver extends AbstractFileDriver
         }
 
         $classConfig = $config[$className];
+        $parentClassMetadata = $classMetadata->parentClassMetadata;
+        $encryptionEnabled = ($parentClassMetadata && $parentClassMetadata->encryptionEnabled)
+            || (isset($classConfig['encryptionEnabled']) && $classConfig['encryptionEnabled']);
 
-        if ($classConfig['encryptionEnabled']) {
-            $classMetadata->encryptionEnabled = $classConfig['encryptionEnabled'];
+        if ($encryptionEnabled) {
+            $classMetadata->encryptionEnabled = true;
             $encryptedFields = isset($classConfig['encryptedFields']) && is_array($classConfig['encryptedFields'])
                 ? $classConfig['encryptedFields']
                 : array();
@@ -52,6 +64,9 @@ class YamlDriver extends AbstractFileDriver
                     throw new EncryptionException(sprintf('Encryption mode %s not supported.', $encryptionMode));
                 }
                 $classMetadata->encryptionMode = $encryptionMode;
+            }
+            elseif ($parentClassMetadata) {
+                $classMetadata->encryptionMode = $parentClassMetadata->encryptionMode;
             }
 
             if (isset($classConfig['encryptedFile'])) {
@@ -64,7 +79,20 @@ class YamlDriver extends AbstractFileDriver
                     $classMetadata->encryptedFileMode = $encryptedFileMode;
                 }
             }
+            elseif ($parentClassMetadata) {
+                $classMetadata->encryptedFile = $parentClassMetadata->encryptedFile;
+                $classMetadata->encryptedFileMode = $parentClassMetadata->encryptedFileMode;
+            }
 
+            // Add the encrypted fields of the parent
+            if ($parentClassMetadata) {
+                $parentPropertiesMetadata = $parentClassMetadata->propertyMetadata;
+                foreach ($parentPropertiesMetadata as $parentPropertyMetadata) {
+                    $classMetadata->addPropertyMetadata($parentPropertyMetadata);
+                }
+            }
+
+            // Add the self encrypted fields
             foreach ($encryptedFields as $fieldName => $encryptedField) {
                 $reflectionProperty = $reflectionClass->hasProperty($fieldName)
                     ? $reflectionClass->getProperty($fieldName)
@@ -85,7 +113,6 @@ class YamlDriver extends AbstractFileDriver
         }
 
         return $classMetadata;
-
     }
 
     /**
@@ -94,5 +121,20 @@ class YamlDriver extends AbstractFileDriver
     protected function getExtension()
     {
         return 'yml';
+    }
+
+    private function generateClassMetadata(\ReflectionClass $reflectionClass)
+    {
+        $className = $reflectionClass->getName();
+        $classMetadata = new ClassMetadata($className);
+        $classMetadata->fileResources[] = $reflectionClass->getFileName();
+
+        $parentClass = $reflectionClass->getParentClass();
+        if ($this->driver && $parentClass) {
+            $parentMetadata = $this->driver->loadMetadataForClass($parentClass);
+            $classMetadata->parentClassMetadata = $parentMetadata;
+        }
+
+        return $classMetadata;
     }
 }

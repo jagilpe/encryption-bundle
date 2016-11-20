@@ -19,6 +19,11 @@ class ClassMetadata  extends MergeableClassMetadata
 
     public $encryptedFileMode;
 
+    /**
+     * @var ClassMetadata
+     */
+    public $parentClassMetadata;
+
     public function serialize()
     {
         $this->sortProperties();
@@ -28,6 +33,7 @@ class ClassMetadata  extends MergeableClassMetadata
             $this->encryptionMode,
             $this->encryptedFile,
             $this->encryptedFileMode,
+            $this->parentClassMetadata->serialize(),
             parent::serialize(),
         ));
     }
@@ -39,9 +45,11 @@ class ClassMetadata  extends MergeableClassMetadata
             $this->encryptionMode,
             $this->encryptedFile,
             $this->encryptedFileMode,
+            $parentClassMetadataString,
             $parentStr
             ) = unserialize($str);
 
+        $this->parentClassMetadata = unserialize($parentClassMetadataString);
         parent::unserialize($parentStr);
     }
 }

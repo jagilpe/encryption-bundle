@@ -173,10 +173,13 @@ class ClassMetadataFactory
             $annotationDriver = new AnnotationDriver($this->reader);
             if (!empty($metadataDirs)) {
                 $fileLocator = new FileLocator($metadataDirs);
+                $ymlDriver = new YamlDriver($fileLocator);
                 $this->driver = new DriverChain(array(
-                    new YamlDriver($fileLocator),
+                    $ymlDriver,
                     $annotationDriver,
                 ));
+
+                $ymlDriver->setDriver($this->driver);
             }
             else {
                 $this->driver = $annotationDriver;
