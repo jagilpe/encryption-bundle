@@ -17,5 +17,5 @@ final class EncryptedEntity
 {
     public $enabled = true;
 
-    public $mode = EncryptionService::MODE_PER_USER_SHAREABLE;
+    public $mode;
 }

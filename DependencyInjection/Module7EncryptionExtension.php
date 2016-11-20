@@ -2,6 +2,8 @@
 
 namespace Module7\EncryptionBundle\DependencyInjection;
 
+use Module7\EncryptionBundle\Service\EncryptionService;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -27,6 +29,9 @@ class Module7EncryptionExtension extends Extension
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
 
         if ($config['enabled']) {
+            if (!in_array($config['settings']['default_mode'], EncryptionService::getSupportedEncryptionModes())) {
+                throw new InvalidConfigurationException('Wrong encryption mode given');
+            }
             $container->setParameter('module7_encryption.settings', $config['settings']);
             $container->setAlias('module7_encryption.access_checker', $config['access_checker']);
             $loader->load('services.yml');

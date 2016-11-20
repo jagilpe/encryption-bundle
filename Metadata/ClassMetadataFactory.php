@@ -34,7 +34,15 @@ class ClassMetadataFactory
      */
     private $doctrine;
 
+    /**
+     * @var KernelInterface
+     */
     private $kernel;
+
+    /**
+     * @var array
+     */
+    private $settings;
 
     /**
      * @var array
@@ -56,11 +64,17 @@ class ClassMetadataFactory
      */
     private $driver;
 
-    public function __construct(Reader $reader, Registry $doctrine, KernelInterface $kernel)
+    public function __construct(
+        Reader $reader,
+        Registry $doctrine,
+        KernelInterface $kernel,
+        array $settings
+    )
     {
         $this->reader = $reader;
         $this->doctrine = $doctrine;
         $this->kernel = $kernel;
+        $this->settings = $settings;
     }
 
     /**
@@ -128,7 +142,12 @@ class ClassMetadataFactory
      */
     private function getClassMetadata(\ReflectionClass $reflectionClass)
     {
-        return $this->getMetadataDriver()->loadMetadataForClass($reflectionClass);
+        /** @var ClassMetadata $classMetadata */
+        $classMetadata = $this->getMetadataDriver()->loadMetadataForClass($reflectionClass);
+        if (null === $classMetadata->encryptionMode) {
+            $classMetadata->encryptionMode = $this->settings['default_mode'];
+        }
+        return $classMetadata;
     }
 
     /**
