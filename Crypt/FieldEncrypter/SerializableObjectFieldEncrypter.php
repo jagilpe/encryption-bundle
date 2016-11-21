@@ -17,7 +17,8 @@ class SerializableObjectFieldEncrypter extends DefaultFieldEncrypter
     public function encrypt($clearValue, KeyDataInterface $keyData)
     {
         $serializedValue = $clearValue !== null ? serialize($clearValue) : null;
-        return parent::encrypt($serializedValue, $keyData);
+        $encryptedValue = parent::encrypt($serializedValue, $keyData);
+        return $encryptedValue;
     }
 
     /**
@@ -26,6 +27,7 @@ class SerializableObjectFieldEncrypter extends DefaultFieldEncrypter
     public function decrypt($encryptedValue, KeyDataInterface $keyData)
     {
         $serializedValue = parent::decrypt($encryptedValue, $keyData);
-        return $serializedValue !== null ? unserialize($serializedValue) : null;
+        $decryptedValue = $serializedValue !== null ? unserialize($serializedValue) : null;
+        return $decryptedValue;
     }
 }

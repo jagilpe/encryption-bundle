@@ -646,9 +646,12 @@ class EncryptionService
             case 'text':
             case 'json_array':
             case 'simple_array':
+            case 'array':
+            case 'object':
                 return new FieldMapping\TextFieldMapping($this, $fieldMapping);
             case 'date':
             case 'datetime':
+            case 'time':
                 return new FieldMapping\DateTimeFieldMapping($this, $fieldMapping);
             case 'boolean':
             case 'smallint':
@@ -689,8 +692,11 @@ class EncryptionService
                 break;
             case 'date':
             case 'datetime':
+            case 'time':
             case 'json_array':
             case 'simple_array':
+            case 'array':
+            case 'object':
                 $encrypterClass = FieldEncrypter\SerializableObjectFieldEncrypter::class;
                 break;
             case 'boolean':
@@ -745,6 +751,7 @@ class EncryptionService
                 break;
             case 'date':
             case 'datetime':
+            case 'time':
                 $normalizerClass = FieldNormalizer\DateTimeFieldNormalizer::class;
                 break;
             case 'json_array':
@@ -752,6 +759,10 @@ class EncryptionService
                 break;
             case 'simple_array':
                 $normalizerClass = FieldNormalizer\SimpleArrayFieldNormalizer::class;
+                break;
+            case 'array':
+            case 'object':
+                $normalizerClass = FieldNormalizer\SerializableObjectFieldNormalizer::class;
                 break;
             case 'boolean':
             case 'smallint':
