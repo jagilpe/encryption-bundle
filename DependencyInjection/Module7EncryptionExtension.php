@@ -28,6 +28,7 @@ class Module7EncryptionExtension extends Extension
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
 
+        $container->setParameter('module7_encryption.enabled', $config['enabled']);
         if ($config['enabled']) {
             if (!in_array($config['settings']['default_mode'], EncryptionService::getSupportedEncryptionModes())) {
                 throw new InvalidConfigurationException('Wrong encryption mode given');
