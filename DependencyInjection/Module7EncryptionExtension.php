@@ -36,6 +36,9 @@ class Module7EncryptionExtension extends Extension
                 if (empty($config['settings']['user_classes'])) {
                     throw new InvalidConfigurationException('If Per User Encryption is enabled the user classes must be specified.');
                 }
+                if (empty($config['settings']['security_check_routes'])) {
+                    throw new InvalidConfigurationException('If Per User Encryption is enabled the security check route/s must be specified.');
+                }
             }
             $container->setParameter('module7_encryption.settings', $config['settings']);
             $container->setAlias('module7_encryption.access_checker', $config['access_checker']);
