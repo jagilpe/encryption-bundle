@@ -822,7 +822,8 @@ class EncryptionService
      */
     private function hasEncryptionFieldsDoctrineMetadata(DoctrineClassMetadata $classMetadata)
     {
-        if (ClassMetadataInfo::INHERITANCE_TYPE_JOINED === $classMetadata->inheritanceType) {
+        if (ClassMetadataInfo::INHERITANCE_TYPE_JOINED === $classMetadata->inheritanceType
+            || ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE === $classMetadata->inheritanceType) {
             $rootEntity = $classMetadata->rootEntityName;
             if ($rootEntity !== $classMetadata->getName()) {
                 $rootEntityEncryptionMetadata = $this->getEncryptionMetadataFor($rootEntity);
