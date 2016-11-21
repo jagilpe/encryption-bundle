@@ -4,15 +4,12 @@ namespace Module7\EncryptionBundle\Metadata;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Util\ClassUtils;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Metadata\Driver\DriverChain;
 use Metadata\Driver\DriverInterface;
 use Metadata\Driver\FileLocator;
 use Module7\EncryptionBundle\Metadata\Driver\AnnotationDriver;
 use Module7\EncryptionBundle\Metadata\Driver\YamlDriver;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -89,7 +86,7 @@ class ClassMetadataFactory
             // We have to load all the metadata
             $doctrineMetadata = $this->doctrine->getManager()->getMetadataFactory();
 
-            /** @var ClassMetadataInfo $doctrineClassMetadata */
+            /** @var ClassMetadata $doctrineClassMetadata */
             foreach ($doctrineMetadata->getAllMetadata() as $doctrineClassMetadata) {
                 $reflectionClass = $doctrineClassMetadata->getReflectionClass();
                 $this->metadata[$reflectionClass->getName()] = $this->getClassMetadata($reflectionClass);

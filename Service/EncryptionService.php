@@ -2,10 +2,11 @@
 
 namespace Module7\EncryptionBundle\Service;
 
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\ClassMetadata as DoctrineClassMetadata;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Module7\EncryptionBundle\Crypt\KeyData;
 use Module7\EncryptionBundle\Metadata\ClassMetadata;
 use Module7\EncryptionBundle\Metadata\ClassMetadataFactory;
@@ -157,17 +158,17 @@ class EncryptionService
     /**
      * Adds the metadata required to encrypt the doctrine entity
      *
-     * @param ClassMetadataInfo $metadata
-     * @return \Doctrine\ORM\Mapping\ClassMetadataInfo
+     * @param DoctrineClassMetadata $metadata
+     * @return DoctrineClassMetadata
      */
-    public function addEncryptionMetadata(ClassMetadataInfo $metadata)
+    public function addEncryptionMetadata(DoctrineClassMetadata $metadata)
     {
         if ($metadata->isMappedSuperclass) {
             return;
         }
 
         $reflection = $metadata->getReflectionClass();
-        if ($this->hasEncryptionEnabled($reflection)) {
+        if ($this->hasEncryptionEnabled($reflection) && !$this->hasEncryptionFieldsDoctrineMetadata($metadata)) {
             if ($this->keyPerEntityRequired($reflection)) {
                 // Add the field required to hold the key used to encrypt this entity
                 $keyField = array(
@@ -213,7 +214,7 @@ class EncryptionService
                 $override = $encryptedFieldMapping->getMappingAttributeOverride();
                 /*
                  * It's not possible to change the type of a column using
-                 * Doctrine\ORM\Mapping\ClassMetadataInfo::setAssociationOverride
+                 * Doctrine\ORM\Mapping\ClassMetadata::setAssociationOverride
                  * The only alternative that I found it to directly access the fieldMappings property
                  * that until the version 2.5 of Doctrine ORM is public. If this changes in comming
                  * versions of Doctrine this should also be changed
@@ -526,11 +527,11 @@ class EncryptionService
      * Checks if the class has been enabled for encryption
      *
      * @param \ReflectionClass $reflection
-     * @param \Doctrine\ORM\Mapping\ClassMetadataInfo $metadata
+     * @param \Doctrine\ORM\Mapping\ClassMetadata $metadata
      *
      * @return boolean
      */
-    public function hasEncryptionEnabled(\ReflectionClass $reflection, ClassMetadataInfo $metadata = null)
+    public function hasEncryptionEnabled(\ReflectionClass $reflection, DoctrineClassMetadata $metadata = null)
     {
         $classMetadata = $this->getEncryptionMetadataFor($reflection->getName());
         return $classMetadata->encryptionEnabled;
@@ -811,5 +812,23 @@ class EncryptionService
     private function getEncryptionMetadataFor($className)
     {
         return $this->metadataFactory->getMetadataFor($className);
+    }
+
+    /**
+     * Checks if the entity already has the encryption fields metadata inherited from a parent class.
+     *
+     * @param DoctrineClassMetadata $classMetadata
+     * @return bool
+     */
+    private function hasEncryptionFieldsDoctrineMetadata(DoctrineClassMetadata $classMetadata)
+    {
+        if (ClassMetadataInfo::INHERITANCE_TYPE_JOINED === $classMetadata->inheritanceType) {
+            $rootEntity = $classMetadata->rootEntityName;
+            if ($rootEntity !== $classMetadata->getName()) {
+                $rootEntityEncryptionMetadata = $this->getEncryptionMetadataFor($rootEntity);
+                return $rootEntityEncryptionMetadata && $rootEntityEncryptionMetadata->encryptionEnabled;
+            }
+        }
+        return false;
     }
 }
