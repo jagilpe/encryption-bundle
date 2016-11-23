@@ -53,7 +53,7 @@ class EncryptEntitiesCommand extends ContainerAwareCommand
         foreach ($encryptedEntityTypes as $encryptedEntityType) {
             $entityClass = $encryptedEntityType->name;
             $repository = $entityManager->getRepository($entityClass);
-            $entities = $repository->findAll();
+            $entities = $repository->findBy(array('encrypted' => false));
             $total = count($entities);
             if ($total > 0){
                 $message = "Encrypting $total entities of type $entityClass";
