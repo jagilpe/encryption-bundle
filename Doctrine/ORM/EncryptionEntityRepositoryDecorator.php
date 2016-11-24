@@ -91,7 +91,8 @@ class EncryptionEntityRepositoryDecorator implements ObjectRepository, Selectabl
     */
     public function findOneBy(array $criteria)
     {
-        return $this->wrapped->findOneBy($criteria);
+        $elements = $this->findBy($criteria);
+        return !empty($elements) ? reset($elements) : null;
     }
 
     /**
