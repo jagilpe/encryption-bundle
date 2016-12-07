@@ -169,6 +169,7 @@ class EncryptionService
 
         $reflection = $metadata->getReflectionClass();
         if ($this->hasEncryptionEnabled($reflection) && !$this->hasEncryptionFieldsDoctrineMetadata($metadata)) {
+            $metadata->setChangeTrackingPolicy(ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT);
             if ($this->keyPerEntityRequired($reflection)) {
                 // Add the field required to hold the key used to encrypt this entity
                 $keyField = array(
