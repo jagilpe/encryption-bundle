@@ -2,6 +2,8 @@
 
 namespace Module7\EncryptionBundle\Service;
 
+use AppBundle\Entity\EmployeeProfile;
+use AppBundle\Entity\UserProfile;
 use Doctrine\ORM\Mapping\ClassMetadata as DoctrineClassMetadata;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\Common\Annotations\Reader;
@@ -206,23 +208,6 @@ class EncryptionService
             );
             $metadata->mapField($isMigratedField);
 
-            // Modify the metadata of the encrypted fields of the entity
-            $encryptedFields = $this->getEncryptionEnabledFields($reflection);
-            foreach ($encryptedFields as $encryptedField) {
-                $fieldName = $encryptedField->name;
-                $fieldMapping = $metadata->getFieldMapping($fieldName);
-                $encryptedFieldMapping = $this->getEncryptedFieldMapping($fieldMapping);
-                $override = $encryptedFieldMapping->getMappingAttributeOverride();
-                /*
-                 * It's not possible to change the type of a column using
-                 * Doctrine\ORM\Mapping\ClassMetadata::setAssociationOverride
-                 * The only alternative that I found it to directly access the fieldMappings property
-                 * that until the version 2.5 of Doctrine ORM is public. If this changes in comming
-                 * versions of Doctrine this should also be changed
-                 */
-                $metadata->fieldMappings[$fieldName] = $override;
-            }
-
             // Add a field to check if the associated file is encrypted
             if ($this->hasFileEncryptionEnabled($reflection)) {
                 $isFileEncryptedField = array(
@@ -231,6 +216,28 @@ class EncryptionService
                     'type' => 'boolean',
                 );
                 $metadata->mapField($isFileEncryptedField);
+            }
+        }
+
+        if ($this->hasEncryptionEnabled($reflection)) {
+            // Modify the metadata of the encrypted fields of the entity
+            $encryptedFields = $this->getEncryptionEnabledFields($reflection);
+            foreach ($encryptedFields as $encryptedField) {
+                $fieldName = $encryptedField->name;
+                $fieldMapping = $metadata->getFieldMapping($fieldName);
+                // We process the field if has not already been process in another class of the hierarchy
+                if (!isset($fieldMapping['_old_type'])) {
+                    $encryptedFieldMapping = $this->getEncryptedFieldMapping($fieldMapping);
+                    $override = $encryptedFieldMapping->getMappingAttributeOverride();
+                    /*
+                     * It's not possible to change the type of a column using
+                     * Doctrine\ORM\Mapping\ClassMetadata::setAssociationOverride
+                     * The only alternative that I found it to directly access the fieldMappings property
+                     * that until the version 2.5 of Doctrine ORM is public. If this changes in comming
+                     * versions of Doctrine this should also be changed
+                     */
+                    $metadata->fieldMappings[$fieldName] = $override;
+                }
             }
         }
 
@@ -410,7 +417,7 @@ class EncryptionService
                     $encryptionEnabledFields = $this->getEncryptionEnabledFields($reflection);
 
                     // Encrypt the fields
-                    foreach ($encryptionEnabledFields as $field) {
+                    foreach ($encryptionEnabledFields as $fieldName => $field) {
                         $fieldEncrypter = $this->getFieldEncrypter($field, $reflection);
                         $value = $this->getFieldValue($entity, $field);
                         $processedValue = $fieldEncrypter->{$operation}($value, $keyData);
@@ -827,13 +834,14 @@ class EncryptionService
     }
 
     /**
-     * Checks if the entity already has the encryption fields metadata inherited from a parent class.
+     * Checks if the required fields metadata were inserted in some other class of the hierachy.
      *
      * @param DoctrineClassMetadata $classMetadata
      * @return bool
      */
     private function hasEncryptionFieldsDoctrineMetadata(DoctrineClassMetadata $classMetadata)
     {
+        $return = false;
         if (ClassMetadataInfo::INHERITANCE_TYPE_JOINED === $classMetadata->inheritanceType
             || ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE === $classMetadata->inheritanceType) {
             $rootEntity = $classMetadata->rootEntityName;
@@ -842,6 +850,7 @@ class EncryptionService
                 return $rootEntityEncryptionMetadata && $rootEntityEncryptionMetadata->encryptionEnabled;
             }
         }
-        return false;
+
+        return $return;
     }
 }
