@@ -2,8 +2,6 @@
 
 namespace Module7\EncryptionBundle\Doctrine\ORM;
 
-use AppBundle\Entity\Medication;
-use AppBundle\Entity\MedicationAccomplishment;
 use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\Common\Collections\Selectable;
 use Doctrine\Common\Collections\Criteria;
