@@ -222,8 +222,8 @@ class EncryptionEntityRepositoryDecorator implements ObjectRepository, Selectabl
                 if (!$this->fieldValueMatches($value, $fieldName, $fieldValue)) {
                     return false;
                 }
-                return true;
             }
+            return true;
         });
 
         return $result;
