@@ -283,6 +283,9 @@ class EncryptionService
                 }
             }
         }
+
+        // Now we have to decrypt the entity once again to be able to work with it from this moment
+        $this->processEntity($entity, self::DECRYPT);
     }
 
     /**
