@@ -259,7 +259,7 @@ class EncryptionService
     }
 
     /**
-     * Process all encryption related actions on an Entity pre persist event
+     * Process all encryption related actions on an Entity post persist event
      *
      * @TODO remove Polavis Viva AppBundle dependency
      *
@@ -284,6 +284,9 @@ class EncryptionService
                 }
             }
         }
+
+        // Now we have to decrypt the entity once again to be able to work with it from this moment
+        $this->processEntity($entity, self::DECRYPT);
     }
 
     /**
@@ -297,6 +300,19 @@ class EncryptionService
     {
         // Process the encryption of the entity
         $this->processEntity($entity, self::ENCRYPT);
+    }
+
+    /**
+     * Process all encryption related actions on an Entity post persist event
+     *
+     * @param mixed $entity
+     *
+     * @return mixed
+     */
+    public function processEntityPostUpdate($entity)
+    {
+        // Now we have to decrypt the entity once again to be able to work with it from this moment
+        $this->processEntity($entity, self::DECRYPT);
     }
 
     /**

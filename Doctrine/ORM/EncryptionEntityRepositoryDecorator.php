@@ -222,8 +222,8 @@ class EncryptionEntityRepositoryDecorator implements ObjectRepository, Selectabl
                 if (!$this->fieldValueMatches($value, $fieldName, $fieldValue)) {
                     return false;
                 }
-                return true;
             }
+            return true;
         });
 
         return $result;
@@ -244,7 +244,7 @@ class EncryptionEntityRepositoryDecorator implements ObjectRepository, Selectabl
             $matches = in_array($value, $fieldValue);
         }
         else {
-            $matches = ($value === $fieldValue);
+            $matches = ($value == $fieldValue);
         }
 
         return $matches;
