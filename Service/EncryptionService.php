@@ -19,6 +19,7 @@ use Module7\EncryptionBundle\Crypt\FieldMapping;
 use Module7\EncryptionBundle\Crypt\FieldEncrypter;
 use Module7\EncryptionBundle\Crypt\FieldNormalizer;
 use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Module7\EncryptionBundle\Entity\EncryptableFile;
 use Module7\EncryptionBundle\Exception\EncryptionException;
 
 /**
@@ -440,10 +441,10 @@ class EncryptionService
     /**
      * Encrypts the uploaded file contained in a File Entity
      *
-     * @param mixed $fileEntity
+     * @param EncryptableFile $fileEntity
      * @param KeyData $keyData
      */
-    private function encryptFile($fileEntity, KeyData $keyData)
+    private function encryptFile(EncryptableFile $fileEntity, KeyData $keyData)
     {
         $file = $fileEntity->getFile();
         $encrypt = false;
@@ -451,8 +452,7 @@ class EncryptionService
         if ($file) {
             $filePath = $file->getRealPath();
             $encrypt = true;
-        }
-        elseif ($fileEntity->getId() && $fileEntity->fileExists() && !$fileEntity->isFileEncrypted()) {
+        } elseif ($fileEntity->getId() && $fileEntity->fileExists() && !$fileEntity->isFileEncrypted()) {
             // The document was persisted but somehow the file was not encrypted
             $filePath = $fileEntity->getAbsolutePath();
             $encrypt = true;
