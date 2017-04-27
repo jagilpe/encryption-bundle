@@ -2,8 +2,6 @@
 
 namespace Module7\EncryptionBundle\Service;
 
-use AppBundle\Entity\EmployeeProfile;
-use AppBundle\Entity\UserProfile;
 use Doctrine\ORM\Mapping\ClassMetadata as DoctrineClassMetadata;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\Common\Annotations\Reader;
@@ -261,10 +259,7 @@ class EncryptionService
     /**
      * Process all encryption related actions on an Entity post persist event
      *
-     * @TODO remove Polavis Viva AppBundle dependency
-     *
      * @param mixed $entity
-     *
      * @return mixed
      */
     public function processEntityPostPersist($entity)

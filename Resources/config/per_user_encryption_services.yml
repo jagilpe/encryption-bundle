@@ -16,12 +16,4 @@ services:
             - "@module7_encryption.encryption.service"
         tags:
             - { name: kernel.event_listener, event: kernel.response, priority: 2 }
-            
-    module7_encryption.web_service_private_key_load_listener:
-        class: Module7\EncryptionBundle\EventListener\WebServicePrivateKeyLoadListener
-        arguments:
-            - "%module7_encryption.settings%"
-            - "@security.token_storage"
-            - "@module7_encryption.key_manager"
-        tags:
-            - { name: kernel.event_listener, event: kernel.request }
+

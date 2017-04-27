@@ -2,8 +2,6 @@
 
 namespace Module7\EncryptionBundle\Security;
 
-use Symfony\Component\Security\Core\User\UserInterface;
-
 /**
  * Default implementation of the AccessCheckerInterface
  *

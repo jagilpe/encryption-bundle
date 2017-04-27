@@ -21,7 +21,7 @@ class CryptographyProvider implements CryptographyProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function encrypt($value, KeyData $keyData, $encType = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
+    public function encrypt($value, KeyDataInterface $keyData, $encType = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
     {
         $method = $this->getCipherMethod($encType);
         $encryptionOptions = $this->getEncryptionOptions($encType);
@@ -31,7 +31,7 @@ class CryptographyProvider implements CryptographyProviderInterface
     /**
      * {@inheritdoc}
      */
-    public function decrypt($value, KeyData $keyData, $encType = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
+    public function decrypt($value, KeyDataInterface $keyData, $encType = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
     {
         $method = $this->getCipherMethod($encType);
         $encryptionOptions = $this->getEncryptionOptions($encType);
@@ -127,9 +127,9 @@ class CryptographyProvider implements CryptographyProviderInterface
     /**
      * Returns the cipher method corresponding to a determined element type
      *
-     * @param string $type
-     *
+     * @param string $encType
      * @return string
+     * @throws EncryptionException
      */
     private function getCipherMethod($encType = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
     {
@@ -146,7 +146,7 @@ class CryptographyProvider implements CryptographyProviderInterface
     /**
      * Returns the key length for the desired encryption method
      *
-     * @param string $type
+     * @param string $encType
      *
      * @return integer
      */
@@ -173,32 +173,22 @@ class CryptographyProvider implements CryptographyProviderInterface
     }
 
     /**
-     * Returns the configured digest method
-     *
-     * @return string
-     */
-    private function getDigestMethod()
-    {
-        return $this->settings['digest_method'];
-    }
-
-    /**
      * Returns the options for the encryption depending on the encryption type
      *
-     * @param string $type
-     *
-     * @return integer
+     * @param string $encType
+     * @return int
+     * @throws EncryptionException
      */
-    private function getEncryptionOptions($type = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
+    private function getEncryptionOptions($encType = CryptographyProviderInterface::PROPERTY_ENCRYPTION)
     {
-        switch ($type) {
+        switch ($encType) {
             case CryptographyProviderInterface::PROPERTY_ENCRYPTION:
             case CryptographyProviderInterface::PRIVATE_KEY_ENCRYPTION:
                 return 0;
             case CryptographyProviderInterface::FILE_ENCRYPTION:
                 return OPENSSL_RAW_DATA;
             default:
-                throw new EncryptionException('Encryption type not supported: '.$type);
+                throw new EncryptionException('Encryption type not supported: '.$encType);
         }
     }
 }

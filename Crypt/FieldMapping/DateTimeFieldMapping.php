@@ -3,7 +3,7 @@
 namespace Module7\EncryptionBundle\Crypt\FieldMapping;
 
 /**
- * Implementation of the FieldMappintInterface for DateTime fields
+ * Implementation of the FieldMappingInterface for DateTime fields
  *
  * @author Javier Gil Pereda <javier.gil@module-7.com>
  */

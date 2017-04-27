@@ -10,6 +10,13 @@ namespace Module7\EncryptionBundle\Entity;
 interface PKEncryptionEnabledUserInterface
 {
     /**
+     * Returns the Id of the User
+     *
+     * @return mixed
+     */
+    public function getId();
+
+    /**
      * Returns the Public Key of the User
      *
      * @return string

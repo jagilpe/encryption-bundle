@@ -17,7 +17,7 @@ use Module7\EncryptionBundle\Service\EncryptionService;
 class EncryptionSubscriber implements EventSubscriber
 {
     /**
-     * @var Module7\EncryptionBundle\Service\EncryptionService
+     * @var \Module7\EncryptionBundle\Service\EncryptionService
      */
     private $encryptionService;
 

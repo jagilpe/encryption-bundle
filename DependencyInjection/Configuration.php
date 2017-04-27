@@ -4,7 +4,6 @@ namespace Module7\EncryptionBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
-use Module7\EncryptionBundle\Service\EncryptionService;
 
 /**
  * This is the class that validates and merges configuration from your app/config files

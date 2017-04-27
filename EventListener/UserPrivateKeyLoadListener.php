@@ -8,7 +8,6 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Module7\EncryptionBundle\Crypt\KeyManagerInterface;
 use Module7\EncryptionBundle\Crypt\KeyStoreInterface;
 use Module7\EncryptionBundle\Crypt\KeyManager;
-use PolavisConnectBundle\Security\SecurityCodeUser;
 use Module7\EncryptionBundle\Exception\EncryptionException;
 
 /**
@@ -75,25 +74,13 @@ class UserPrivateKeyLoadListener
                 $user = $this->getUser();
 
                 if ($user) {
-                    if (!$user instanceof SecurityCodeUser) {
-                        $password = $request->request->get('_password');
-                        $privateKey = $this->keyManager->getUserPrivateKey($user, array('password' => $password));
-                        if ($privateKey) {
-                            $request->getSession()->set(KeyManager::SESSION_PRIVATE_KEY_PARAM, $privateKey);
-                        }
-                        else {
-                            throw new EncryptionException('Could not load user\'s key');
-                        }
+                    $password = $request->request->get('_password');
+                    $privateKey = $this->keyManager->getUserPrivateKey($user, array('password' => $password));
+                    if ($privateKey) {
+                        $request->getSession()->set(KeyManager::SESSION_PRIVATE_KEY_PARAM, $privateKey);
                     }
                     else {
-                        $vivaUser = $user->getSecurityCode()->getUserProfile()->getUser();
-                        $privateKey = $privateKey = $this->keyStore->getPrivateKey($vivaUser);
-                        if ($privateKey) {
-                            $request->getSession()->set(KeyManager::SESSION_PRIVATE_KEY_PARAM, $privateKey);
-                        }
-                        else {
-                            throw new EncryptionException('Could not load user\'s key');
-                        }
+                        throw new EncryptionException('Could not load user\'s key');
                     }
                 }
             }

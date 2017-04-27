@@ -2,8 +2,6 @@
 
 namespace Module7\EncryptionBundle\Crypt\FieldNormalizer;
 
-use Module7\EncryptionBundle\Exception\EncryptionException;
-
 /**
  * Implementation of the EncryptedFieldNormalizerInterface for simple array fields
  *

@@ -17,21 +17,21 @@ interface CryptographyProviderInterface
      * Encrypts a value using symmetric encryption
      *
      * @param string $value
-     * @param KeyData $keyData
+     * @param KeyDataInterface $keyData
      *
      * @return string
      */
-    public function encrypt($value, KeyData $keyData);
+    public function encrypt($value, KeyDataInterface $keyData);
 
     /**
      * Decrypts a value using symmetric encryption
      *
      * @param string $value
-     * @param KeyData $keyData
+     * @param KeyDataInterface $keyData
      *
      * @return string
      */
-    public function decrypt($value, KeyData $keyData);
+    public function decrypt($value, KeyDataInterface $keyData);
 
     /**
      * Encrypts with a public key using asymmetric encryption
@@ -57,7 +57,7 @@ interface CryptographyProviderInterface
      * Encrypts with a public key using asymmetric encryption
      *
      * @param string $value
-     * @param mixed $publicKey
+     * @param mixed $privateKey
      *
      * @return string
      */
@@ -67,7 +67,7 @@ interface CryptographyProviderInterface
      * Decrypts with a public key using asymmetric encryption
      *
      * @param string $value
-     * @param mixed $publicKey
+     * @param mixed $privateKey
      *
      * @return string
      */

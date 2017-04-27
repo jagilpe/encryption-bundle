@@ -2,7 +2,6 @@
 
 namespace Module7\EncryptionBundle\Entity\Traits;
 
-use Doctrine\Common\Util\ClassUtils;
 use Module7\EncryptionBundle\Crypt\SymmetricKey;
 
 /**

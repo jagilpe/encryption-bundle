@@ -2,9 +2,6 @@
 
 namespace Module7\EncryptionBundle\Security;
 
-use Symfony\Component\Security\Core\User\UserInterface;
-use Module7\EncryptionBundle\Exception\EncryptionException;
-
 /**
  * Implementation of the AccessCheckerInterface that chains the response of a list of othe AccessCheckers
  *

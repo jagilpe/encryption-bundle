@@ -44,6 +44,7 @@ class EncryptionEntityRepositoryDecorator implements ObjectRepository, Selectabl
      *
      * @param string $method
      * @param array  $arguments
+     * @return mixed
      */
     public function __call($method, $arguments)
     {
@@ -266,12 +267,11 @@ class EncryptionEntityRepositoryDecorator implements ObjectRepository, Selectabl
                 $value2 = $this->getFieldValue($entity2, $fieldName);
 
                 if ($value1 < $value2) {
-                    $result = (strtoupper($order) === 'ASC') ? -1 : 1;
+                    return (strtoupper($order) === 'ASC') ? -1 : 1;
                 }
                 elseif ($value1 > $value2) {
-                    $result = (strtoupper($order) === 'ASC') ? 1 : -1;
+                    return (strtoupper($order) === 'ASC') ? 1 : -1;
                 }
-                return $result;
             }
 
             // If we are here is because all the values were equal

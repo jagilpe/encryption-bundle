@@ -3,7 +3,6 @@
 namespace Module7\EncryptionBundle\Annotation;
 
 use Doctrine\Common\Annotations\Annotation;
-use Module7\EncryptionBundle\Service\EncryptionService;
 
 /**
  * Annotation to mark an entity as encryptable
