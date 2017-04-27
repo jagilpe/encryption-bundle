@@ -20,7 +20,7 @@ class CreateUserKeysCommand extends ContainerAwareCommand
 {
     protected function configure()
     {
-        $this->setName('module7_crypt:user:generate_keys')
+        $this->setName('jagilpe:encryption:user:generate_keys')
             ->setDescription('Generates the encryption keys of a user')
             ->addArgument(
                 'usename',

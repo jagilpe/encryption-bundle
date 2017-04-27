@@ -21,7 +21,7 @@ class EncryptEntitiesCommand extends ContainerAwareCommand
      */
     protected function configure()
     {
-        $this->setName('module7_crypt:migrate:encrypt_entities')
+        $this->setName('jagilpe:encryption:migrate:encrypt_entities')
             ->setDescription('Converts the unencrypted values of the encrypted enabled field to a compatible form')
             ->addOption(
                 'force',
