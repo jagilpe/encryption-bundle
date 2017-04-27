@@ -30,9 +30,5 @@
 		}
 	},
 	"target-dir" : "Jagilpe/EncryptionBundle",
-	"extra" : {
-		"branch-alias" : {
-			"dev-master" : "dev-master"
-		}
-	}
+	"minimum-stability": "dev"
 }
