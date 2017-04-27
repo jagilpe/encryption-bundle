@@ -1,11 +1,10 @@
 {
-	"name" : "module7/encryption",
+	"name" : "jagilpe/encryption",
 	"type" : "symfony-bundle",
 	"description" : "A Symfony Encryption Bundle",
 	"keywords" : [
 		"Encryption"
 	],
-	"homepage" : "https://www.module-7.com",
 	"license" : "MIT",
 	"authors" : [
 		{
