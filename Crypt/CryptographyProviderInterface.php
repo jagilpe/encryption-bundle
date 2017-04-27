@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt;
+namespace Jagilpe\EncryptionBundle\Crypt;
 
 /**
  * Manages all the encryption modes and algorithms

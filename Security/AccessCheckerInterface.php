@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Security;
+namespace Jagilpe\EncryptionBundle\Security;
 
 /**
  * Defines the interface to check the different permissions of the users related with the encryption

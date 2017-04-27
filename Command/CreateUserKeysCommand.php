@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Command;
+namespace Jagilpe\EncryptionBundle\Command;
 
 use Doctrine\Common\Util\ClassUtils;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 
 /**
@@ -69,7 +69,7 @@ class CreateUserKeysCommand extends ContainerAwareCommand
     {
         $container = $this->getContainer();
         $entityManager = $container->get('doctrine')->getManager();
-        $encryptionSettings = $container->getParameter('module7_encryption.settings');
+        $encryptionSettings = $container->getParameter('jagilpe_encryption.settings');
         $userClasses = $encryptionSettings['user_classes'];
 
         $users = array();
@@ -93,7 +93,7 @@ class CreateUserKeysCommand extends ContainerAwareCommand
     {
         if (!$user->getPublicKey() || !$user->getPrivateKey()) {
             $container = $this->getContainer();
-            $keyManager = $container->get('module7_encryption.key_manager');
+            $keyManager = $container->get('jagilpe_encryption.key_manager');
             $keyManager->generateUserPKIKeys($user);
         }
     }

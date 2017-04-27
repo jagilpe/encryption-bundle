@@ -1,8 +1,8 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt\FieldEncrypter;
+namespace Jagilpe\EncryptionBundle\Crypt\FieldEncrypter;
 
-use Module7\EncryptionBundle\Crypt\KeyDataInterface;
+use Jagilpe\EncryptionBundle\Crypt\KeyDataInterface;
 
 /**
  * Implementation of the FieldEncrypterInterface for serializable objects

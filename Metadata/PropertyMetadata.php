@@ -1,12 +1,12 @@
 <?php
 
-namespace Module7\EncryptionBundle\Metadata;
+namespace Jagilpe\EncryptionBundle\Metadata;
 
 use Metadata\PropertyMetadata as BasePropertyMetadata;
 
 /**
  * Class PropertyMetadata
- * @package Module7\EncryptionBundle\Metadata
+ * @package Jagilpe\EncryptionBundle\Metadata
  * @author Javier Gil Pereda <javier.gil@module-7.com>
  */
 class PropertyMetadata extends BasePropertyMetadata

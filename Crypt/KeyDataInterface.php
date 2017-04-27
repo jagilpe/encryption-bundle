@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt;
+namespace Jagilpe\EncryptionBundle\Crypt;
 
 /**
  * Interface for the key data required for symetric encryption

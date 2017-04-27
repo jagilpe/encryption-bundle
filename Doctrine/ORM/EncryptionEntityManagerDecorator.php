@@ -1,9 +1,9 @@
 <?php
 
-namespace Module7\EncryptionBundle\Doctrine\ORM;
+namespace Jagilpe\EncryptionBundle\Doctrine\ORM;
 
 use Doctrine\ORM\Decorator\EntityManagerDecorator;
-use Module7\EncryptionBundle\Service\EncryptionService;
+use Jagilpe\EncryptionBundle\Service\EncryptionService;
 
 /**
  * Decorator for the Doctrine Entity Manager. Returns decorated versions of the Repositories

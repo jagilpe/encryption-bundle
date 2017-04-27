@@ -1,12 +1,12 @@
 <?php
 
-namespace Module7\EncryptionBundle\Entity;
-use Module7\EncryptionBundle\Crypt\SymmetricKey;
+namespace Jagilpe\EncryptionBundle\Entity;
+use Jagilpe\EncryptionBundle\Crypt\SymmetricKey;
 
 /**
  * Contract for all the encryptable entities using per user encryption
  *
- * @package Module7\EncryptionBundle\Entity
+ * @package Jagilpe\EncryptionBundle\Entity
  * @author Javier Gil Pereda <javier.gil@module-7.com>
  */
 interface PerUserEncryptableEntity extends EncryptableEntity

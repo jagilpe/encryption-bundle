@@ -1,8 +1,8 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt;
+namespace Jagilpe\EncryptionBundle\Crypt;
 
-use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 
 /**
  * Holds the symmetric key used to encrypt the fields of an entity
@@ -46,7 +46,7 @@ class SymmetricKey
     /**
      * Adds a new version of the key encrypted with the key of a new user
      *
-     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      * @param string $encryptedKey
      */
     public function addKey(PKEncryptionEnabledUserInterface $user, $encryptedKey)

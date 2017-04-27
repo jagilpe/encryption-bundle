@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Entity;
+namespace Jagilpe\EncryptionBundle\Entity;
 
 /**
  * Defines the interface to treat with an encription enabled user entity

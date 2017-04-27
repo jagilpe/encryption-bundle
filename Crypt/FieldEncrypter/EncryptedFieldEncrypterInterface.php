@@ -1,8 +1,8 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt\FieldEncrypter;
+namespace Jagilpe\EncryptionBundle\Crypt\FieldEncrypter;
 
-use Module7\EncryptionBundle\Crypt\KeyDataInterface;
+use Jagilpe\EncryptionBundle\Crypt\KeyDataInterface;
 
 /**
  * Defines an interface for the encryption of the content of a determined field
@@ -15,7 +15,7 @@ interface EncryptedFieldEncrypterInterface
      * Encrypts the value of the field
      *
      * @param mixed $clearValue
-     * @param \Module7\EncryptionBundle\Crypt\KeyDataInterface $keyData
+     * @param \Jagilpe\EncryptionBundle\Crypt\KeyDataInterface $keyData
      *
      * @return string
      */
@@ -25,7 +25,7 @@ interface EncryptedFieldEncrypterInterface
      * Decrypts the value of the field
      *
      * @param string $encryptedValue
-     * @param \Module7\EncryptionBundle\Crypt\KeyDataInterface $keyData
+     * @param \Jagilpe\EncryptionBundle\Crypt\KeyDataInterface $keyData
      *
      * @return mixed
      */

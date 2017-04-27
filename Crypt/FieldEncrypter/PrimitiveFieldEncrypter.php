@@ -1,9 +1,9 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt\FieldEncrypter;
+namespace Jagilpe\EncryptionBundle\Crypt\FieldEncrypter;
 
-use Module7\EncryptionBundle\Crypt\KeyDataInterface;
-use Module7\EncryptionBundle\Exception\EncryptionException;
+use Jagilpe\EncryptionBundle\Crypt\KeyDataInterface;
+use Jagilpe\EncryptionBundle\Exception\EncryptionException;
 
 /**
  * Implementation of the FieldEncrypterInterface for primitive values other than the text ones

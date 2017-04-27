@@ -1,8 +1,8 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt\FieldNormalizer;
+namespace Jagilpe\EncryptionBundle\Crypt\FieldNormalizer;
 
-use Module7\EncryptionBundle\Exception\EncryptionException;
+use Jagilpe\EncryptionBundle\Exception\EncryptionException;
 
 /**
  * Implementation of the EncryptedFieldNormalizerInterface for primitive fields other than the text ones
@@ -32,7 +32,7 @@ class PrimitiveFieldNormalizer extends DefaultFieldNormalizer
 
     /**
      * {@inheritDoc}
-     * @see \Module7\EncryptionBundle\Crypt\FieldNormalizer\DefaultFieldNormalizer::normalize()
+     * @see \Jagilpe\EncryptionBundle\Crypt\FieldNormalizer\DefaultFieldNormalizer::normalize()
      */
     public function normalize($clearValue)
     {

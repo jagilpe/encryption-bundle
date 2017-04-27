@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt\FieldMapping;
+namespace Jagilpe\EncryptionBundle\Crypt\FieldMapping;
 
 /**
  * Defines an interface to get the new mapping metadata for the encrypted fields

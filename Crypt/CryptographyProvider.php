@@ -1,8 +1,8 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt;
+namespace Jagilpe\EncryptionBundle\Crypt;
 
-use Module7\EncryptionBundle\Exception\EncryptionException;
+use Jagilpe\EncryptionBundle\Exception\EncryptionException;
 
 /**
  * Manages all the encryption modes and algorithms

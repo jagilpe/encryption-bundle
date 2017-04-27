@@ -1,7 +1,7 @@
 <?php
 
-namespace Module7\EncryptionBundle\Entity\Traits;
-use Module7\EncryptionBundle\Entity\EncryptableEntity;
+namespace Jagilpe\EncryptionBundle\Entity\Traits;
+use Jagilpe\EncryptionBundle\Entity\EncryptableEntity;
 
 /**
  * Trait with the properties and methods needed by the encryptable entities

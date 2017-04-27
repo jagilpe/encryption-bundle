@@ -3,13 +3,13 @@
 /**
  * This file holds the definition of the main bundle of the application
  */
-namespace Module7\EncryptionBundle;
+namespace Jagilpe\EncryptionBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Module7\EncryptionBundle\DependencyInjection\Compiler\AccessCheckerPass;
+use Jagilpe\EncryptionBundle\DependencyInjection\Compiler\AccessCheckerPass;
 
-class Module7EncryptionBundle extends Bundle
+class JagilpeEncryptionBundle extends Bundle
 {
     /**
      *

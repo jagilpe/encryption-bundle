@@ -1,10 +1,10 @@
 <?php
 
-namespace Module7\EncryptionBundle\Entity\Traits;
+namespace Jagilpe\EncryptionBundle\Entity\Traits;
 
 use Doctrine\Common\Util\ClassUtils;
-use Module7\EncryptionBundle\Crypt\SymmetricKey;
-use Module7\EncryptionBundle\Entity\PerUserEncryptableEntity;
+use Jagilpe\EncryptionBundle\Crypt\SymmetricKey;
+use Jagilpe\EncryptionBundle\Entity\PerUserEncryptableEntity;
 
 /**
  * Trait with the properties and methods needed by the encryptable entities for the

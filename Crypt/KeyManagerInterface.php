@@ -1,8 +1,8 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt;
+namespace Jagilpe\EncryptionBundle\Crypt;
 
-use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 
 /**
  * Manages the different encryption keys
@@ -14,21 +14,21 @@ interface KeyManagerInterface
     /**
      * Generates the required keys for the PKI
      *
-     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
     public function generateUserPKIKeys(PKEncryptionEnabledUserInterface $user);
 
     /**
      * Stores the keys of the user in the configured key store
      *
-     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
     public function storeUserPKIKeys(PKEncryptionEnabledUserInterface $user);
 
     /**
      * Handles a password change by the user
      *
-     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      * @param $currentPassword
      *
      */
@@ -37,7 +37,7 @@ interface KeyManagerInterface
     /**
      * Handles a password reset by the user
      *
-     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      *
      */
     public function handleUserPasswordReset(PKEncryptionEnabledUserInterface $user);
@@ -48,7 +48,7 @@ interface KeyManagerInterface
      * @param mixed $entity
      * @param array $params
      *
-     * @return \Module7\EncryptionBundle\Crypt\KeyDataInterface
+     * @return \Jagilpe\EncryptionBundle\Crypt\KeyDataInterface
      */
     public function getEntityEncryptionKeyData($entity);
 

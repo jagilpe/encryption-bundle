@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt\FieldNormalizer;
+namespace Jagilpe\EncryptionBundle\Crypt\FieldNormalizer;
 
 /**
  * Default implementation of the EncryptedFieldNormalizerInterface
@@ -18,7 +18,7 @@ class DefaultFieldNormalizer implements EncryptedFieldNormalizerInterface
      *
      * {@inheritdoc}
      *
-     * @see \Module7\EncryptionBundle\Crypt\FieldNormalizer\EncryptedFieldNormalizerInterface::normalize()
+     * @see \Jagilpe\EncryptionBundle\Crypt\FieldNormalizer\EncryptedFieldNormalizerInterface::normalize()
      */
     public function normalize($clearValue)
     {

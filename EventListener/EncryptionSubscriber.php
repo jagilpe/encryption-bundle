@@ -1,12 +1,12 @@
 <?php
 
-namespace Module7\EncryptionBundle\EventListener;
+namespace Jagilpe\EncryptionBundle\EventListener;
 
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
-use Module7\EncryptionBundle\Service\EncryptionService;
+use Jagilpe\EncryptionBundle\Service\EncryptionService;
 
 /**
  * Event subscriber for all the doctrine related events for the encryption
@@ -17,7 +17,7 @@ use Module7\EncryptionBundle\Service\EncryptionService;
 class EncryptionSubscriber implements EventSubscriber
 {
     /**
-     * @var \Module7\EncryptionBundle\Service\EncryptionService
+     * @var \Jagilpe\EncryptionBundle\Service\EncryptionService
      */
     private $encryptionService;
 

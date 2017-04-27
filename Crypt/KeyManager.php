@@ -1,17 +1,17 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt;
+namespace Jagilpe\EncryptionBundle\Crypt;
 
 use Doctrine\Common\Util\ClassUtils;
-use Module7\EncryptionBundle\Metadata\ClassMetadata;
-use Module7\EncryptionBundle\Metadata\ClassMetadataFactory;
-use Module7\EncryptionBundle\Service\EncryptionService;
+use Jagilpe\EncryptionBundle\Metadata\ClassMetadata;
+use Jagilpe\EncryptionBundle\Metadata\ClassMetadataFactory;
+use Jagilpe\EncryptionBundle\Service\EncryptionService;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
-use Module7\EncryptionBundle\Exception\EncryptionException;
-use Module7\EncryptionBundle\Security\AccessCheckerInterface;
+use Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Jagilpe\EncryptionBundle\Exception\EncryptionException;
+use Jagilpe\EncryptionBundle\Security\AccessCheckerInterface;
 
 /**
  * Default implementation of the KeyManagerInterface
@@ -33,17 +33,17 @@ class KeyManager implements KeyManagerInterface
     private $session;
 
     /**
-     * @var \Module7\EncryptionBundle\Crypt\CryptographyProviderInterface
+     * @var \Jagilpe\EncryptionBundle\Crypt\CryptographyProviderInterface
      */
     private $cryptographyProvider;
 
     /**
-     * @var \Module7\EncryptionBundle\Crypt\KeyStoreInterface
+     * @var \Jagilpe\EncryptionBundle\Crypt\KeyStoreInterface
      */
     private $keyStore;
 
     /**
-     * @var \Module7\EncryptionBundle\Security\AccessCheckerInterface
+     * @var \Jagilpe\EncryptionBundle\Security\AccessCheckerInterface
      */
     private $accessChecker;
 
@@ -465,7 +465,7 @@ class KeyManager implements KeyManagerInterface
     /**
      * Encrypts the Private key of the user using his password
      *
-     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      *
      * @return array
      */
@@ -510,7 +510,7 @@ class KeyManager implements KeyManagerInterface
     /**
      * Returns the password digest of the password of the user
      *
-     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      *
      * @return string
      */
@@ -533,7 +533,7 @@ class KeyManager implements KeyManagerInterface
     /**
      * Encrypts the Private key of the user using his password or a digest of it
      *
-     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      * @param array $params
      *
      * @return string|boolean

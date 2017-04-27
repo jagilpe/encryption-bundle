@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Security;
+namespace Jagilpe\EncryptionBundle\Security;
 
 /**
  * Default implementation of the AccessCheckerInterface

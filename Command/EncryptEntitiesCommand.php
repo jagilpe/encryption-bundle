@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Command;
+namespace Jagilpe\EncryptionBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -46,7 +46,7 @@ class EncryptEntitiesCommand extends ContainerAwareCommand
 
         $container = $this->getContainer();
         $entityManager = $container->get('doctrine')->getManager();
-        $encryptionService = $container->get('module7_encryption.encryption.service');
+        $encryptionService = $container->get('jagilpe_encryption.encryption.service');
 
         // Encrypt the entities in the database
         $encryptedEntityTypes = $encryptionService->getEncryptionEnabledEntitiesMetadata();

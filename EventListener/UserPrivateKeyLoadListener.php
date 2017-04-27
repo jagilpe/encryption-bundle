@@ -1,14 +1,14 @@
 <?php
 
-namespace Module7\EncryptionBundle\EventListener;
+namespace Jagilpe\EncryptionBundle\EventListener;
 
-use Module7\EncryptionBundle\Service\EncryptionService;
+use Jagilpe\EncryptionBundle\Service\EncryptionService;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Module7\EncryptionBundle\Crypt\KeyManagerInterface;
-use Module7\EncryptionBundle\Crypt\KeyStoreInterface;
-use Module7\EncryptionBundle\Crypt\KeyManager;
-use Module7\EncryptionBundle\Exception\EncryptionException;
+use Jagilpe\EncryptionBundle\Crypt\KeyManagerInterface;
+use Jagilpe\EncryptionBundle\Crypt\KeyStoreInterface;
+use Jagilpe\EncryptionBundle\Crypt\KeyManager;
+use Jagilpe\EncryptionBundle\Exception\EncryptionException;
 
 /**
  * Event listener to load the private key of the logged in user
@@ -29,12 +29,12 @@ class UserPrivateKeyLoadListener
     private $tokenStorage;
 
     /**
-     * @var \Module7\EncryptionBundle\Crypt\KeyManagerInterface
+     * @var \Jagilpe\EncryptionBundle\Crypt\KeyManagerInterface
      */
     private $keyManager;
 
     /**
-     * @var \Module7\EncryptionBundle\Crypt\KeyStoreInterface
+     * @var \Jagilpe\EncryptionBundle\Crypt\KeyStoreInterface
      */
     private $keyStore;
 
@@ -90,7 +90,7 @@ class UserPrivateKeyLoadListener
     /**
      * Returns the logged in user
      *
-     * @return \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface
+     * @return \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface
      */
     private function getUser()
     {

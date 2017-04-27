@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt\FieldMapping;
+namespace Jagilpe\EncryptionBundle\Crypt\FieldMapping;
 
 /**
  * Implementation of the FieldEncrypterInterface for string fields

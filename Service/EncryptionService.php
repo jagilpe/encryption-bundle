@@ -1,24 +1,24 @@
 <?php
 
-namespace Module7\EncryptionBundle\Service;
+namespace Jagilpe\EncryptionBundle\Service;
 
 use Doctrine\ORM\Mapping\ClassMetadata as DoctrineClassMetadata;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
-use Module7\EncryptionBundle\Crypt\KeyData;
-use Module7\EncryptionBundle\Metadata\ClassMetadata;
-use Module7\EncryptionBundle\Metadata\ClassMetadataFactory;
-use Module7\EncryptionBundle\Metadata\PropertyMetadata;
-use Module7\EncryptionBundle\Crypt\CryptographyProviderInterface;
-use Module7\EncryptionBundle\Crypt\KeyManagerInterface;
-use Module7\EncryptionBundle\Crypt\FieldMapping;
-use Module7\EncryptionBundle\Crypt\FieldEncrypter;
-use Module7\EncryptionBundle\Crypt\FieldNormalizer;
-use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
-use Module7\EncryptionBundle\Entity\EncryptableFile;
-use Module7\EncryptionBundle\Exception\EncryptionException;
+use Jagilpe\EncryptionBundle\Crypt\KeyData;
+use Jagilpe\EncryptionBundle\Metadata\ClassMetadata;
+use Jagilpe\EncryptionBundle\Metadata\ClassMetadataFactory;
+use Jagilpe\EncryptionBundle\Metadata\PropertyMetadata;
+use Jagilpe\EncryptionBundle\Crypt\CryptographyProviderInterface;
+use Jagilpe\EncryptionBundle\Crypt\KeyManagerInterface;
+use Jagilpe\EncryptionBundle\Crypt\FieldMapping;
+use Jagilpe\EncryptionBundle\Crypt\FieldEncrypter;
+use Jagilpe\EncryptionBundle\Crypt\FieldNormalizer;
+use Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Jagilpe\EncryptionBundle\Entity\EncryptableFile;
+use Jagilpe\EncryptionBundle\Exception\EncryptionException;
 
 /**
  * Encapsulates the core encryption logic
@@ -60,12 +60,12 @@ class EncryptionService
     private $reader;
 
     /**
-     * @var \Module7\EncryptionBundle\Crypt\CryptographyProviderInterface
+     * @var \Jagilpe\EncryptionBundle\Crypt\CryptographyProviderInterface
      */
     private $cryptographyProvider;
 
     /**
-     * @var \Module7\EncryptionBundle\Crypt\KeyManagerInterface
+     * @var \Jagilpe\EncryptionBundle\Crypt\KeyManagerInterface
      */
     private $keyManager;
 
@@ -328,7 +328,7 @@ class EncryptionService
     /**
      * Initializes user before is persisted
      *
-     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
     public function handleUserPreCreation(PKEncryptionEnabledUserInterface $user)
     {
@@ -338,7 +338,7 @@ class EncryptionService
     /**
      * Executes the required actions after the user is persisted
      *
-     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
     public function handleUserPostCreation(PKEncryptionEnabledUserInterface $user)
     {
@@ -348,7 +348,7 @@ class EncryptionService
     /**
      * Handles the event of a password change by the user
      *
-     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      * @param string $currentPassword
      */
     public function handleUserPasswordChangeSuccess(PKEncryptionEnabledUserInterface $user, $currentPassword)
@@ -359,7 +359,7 @@ class EncryptionService
     /**
      * Handles the event of a password reset by the user
      *
-     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
     public function handleUserPasswordResetSuccess(PKEncryptionEnabledUserInterface $user)
     {
@@ -653,7 +653,7 @@ class EncryptionService
      *
      * @param array $fieldMapping
      *
-     * @return \Module7\EncryptionBundle\Crypt\FieldMapping\EncryptedFieldMappingInterface
+     * @return \Jagilpe\EncryptionBundle\Crypt\FieldMapping\EncryptedFieldMappingInterface
      *
      * @throws EncryptionException
      */
@@ -689,7 +689,7 @@ class EncryptionService
      * @param \ReflectionProperty $reflectionProperty
      * @param \ReflectionClass $reflectionClass
      *
-     * @return \Module7\EncryptionBundle\Crypt\FieldEncrypter\EncryptedFieldEncrypterInterface
+     * @return \Jagilpe\EncryptionBundle\Crypt\FieldEncrypter\EncryptedFieldEncrypterInterface
      *
      * @throws EncryptionException
      */
@@ -748,7 +748,7 @@ class EncryptionService
      * @param \ReflectionProperty $reflectionProperty
      * @param \ReflectionClass $reflectionClass
      *
-     * @return \Module7\EncryptionBundle\Crypt\FieldNormalizer\EncryptedFieldNormalizerInterface
+     * @return \Jagilpe\EncryptionBundle\Crypt\FieldNormalizer\EncryptedFieldNormalizerInterface
      *
      * @throws EncryptionException
      */

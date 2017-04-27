@@ -11,7 +11,7 @@
     </php>
 
     <testsuites>
-        <testsuite name="Module7 EncryptionBundle Test Suite">
+        <testsuite name="Jagilpe EncryptionBundle Test Suite">
             <directory>./Tests/</directory>
         </testsuite>
     </testsuites>

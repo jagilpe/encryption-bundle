@@ -26,10 +26,10 @@
 	},
 	"autoload" : {
 		"psr-0" : {
-			"Module7\\EncryptionBundle\\" : ""
+			"Jagilpe\\EncryptionBundle\\" : ""
 		}
 	},
-	"target-dir" : "Module7/EncryptionBundle",
+	"target-dir" : "Jagilpe/EncryptionBundle",
 	"extra" : {
 		"branch-alias" : {
 			"dev-master" : "dev-master"

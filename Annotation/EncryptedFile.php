@@ -1,9 +1,9 @@
 <?php
 
-namespace Module7\EncryptionBundle\Annotation;
+namespace Jagilpe\EncryptionBundle\Annotation;
 
 use Doctrine\Common\Annotations\Annotation;
-use Module7\EncryptionBundle\Service\EncryptionService;
+use Jagilpe\EncryptionBundle\Service\EncryptionService;
 
 /**
  * Annotation to mark an entity as an encryptable file

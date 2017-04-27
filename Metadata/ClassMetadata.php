@@ -1,12 +1,12 @@
 <?php
 
-namespace Module7\EncryptionBundle\Metadata;
+namespace Jagilpe\EncryptionBundle\Metadata;
 
 use Metadata\MergeableClassMetadata;
 
 /**
  * Class ClassMetadata
- * @package Module7\EncryptionBundle\Metadata
+ * @package Jagilpe\EncryptionBundle\Metadata
  * @author Javier Gil Pereda <javier.gil@module-7.com>
  */
 class ClassMetadata  extends MergeableClassMetadata

@@ -1,9 +1,9 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt\FieldEncrypter;
+namespace Jagilpe\EncryptionBundle\Crypt\FieldEncrypter;
 
-use Module7\EncryptionBundle\Crypt\CryptographyProviderInterface;
-use Module7\EncryptionBundle\Crypt\KeyDataInterface;
+use Jagilpe\EncryptionBundle\Crypt\CryptographyProviderInterface;
+use Jagilpe\EncryptionBundle\Crypt\KeyDataInterface;
 
 /**
  * Default implementation of the FieldEncrypterInterface
@@ -13,7 +13,7 @@ use Module7\EncryptionBundle\Crypt\KeyDataInterface;
 class DefaultFieldEncrypter implements EncryptedFieldEncrypterInterface
 {
     /**
-     * @var \Module7\EncryptionBundle\Crypt\CryptographyProviderInterface
+     * @var \Jagilpe\EncryptionBundle\Crypt\CryptographyProviderInterface
      */
     private $cryptographyProvider;
 

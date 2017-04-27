@@ -1,8 +1,8 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt\FieldMapping;
+namespace Jagilpe\EncryptionBundle\Crypt\FieldMapping;
 
-use Module7\EncryptionBundle\Exception\EncryptionException;
+use Jagilpe\EncryptionBundle\Exception\EncryptionException;
 
 /**
  * Implementation of the EncryptedFieldMappingInterface for primitive values other than the text ones

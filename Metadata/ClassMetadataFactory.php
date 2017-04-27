@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Metadata;
+namespace Jagilpe\EncryptionBundle\Metadata;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Util\ClassUtils;
@@ -8,15 +8,15 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Metadata\Driver\DriverChain;
 use Metadata\Driver\DriverInterface;
 use Metadata\Driver\FileLocator;
-use Module7\EncryptionBundle\Metadata\Driver\AnnotationDriver;
-use Module7\EncryptionBundle\Metadata\Driver\YamlDriver;
+use Jagilpe\EncryptionBundle\Metadata\Driver\AnnotationDriver;
+use Jagilpe\EncryptionBundle\Metadata\Driver\YamlDriver;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  * Class ClassMetadataFactory
- * @package Module7\EncryptionBundle\Metadata
+ * @package Jagilpe\EncryptionBundle\Metadata
  * @author Javier Gil Pereda <javier.gil@module-7.com>
  */
 class ClassMetadataFactory

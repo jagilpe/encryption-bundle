@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Entity\Traits;
+namespace Jagilpe\EncryptionBundle\Entity\Traits;
 
 use Doctrine\ORM\Mapping as ORM;
 

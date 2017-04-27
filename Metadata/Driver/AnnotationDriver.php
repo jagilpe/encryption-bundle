@@ -1,18 +1,18 @@
 <?php
 
-namespace Module7\EncryptionBundle\Metadata\Driver;
+namespace Jagilpe\EncryptionBundle\Metadata\Driver;
 
 use Metadata\Driver\DriverInterface;
 use Doctrine\Common\Annotations\Reader;
-use Module7\EncryptionBundle\Annotation\EncryptedEntity;
-use Module7\EncryptionBundle\Annotation\EncryptedField;
-use Module7\EncryptionBundle\Annotation\EncryptedFile;
-use Module7\EncryptionBundle\Metadata\ClassMetadata;
-use Module7\EncryptionBundle\Metadata\PropertyMetadata;
+use Jagilpe\EncryptionBundle\Annotation\EncryptedEntity;
+use Jagilpe\EncryptionBundle\Annotation\EncryptedField;
+use Jagilpe\EncryptionBundle\Annotation\EncryptedFile;
+use Jagilpe\EncryptionBundle\Metadata\ClassMetadata;
+use Jagilpe\EncryptionBundle\Metadata\PropertyMetadata;
 
 /**
  * Class AnnotationDriver
- * @package Module7\EncryptionBundle\Metadata\Driver
+ * @package Jagilpe\EncryptionBundle\Metadata\Driver
  * @author Javier Gil Pereda <javier.gil@module-7.com>
  */
 class AnnotationDriver implements DriverInterface
@@ -40,7 +40,7 @@ class AnnotationDriver implements DriverInterface
 
         $encryptionAnnotation = $this->reader->getClassAnnotation(
             $reflectionClass,
-            'Module7\\EncryptionBundle\\Annotation\\EncryptedEntity'
+            'Jagilpe\\EncryptionBundle\\Annotation\\EncryptedEntity'
         );
         /** @var EncryptedEntity $encryptionAnnotation */
         if ($encryptionAnnotation) {
@@ -49,7 +49,7 @@ class AnnotationDriver implements DriverInterface
 
             $encryptedFileAnnotation = $this->reader->getClassAnnotation(
                 $reflectionClass,
-                'Module7\\EncryptionBundle\\Annotation\\EncryptedFile'
+                'Jagilpe\\EncryptionBundle\\Annotation\\EncryptedFile'
             );
 
             /** @var EncryptedFile $encryptedFileAnnotation */
@@ -61,7 +61,7 @@ class AnnotationDriver implements DriverInterface
             foreach ($reflectionClass->getProperties() as $reflectionProperty) {
                 $propertyAnnotation = $this->reader->getPropertyAnnotation(
                     $reflectionProperty,
-                    'Module7\\EncryptionBundle\\Annotation\\EncryptedField'
+                    'Jagilpe\\EncryptionBundle\\Annotation\\EncryptedField'
                 );
 
                 /** @var EncryptedField $propertyAnnotation */

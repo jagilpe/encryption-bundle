@@ -1,11 +1,11 @@
 <?php
 
-namespace Module7\EncryptionBundle\Entity;
+namespace Jagilpe\EncryptionBundle\Entity;
 
 /**
  * Contract for all the encryptable entities
  *
- * @package Module7\EncryptionBundle\Entity
+ * @package Jagilpe\EncryptionBundle\Entity
  * @author Javier Gil Pereda <javier.gil@module-7.com>
  */
 interface EncryptableEntity

@@ -1,13 +1,13 @@
 <?php
 
-namespace Module7\EncryptionBundle\EventListener;
+namespace Jagilpe\EncryptionBundle\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use FOS\UserBundle\FOSUserEvents;
 use FOS\UserBundle\Event\FormEvent as FOSFormEvent;
 use FOS\UserBundle\Event\FilterUserResponseEvent as FOSFilterUserResponseEvent;
-use Module7\EncryptionBundle\Service\EncryptionService;
-use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Jagilpe\EncryptionBundle\Service\EncryptionService;
+use Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 
 /**
  * Event subscriber for all the user related events for the encryption
@@ -18,7 +18,7 @@ use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
 class UserEventsSubsbriber implements EventSubscriberInterface
 {
     /**
-     * @var \Module7\EncryptionBundle\Service\EncryptionService
+     * @var \Jagilpe\EncryptionBundle\Service\EncryptionService
      */
     private $encryptionService;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt\FieldNormalizer;
+namespace Jagilpe\EncryptionBundle\Crypt\FieldNormalizer;
 
 /**
  * Defines an interface to get convert the original values of a field to the one required by the encryption module

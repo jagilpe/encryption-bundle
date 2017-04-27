@@ -1,11 +1,11 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt;
+namespace Jagilpe\EncryptionBundle\Crypt;
 
 use Doctrine\Bundle\DoctrineBundle\Registry as Doctrine;
-use Module7\EncryptionBundle\Exception\EncryptionException;
-use Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
-use Module7\EncryptionBundle\Entity\PKIPrivateKey;
+use Jagilpe\EncryptionBundle\Exception\EncryptionException;
+use Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface;
+use Jagilpe\EncryptionBundle\Entity\PKIPrivateKey;
 
 /**
  * Default implementation of the KeyStore
@@ -20,7 +20,7 @@ class KeyStore implements KeyStoreInterface
     private $doctrine;
 
     /**
-     * @var \Module7\EncryptionBundle\Crypt\CryptographyProviderInterface
+     * @var \Jagilpe\EncryptionBundle\Crypt\CryptographyProviderInterface
      */
     private $cryptographyProvider;
 
@@ -127,9 +127,9 @@ class KeyStore implements KeyStoreInterface
     /**
      * Returns the Key pair of the user or a new one if it has not already been persisted
      *
-     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      *
-     * @return \Module7\EncryptionBundle\Entity\PKIPrivateKey
+     * @return \Jagilpe\EncryptionBundle\Entity\PKIPrivateKey
      */
     private function getUserKey(PKEncryptionEnabledUserInterface $user)
     {
@@ -150,8 +150,8 @@ class KeyStore implements KeyStoreInterface
     /**
      * Returns the previously persisted key pair of a user
      *
-     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
-     * @return \Module7\EncryptionBundle\Entity\PKIPrivateKey
+     * @param \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @return \Jagilpe\EncryptionBundle\Entity\PKIPrivateKey
      */
     private function findKeyByUser(PKEncryptionEnabledUserInterface $user)
     {
@@ -170,7 +170,7 @@ class KeyStore implements KeyStoreInterface
     /**
      * Deletes the key pair of a user
      *
-     * @param \Module7\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
+     * @param \Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface $user
      */
     private function deleteUserKey(PKEncryptionEnabledUserInterface$user, $flush = false)
     {
@@ -196,13 +196,13 @@ class KeyStore implements KeyStoreInterface
      */
     private function getKeyRepository()
     {
-        return $this->getEntityManager()->getRepository('Module7EncryptionBundle:PKIPrivateKey');
+        return $this->getEntityManager()->getRepository('JagilpeEncryptionBundle:PKIPrivateKey');
     }
 
     /**
      * Encrypts the private key of the user using the app master public key
      *
-     * @param \Module7\EncryptionBundle\Entity\PKIPrivateKey $pkiKey
+     * @param \Jagilpe\EncryptionBundle\Entity\PKIPrivateKey $pkiKey
      */
     private function encryptPrivateKey(PKIPrivateKey $pkiKey)
     {
@@ -235,7 +235,7 @@ class KeyStore implements KeyStoreInterface
     /**
      * Descrypts the private key of the user using the app master private key and returns it
      *
-     * @param \Module7\EncryptionBundle\Entity\PKIPrivateKey $pkiKey
+     * @param \Jagilpe\EncryptionBundle\Entity\PKIPrivateKey $pkiKey
      *
      * @return string
      */

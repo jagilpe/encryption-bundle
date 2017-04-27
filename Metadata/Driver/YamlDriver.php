@@ -1,18 +1,18 @@
 <?php
 
-namespace Module7\EncryptionBundle\Metadata\Driver;
+namespace Jagilpe\EncryptionBundle\Metadata\Driver;
 
 use Metadata\Driver\AbstractFileDriver;
 use Metadata\Driver\DriverInterface;
-use Module7\EncryptionBundle\Exception\EncryptionException;
-use Module7\EncryptionBundle\Metadata\ClassMetadata;
-use Module7\EncryptionBundle\Metadata\PropertyMetadata;
-use Module7\EncryptionBundle\Service\EncryptionService;
+use Jagilpe\EncryptionBundle\Exception\EncryptionException;
+use Jagilpe\EncryptionBundle\Metadata\ClassMetadata;
+use Jagilpe\EncryptionBundle\Metadata\PropertyMetadata;
+use Jagilpe\EncryptionBundle\Service\EncryptionService;
 use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class YamlDriver
- * @package Module7\EncryptionBundle\Metadata\Driver
+ * @package Jagilpe\EncryptionBundle\Metadata\Driver
  * @author Javier Gil Pereda <javier.gil@module-7.com>
  */
 class YamlDriver extends AbstractFileDriver

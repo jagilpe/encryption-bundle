@@ -1,8 +1,8 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt\FieldNormalizer;
+namespace Jagilpe\EncryptionBundle\Crypt\FieldNormalizer;
 
-use Module7\EncryptionBundle\Exception\EncryptionException;
+use Jagilpe\EncryptionBundle\Exception\EncryptionException;
 
 /**
  * Implementation of the EncryptedFieldNormalizerInterface for date and datetime fields
@@ -15,7 +15,7 @@ class DateTimeFieldNormalizer implements EncryptedFieldNormalizerInterface
      *
      * {@inheritdoc}
      *
-     * @see \Module7\EncryptionBundle\Crypt\FieldNormalizer\EncryptedFieldNormalizerInterface::normalize()
+     * @see \Jagilpe\EncryptionBundle\Crypt\FieldNormalizer\EncryptedFieldNormalizerInterface::normalize()
      */
     public function normalize($clearValue)
     {

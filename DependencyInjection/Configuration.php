@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\DependencyInjection;
+namespace Jagilpe\EncryptionBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -20,13 +20,13 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('module7_encryption');
+        $rootNode = $treeBuilder->root('jagilpe_encryption');
 
         $rootNode
             ->addDefaultsIfNotSet()
             ->children()
                 ->scalarNode('enabled')->defaultValue(false)->end()
-                ->scalarNode('access_checker')->defaultValue('module7_encryption.security.access_checker.chained')->end()
+                ->scalarNode('access_checker')->defaultValue('jagilpe_encryption.security.access_checker.chained')->end()
                 ->arrayNode('settings')
                     ->addDefaultsIfNotSet()
                     ->children()

@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\DependencyInjection\Compiler;
+namespace Jagilpe\EncryptionBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Reference;
@@ -22,13 +22,13 @@ class AccessCheckerPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         // Check if the list factory is defined
-        if (!$container->has('module7_encryption.security.access_checker.chained')) {
+        if (!$container->has('jagilpe_encryption.security.access_checker.chained')) {
             return;
         }
 
-        $definition = $container->findDefinition('module7_encryption.security.access_checker.chained');
+        $definition = $container->findDefinition('jagilpe_encryption.security.access_checker.chained');
 
-        $taggedServices = $container->findTaggedServiceIds('module7_encryption.access_checker');
+        $taggedServices = $container->findTaggedServiceIds('jagilpe_encryption.access_checker');
 
         if (!empty($taggedServices)) {
             foreach ($taggedServices as $id => $tags) {
@@ -36,7 +36,7 @@ class AccessCheckerPass implements CompilerPassInterface
             }
         }
         else {
-            $container->setAlias('module7_encryption.access_checker', 'module7_encryption.security.access_checker.default');
+            $container->setAlias('jagilpe_encryption.access_checker', 'jagilpe_encryption.security.access_checker.default');
         }
     }
 }

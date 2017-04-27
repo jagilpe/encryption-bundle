@@ -1,70 +1,70 @@
 services:
     # Encryption services
-    module7_encryption.encryption.service:
-        class: Module7\EncryptionBundle\Service\EncryptionService
+    jagilpe_encryption.encryption.service:
+        class: Jagilpe\EncryptionBundle\Service\EncryptionService
         arguments:
             - "@doctrine"
             - "@annotation_reader"
-            - "@module7_encryption.cryptography_provider"
-            - "@module7_encryption.key_manager"
-            - "@module7_encryption.metadata_factory"
-            - "%module7_encryption.settings%"
+            - "@jagilpe_encryption.cryptography_provider"
+            - "@jagilpe_encryption.key_manager"
+            - "@jagilpe_encryption.metadata_factory"
+            - "%jagilpe_encryption.settings%"
 
-    module7_encryption.metadata_factory:
-        class: Module7\EncryptionBundle\Metadata\ClassMetadataFactory
+    jagilpe_encryption.metadata_factory:
+        class: Jagilpe\EncryptionBundle\Metadata\ClassMetadataFactory
         arguments:
             - "@annotation_reader"
             - "@doctrine"
             - "@kernel"
-            - "%module7_encryption.settings%"
+            - "%jagilpe_encryption.settings%"
 
-    module7_encryption.cryptography_provider:
-        class: Module7\EncryptionBundle\Crypt\CryptographyProvider
+    jagilpe_encryption.cryptography_provider:
+        class: Jagilpe\EncryptionBundle\Crypt\CryptographyProvider
         arguments:
-            - "%module7_encryption.settings%"
+            - "%jagilpe_encryption.settings%"
         
-    module7_encryption.key_manager:
-        class: Module7\EncryptionBundle\Crypt\KeyManager
+    jagilpe_encryption.key_manager:
+        class: Jagilpe\EncryptionBundle\Crypt\KeyManager
         arguments:
             - "@security.token_storage"
             - "@session"
-            - "@module7_encryption.cryptography_provider"
-            - "@module7_encryption.key_store"
+            - "@jagilpe_encryption.cryptography_provider"
+            - "@jagilpe_encryption.key_store"
             - "@event_dispatcher"
-            - "@module7_encryption.access_checker"
-            - "@module7_encryption.metadata_factory"
-            - "%module7_encryption.settings%"
+            - "@jagilpe_encryption.access_checker"
+            - "@jagilpe_encryption.metadata_factory"
+            - "%jagilpe_encryption.settings%"
 
-    module7_encryption.key_store:
-        class: Module7\EncryptionBundle\Crypt\KeyStore
+    jagilpe_encryption.key_store:
+        class: Jagilpe\EncryptionBundle\Crypt\KeyStore
         arguments:
             - "@doctrine"
-            - "@module7_encryption.cryptography_provider"
+            - "@jagilpe_encryption.cryptography_provider"
             - "%enc_master_key%"
 
-    module7_encryption.decorating_entity_manager:
-        class: Module7\EncryptionBundle\Doctrine\ORM\EncryptionEntityManagerDecorator
+    jagilpe_encryption.decorating_entity_manager:
+        class: Jagilpe\EncryptionBundle\Doctrine\ORM\EncryptionEntityManagerDecorator
         decorates: doctrine.orm.default_entity_manager
         arguments: 
-            - "@module7_encryption.decorating_entity_manager.inner"
-            - "@module7_encryption.encryption.service"
+            - "@jagilpe_encryption.decorating_entity_manager.inner"
+            - "@jagilpe_encryption.encryption.service"
         public: false
     
     # Event subscribers and listeners
-    module7_encryption.doctrine_subscriber:
-        class: Module7\EncryptionBundle\EventListener\EncryptionSubscriber
+    jagilpe_encryption.doctrine_subscriber:
+        class: Jagilpe\EncryptionBundle\EventListener\EncryptionSubscriber
         arguments:
-            - "@module7_encryption.encryption.service"
+            - "@jagilpe_encryption.encryption.service"
         tags:
             - { name: doctrine.event_subscriber, connection: default, priority: -10 }
 
     # default access checker
-    module7_encryption.security.access_checker.default:
-        class: Module7\EncryptionBundle\Security\DefaultAccessChecker
+    jagilpe_encryption.security.access_checker.default:
+        class: Jagilpe\EncryptionBundle\Security\DefaultAccessChecker
         arguments:
-            - "%module7_encryption.settings%"
+            - "%jagilpe_encryption.settings%"
 
-    module7_encryption.security.access_checker.chained:
-        class: Module7\EncryptionBundle\Security\ChainedAccessChecker
+    jagilpe_encryption.security.access_checker.chained:
+        class: Jagilpe\EncryptionBundle\Security\ChainedAccessChecker
         arguments:
-            - "%module7_encryption.settings%"
+            - "%jagilpe_encryption.settings%"

@@ -1,12 +1,12 @@
 <?php
 
-namespace Module7\EncryptionBundle\Doctrine\ORM;
+namespace Jagilpe\EncryptionBundle\Doctrine\ORM;
 
 use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\Common\Collections\Selectable;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\EntityRepository;
-use Module7\EncryptionBundle\Service\EncryptionService;
+use Jagilpe\EncryptionBundle\Service\EncryptionService;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Collections\ArrayCollection;
 
@@ -28,7 +28,7 @@ class EncryptionEntityRepositoryDecorator implements ObjectRepository, Selectabl
     private $classMetadata;
 
     /**
-     * @var \Module7\EncryptionBundle\Service\EncryptionService
+     * @var \Jagilpe\EncryptionBundle\Service\EncryptionService
      */
     private $encryptionService;
 

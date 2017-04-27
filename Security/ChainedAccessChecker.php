@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Security;
+namespace Jagilpe\EncryptionBundle\Security;
 
 /**
  * Implementation of the AccessCheckerInterface that chains the response of a list of othe AccessCheckers

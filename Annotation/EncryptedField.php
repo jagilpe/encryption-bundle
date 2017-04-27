@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Annotation;
+namespace Jagilpe\EncryptionBundle\Annotation;
 
 use Doctrine\Common\Annotations\Annotation;
 

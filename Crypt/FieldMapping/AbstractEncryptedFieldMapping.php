@@ -1,8 +1,8 @@
 <?php
 
-namespace Module7\EncryptionBundle\Crypt\FieldMapping;
+namespace Jagilpe\EncryptionBundle\Crypt\FieldMapping;
 
-use Module7\EncryptionBundle\Service\EncryptionService;
+use Jagilpe\EncryptionBundle\Service\EncryptionService;
 
 /**
  * Base implementation for the Field Mapping
@@ -12,7 +12,7 @@ use Module7\EncryptionBundle\Service\EncryptionService;
 abstract class AbstractEncryptedFieldMapping implements EncryptedFieldMappingInterface
 {
     /**
-     * @var \Module7\EncryptionBundle\Service\EncryptionService
+     * @var \Jagilpe\EncryptionBundle\Service\EncryptionService
      */
     protected $encryptionService;
 

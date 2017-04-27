@@ -1,19 +1,19 @@
 services:
-    module7_encryption.user_events.subscriber:
-        class: Module7\EncryptionBundle\EventListener\UserEventsSubsbriber
+    jagilpe_encryption.user_events.subscriber:
+        class: Jagilpe\EncryptionBundle\EventListener\UserEventsSubsbriber
         arguments:
-            - "@module7_encryption.encryption.service"
+            - "@jagilpe_encryption.encryption.service"
         tags:
             - { name: kernel.event_subscriber }
             
-    module7_encryption.user_private_key_load_listener:
-        class: Module7\EncryptionBundle\EventListener\UserPrivateKeyLoadListener
+    jagilpe_encryption.user_private_key_load_listener:
+        class: Jagilpe\EncryptionBundle\EventListener\UserPrivateKeyLoadListener
         arguments:
-            - "%module7_encryption.settings%"
+            - "%jagilpe_encryption.settings%"
             - "@security.token_storage"
-            - "@module7_encryption.key_manager"
-            - "@module7_encryption.key_store"
-            - "@module7_encryption.encryption.service"
+            - "@jagilpe_encryption.key_manager"
+            - "@jagilpe_encryption.key_store"
+            - "@jagilpe_encryption.encryption.service"
         tags:
             - { name: kernel.event_listener, event: kernel.response, priority: 2 }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Module7\EncryptionBundle\Exception;
+namespace Jagilpe\EncryptionBundle\Exception;
 
 /**
  * Base Exception for the EncryptionBundle
