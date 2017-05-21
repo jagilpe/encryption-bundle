@@ -42,6 +42,7 @@ class JagilpeEncryptionExtension extends Extension
                 }
             }
             $container->setParameter('jagilpe_encryption.settings', $config['settings']);
+            $container->setParameter('jagilpe_encryption.master_key', $config['master_key']);
             $container->setAlias('jagilpe_encryption.access_checker', $config['access_checker']);
             $loader->load('services.yml');
             if ($config['settings']['per_user_encryption_enabled']) {

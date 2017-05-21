@@ -40,7 +40,7 @@ services:
         arguments:
             - "@doctrine"
             - "@jagilpe_encryption.cryptography_provider"
-            - "%enc_master_key%"
+            - "%jagilpe_encryption.master_key%"
 
     jagilpe_encryption.decorating_entity_manager:
         class: Jagilpe\EncryptionBundle\Doctrine\ORM\EncryptionEntityManagerDecorator
