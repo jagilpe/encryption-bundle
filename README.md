@@ -73,9 +73,9 @@ Edit your config.yml file and include the route to the master key file and the p
 ```yaml
 // app/config.yml
 jagilpe_encryption:
-                                       master_key:
-                                           cert_file: path_to_master_key/master-key.pem
-                                           passphrase: key_pass_phrase
+   master_key:
+       cert_file: path_to_master_key/master-key.pem
+       passphrase: key_pass_phrase
 ```
 
 # Documentation
