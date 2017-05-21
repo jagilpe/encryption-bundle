@@ -22,8 +22,8 @@ jagilpe_encryption:
         passphrase: key_pass_phrase
 ```
 
-This master key is used in two cases. For the [System Wide encryption](#System wide encryption) and for recovering the private key 
-of the user in case this has forgotten his password in [Per User Encryption](#Per user encryption)
+This master key is used in two cases. For the System Wide encryption and for recovering the private key 
+of the user in case this has forgotten his password in Per User Encryption
 
 # Enabling the encryption
 
@@ -99,7 +99,7 @@ option to false. This way you don't have to modify your User Class (see below).
 ### Enable the Per User Encryption support in the User Class
 
 To support the per user encryption the user class must implement the [Jagilpe\EncryptionBundle\Entity\PKEncryptionEnabledUserInterface](https://api.gilpereda.com/encryption-bundle/master/Jagilpe/EncryptionBundle/Entity/PKEncryptionEnabledUserInterface.html)
-interface and to use the [Jagilpe\EncryptionBundle\Entity\Traits\EncryptionEnabledUserTrait.php](https://api.gilpereda.com/encryption-bundle/master/Jagilpe/EncryptionBundle/Entity/Traits/EncryptionEnabledUserTrait.html)
+interface and to use the [Jagilpe\EncryptionBundle\Entity\Traits\EncryptionEnabledUserTrait](https://api.gilpereda.com/encryption-bundle/master/Jagilpe/EncryptionBundle/Entity/Traits/EncryptionEnabledUserTrait.html)
 
 ```php
 <?php
