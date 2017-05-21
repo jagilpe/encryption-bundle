@@ -11,8 +11,8 @@ data in the database using some extension of the database management system...
 
 Before you opt for one of them, you should be sure if it's the right one for your requirements and use case.
 
-The EncryptionBundle was originally developed for a determined application with a clear use case in mind. Each user of
-the application could store information information that refers to him and that, at least in the first stage of the application,
+The EncryptionBundle was originally developed for its use in an application with a clear use case in mind. Each user of
+the application could store information that refers to him and that, at least in the first stage of the application,
 should not be accessed by other users of the system. The sensitive data should be stored encrypted, and only its owner
 should be able to decrypt it. Another requirement to the encryption of the data was that, although initially the data was
 to be encrypted and decrypted in the backend, in some moment it should be easy to move the encryption and decryption 
@@ -66,7 +66,7 @@ openssl genrsa -aes256 -out master-key.pem 8192
 
 This will create a file called master-key.pem. Copy this file anywhere you want in your server.
 
-## Master key configuration
+## Configure the master encryption key
 
 Edit your config.yml file and include the route to the master key file and the pass phrase you used when you created it. 
 
@@ -80,8 +80,8 @@ jagilpe_encryption:
 
 # Documentation
 
-The encryption is disabled as default. For further instruction about how to enable and use the 
-You can access the usage documentation [here](Resources/doc/index.md)
+The encryption is disabled as default. For further instruction about how to enable and use the bundle you can refer to
+the usage documentation [here](Resources/doc/index.md)
 
 # API Reference
 
