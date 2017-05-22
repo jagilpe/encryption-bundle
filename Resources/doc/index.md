@@ -15,7 +15,7 @@ openssl genrsa -aes256 -out master-key.pem 8192
 To configure it:
 
 ```yaml
-// app/config.yml
+# app/config.yml
 jagilpe_encryption:
     master_key:
         cert_file: path_to_master_key/master-key.pem
@@ -31,6 +31,7 @@ The encryption is disabled as default. To enable the encryption you should set t
 mode to use as default, and depending on the encryption mode we want to use, configure some other options.
 
 ```yaml
+# app/config.yml
 jagilpe_encryption:
     enabled: true
     settings:
@@ -80,6 +81,7 @@ option to true (default option)
 Per user encryption configuration example
 
 ```yaml
+# app/config.yml
 jagilpe_encryption:
     enabled: false
     master_key: 
@@ -103,7 +105,7 @@ interface and to use the [Jagilpe\EncryptionBundle\Entity\Traits\EncryptionEnabl
 
 ```php
 <?php
-
+// src/AppBundle/Entity/User.php
 namespace AppBundle\Entity;
 
 use FOS\UserBundle\Model\User as BaseUser;
@@ -156,7 +158,7 @@ should have the name `Entity.MyEntity.yml`
 The first line of the file should contain the full name of the class.
 
 ```yaml
-# src/AppBundle/Resources/config/jgp_encryption/Entity.MyEntity.yml
+# src/AppBundle/Resources/config/m7_encryption/Entity.MyEntity.yml
 AppBundle\Entity\MyEntity:
     encryptionEnabled: true
 ```
@@ -238,7 +240,7 @@ class MyEntity implements PerUserEncryptableEntity
 ```
 
 ```yaml
-# src/AppBundle/Resources/config/jgp_encryption/Entity.MyEntity.yml
+# src/AppBundle/Resources/config/m7_encryption/Entity.MyEntity.yml
 AppBundle\Entity\MyEntity:
     encryptionEnabled: true
     encryptionMode: "PER_USER_SHAREABLE"
@@ -348,7 +350,7 @@ class MyEntity implements SystemEncryptableEntity
 ```
 
 ```yaml
-# src/AppBundle/Resources/config/jgp_encryption/Entity.MyEntity.yml
+# src/AppBundle/Resources/config/m7_encryption/Entity.MyEntity.yml
 AppBundle\Entity\MyEntity:
     encryptionEnabled: true
     encryptionMode: "SYSTEM_ENCRYPTION"
@@ -480,7 +482,7 @@ class MyEntity implements SystemEncryptableEntity
 ```
 
 ```yaml
-# src/AppBundle/Resources/config/jgp_encryption/Entity.MyEntity.yml
+# src/AppBundle/Resources/config/m7_encryption/Entity.MyEntity.yml
 AppBundle\Entity\MyEntity:
     encryptionEnabled: true
     encryptionMode: "SYSTEM_ENCRYPTION"
@@ -659,7 +661,7 @@ class MyFileEntity implements SystemEncryptableEntity, EncryptableFile
 ```
 
 ```yaml
-# src/AppBundle/Resources/config/jgp_encryption/Entity.MyFileEntity.yml
+# src/AppBundle/Resources/config/m7_encryption/Entity.MyFileEntity.yml
 AppBundle\Entity\MyEntity:
     encryptionEnabled: true
     encryptedFile: true

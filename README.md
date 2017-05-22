@@ -3,7 +3,7 @@ EncryptionBundle
 
 EncryptionBundle is a Symfony bundle whose goal is encrypt the contents of our entities before they are persisted.
 
-### Important! Batch decryption of all the data is not implemented. Once the bundle is enabled and the data is encrypted, there is no way to recover the unencrypted data.
+**Important! Batch decryption of all the data is not implemented. Once the bundle is enabled and the data is encrypted, there is no way to recover the unencrypted data.**
  
 There are many alternatives to save the data of your application encrypted, depending on the requirements and constraints.
 You can encrypt the partition in which the data is saved using some operative system level encryption, you can encrypt the 
