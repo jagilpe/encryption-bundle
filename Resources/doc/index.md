@@ -712,8 +712,6 @@ php app/console jagilpe:encryption:migrate:encrypt_entities --force
 php bin/console jagilpe:encryption:migrate:encrypt_entities --force
 ```
 
-## Encryption of the existing data
-
 # Configuration reference
 
 Below you find a reference of all configuration options with their default values if any:
